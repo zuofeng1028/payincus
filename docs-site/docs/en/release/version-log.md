@@ -6,16 +6,30 @@ This page is generated from Git tags and commits to show system version history.
 
 ## Current Source State / 当前源码状态
 
-- Current HEAD / 当前 HEAD: `d1290ac`
+- Current HEAD / 当前 HEAD: `15e6c63`
 - Commit date / 提交日期: 2026-06-27
-- Commit subject / 提交说明: Guard OTA workers against duplicate starts
-- Latest tag / 最新 tag: `v0.9.3`
+- Commit subject / 提交说明: Close OTA worker database on skipped duplicate
+- Latest tag / 最新 tag: `v0.9.4`
 
 ## Unreleased Changes / 未发布变更
 
 - This tag points to the same commit as the adjacent tag, so there are no additional Git commits.
 
 ## Historical Versions / 历史版本
+
+## v0.9.4
+
+- Release commit / 发布提交: `15e6c63`
+- Commit date / 提交日期: 2026-06-27
+- Commit subject / 提交说明: Close OTA worker database on skipped duplicate
+
+### Other Changes / 其他变更
+
+- Close OTA worker database on skipped duplicate `15e6c63`
+
+### Improvements and Adjustments / 改进与调整
+
+- Update version log for v0.9.3 `7fd8a40`
 
 ## v0.9.3
 
