@@ -267,6 +267,22 @@ export interface ResourceRiskState {
   instance?: { id: number; name: string; status: string; incusId?: string | null }
   user?: { id: number; username: string }
   host?: { id: number; name: string }
+  activeOrderRestriction?: {
+    id: number
+    status: string
+    reason: string
+    sourceInstanceId: number | null
+    ticketId: number | null
+    createdAt: string
+  } | null
+  activeAccountOrderRestriction?: {
+    id: number
+    status: string
+    reason: string
+    sourceInstanceId: number | null
+    ticketId: number | null
+    createdAt: string
+  } | null
 }
 
 export interface ResourceRiskEvent {

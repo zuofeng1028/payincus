@@ -95,6 +95,11 @@ assert(
     riskRoute.includes("'/admin/resource-risk/instances/:id/manual-order-restrict'") &&
     riskRoute.includes("'/admin/resource-risk/order-restrictions/:id/release'") &&
     riskRoute.includes('parseQosTiers(body.qosTiers)') &&
+    riskRoute.includes('activeOrderRestriction') &&
+    riskRoute.includes('activeAccountOrderRestriction') &&
+    riskRoute.includes('sourceInstanceId: true') &&
+    riskRoute.includes('restriction.sourceInstanceId === item.instanceId') &&
+    riskRoute.includes('restrictionByUserId') &&
     app.includes("await fastify.register(resourceRiskRoutes, { prefix: '/api' })") &&
     app.includes('startResourceRiskScheduler()') &&
     riskService.includes('autoSuspendInstance') &&
@@ -121,6 +126,18 @@ assert(
     adminView.includes('policyForm.qosTiers') &&
     adminView.includes('addQosTier') &&
     adminView.includes('manualSuspend(item)') &&
+    adminView.includes('pageSize: 10') &&
+    adminView.includes('changeInstancesPage') &&
+    adminView.includes('changeEventsPage') &&
+    adminView.includes('changeRestrictionsPage') &&
+    adminView.includes('res.items.length === 0') &&
+    adminView.includes('await loadRestrictions(nextTotalPages)') &&
+    adminView.includes('解除封禁') &&
+    adminView.includes('解除限单') &&
+    adminView.includes('账号已限单') &&
+    adminView.includes('hasActiveOrderRestriction(item)') &&
+    adminView.includes('hasOtherActiveOrderRestriction(item)') &&
+    adminView.includes('releaseOrderRestrictionFromState(item)') &&
     !adminView.includes('qosTiersText') &&
     createView.includes('orderRiskReviewAvailable') &&
     createView.includes('api.resourceRisk.createReviewTicket') &&

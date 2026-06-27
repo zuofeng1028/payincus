@@ -228,7 +228,7 @@ export default async function resourceRiskRoutes(fastify: FastifyInstance) {
     const pageSize = parsePageSize(query.pageSize)
     const where = query.level ? { level: query.level } : {}
 
-    const [items, total] = await Promise.all([
+    const [rawItems, total] = await Promise.all([
       prisma.instanceRiskState.findMany({
         where,
         orderBy: [{ score: 'desc' }, { updatedAt: 'desc' }],
@@ -242,6 +242,38 @@ export default async function resourceRiskRoutes(fastify: FastifyInstance) {
       }),
       prisma.instanceRiskState.count({ where })
     ])
+
+    const userIds = Array.from(new Set(rawItems.map(item => item.userId)))
+    const activeRestrictions = userIds.length > 0
+      ? await prisma.userOrderRestriction.findMany({
+        where: {
+          userId: { in: userIds },
+          status: 'active',
+          restrictedCreate: true
+        },
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          userId: true,
+          status: true,
+          reason: true,
+          sourceInstanceId: true,
+          ticketId: true,
+          createdAt: true
+        }
+      })
+      : []
+    const restrictionByUserId = new Map<number, (typeof activeRestrictions)[number]>()
+    for (const restriction of activeRestrictions) {
+      if (!restrictionByUserId.has(restriction.userId)) {
+        restrictionByUserId.set(restriction.userId, restriction)
+      }
+    }
+    const items = rawItems.map(item => ({
+      ...item,
+      activeOrderRestriction: activeRestrictions.find(restriction => restriction.sourceInstanceId === item.instanceId) ?? null,
+      activeAccountOrderRestriction: restrictionByUserId.get(item.userId) ?? null
+    }))
 
     return { items, total, page, pageSize }
   })

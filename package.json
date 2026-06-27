@@ -1,6 +1,6 @@
 {
   "name": "payincus",
-  "version": "0.8.8",
+  "version": "0.8.9",
   "description": "PayIncus commercial Incus platform",
   "type": "module",
   "private": true,

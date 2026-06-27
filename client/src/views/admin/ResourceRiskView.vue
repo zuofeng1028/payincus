@@ -15,6 +15,12 @@ interface QosTierForm {
   score: number
 }
 
+interface PageState {
+  page: number
+  pageSize: number
+  total: number
+}
+
 const toast = useToast()
 const loading = ref(true)
 const saving = ref(false)
@@ -23,6 +29,9 @@ const overview = ref<{ totalStates: number; highRisk: number; activeRestrictions
 const instances = ref<ResourceRiskState[]>([])
 const events = ref<ResourceRiskEvent[]>([])
 const restrictions = ref<UserOrderRestrictionRecord[]>([])
+const instancesPage = ref<PageState>({ page: 1, pageSize: 10, total: 0 })
+const eventsPage = ref<PageState>({ page: 1, pageSize: 10, total: 0 })
+const restrictionsPage = ref<PageState>({ page: 1, pageSize: 10, total: 0 })
 const policy = ref<ResourceRiskPolicy | null>(null)
 const policyForm = ref({
   enabled: true,
@@ -53,6 +62,33 @@ const tabs: Array<{ key: TabKey; label: string }> = [
 
 const highRiskCount = computed(() => overview.value?.highRisk || 0)
 const activeRestrictionCount = computed(() => overview.value?.activeRestrictions || 0)
+
+function totalPages(pageState: PageState): number {
+  return Math.max(1, Math.ceil(pageState.total / pageState.pageSize))
+}
+
+function pageSummary(pageState: PageState): string {
+  if (pageState.total === 0) return '共 0 条'
+  const start = (pageState.page - 1) * pageState.pageSize + 1
+  const end = Math.min(pageState.total, pageState.page * pageState.pageSize)
+  return `第 ${start}-${end} 条 / 共 ${pageState.total} 条`
+}
+
+function isSuspendedRisk(item: ResourceRiskState): boolean {
+  return item.status === 'manual_suspended' || item.instance?.status === 'suspended'
+}
+
+function hasActiveOrderRestriction(item: ResourceRiskState): boolean {
+  return item.activeOrderRestriction?.status === 'active'
+}
+
+function hasOtherActiveOrderRestriction(item: ResourceRiskState): boolean {
+  return !hasActiveOrderRestriction(item) && item.activeAccountOrderRestriction?.status === 'active'
+}
+
+function isNormalRisk(item: ResourceRiskState): boolean {
+  return item.status === 'normal' && item.level === 'normal' && item.score === 0 && !item.currentBandwidthLimit
+}
 
 function formatDate(value: string | null | undefined): string {
   if (!value) return '-'
@@ -156,23 +192,88 @@ function syncPolicyForm(nextPolicy: ResourceRiskPolicy) {
 async function loadAll() {
   loading.value = true
   try {
-    const [overviewRes, policyRes, instancesRes, eventsRes, restrictionsRes] = await Promise.all([
+    const [overviewRes, policyRes] = await Promise.all([
       api.resourceRisk.overview(),
-      api.resourceRisk.getPolicy(),
-      api.resourceRisk.listInstances({ page: 1, pageSize: 50 }),
-      api.resourceRisk.listEvents({ page: 1, pageSize: 50 }),
-      api.resourceRisk.listRestrictions({ page: 1, pageSize: 50, status: 'active' })
+      api.resourceRisk.getPolicy()
     ])
     overview.value = overviewRes.counters
     syncPolicyForm(policyRes.policy)
-    instances.value = instancesRes.items
-    events.value = eventsRes.items
-    restrictions.value = restrictionsRes.items
+    await Promise.all([
+      loadInstances(instancesPage.value.page),
+      loadEvents(eventsPage.value.page),
+      loadRestrictions(restrictionsPage.value.page)
+    ])
   } catch (error: any) {
     toast.error(`加载资源风控失败：${error?.message || error}`)
   } finally {
     loading.value = false
   }
+}
+
+async function loadOverview() {
+  const overviewRes = await api.resourceRisk.overview()
+  overview.value = overviewRes.counters
+}
+
+async function loadInstances(page = instancesPage.value.page) {
+  const res = await api.resourceRisk.listInstances({ page, pageSize: instancesPage.value.pageSize })
+  const nextTotalPages = Math.max(1, Math.ceil(res.total / res.pageSize))
+  if (res.total > 0 && res.items.length === 0 && res.page > nextTotalPages) {
+    await loadInstances(nextTotalPages)
+    return
+  }
+  instances.value = res.items
+  instancesPage.value = { page: res.page, pageSize: res.pageSize, total: res.total }
+}
+
+async function loadEvents(page = eventsPage.value.page) {
+  const res = await api.resourceRisk.listEvents({ page, pageSize: eventsPage.value.pageSize })
+  const nextTotalPages = Math.max(1, Math.ceil(res.total / res.pageSize))
+  if (res.total > 0 && res.items.length === 0 && res.page > nextTotalPages) {
+    await loadEvents(nextTotalPages)
+    return
+  }
+  events.value = res.items
+  eventsPage.value = { page: res.page, pageSize: res.pageSize, total: res.total }
+}
+
+async function loadRestrictions(page = restrictionsPage.value.page) {
+  const res = await api.resourceRisk.listRestrictions({ page, pageSize: restrictionsPage.value.pageSize, status: 'active' })
+  const nextTotalPages = Math.max(1, Math.ceil(res.total / res.pageSize))
+  if (res.total > 0 && res.items.length === 0 && res.page > nextTotalPages) {
+    await loadRestrictions(nextTotalPages)
+    return
+  }
+  restrictions.value = res.items
+  restrictionsPage.value = { page: res.page, pageSize: res.pageSize, total: res.total }
+}
+
+async function reloadOperationalLists() {
+  await Promise.all([
+    loadOverview(),
+    loadInstances(instancesPage.value.page),
+    loadRestrictions(restrictionsPage.value.page),
+    loadEvents(eventsPage.value.page)
+  ])
+}
+
+async function changeInstancesPage(page: number) {
+  if (page < 1 || page > totalPages(instancesPage.value) || page === instancesPage.value.page) return
+  await loadInstances(page)
+}
+
+async function changeEventsPage(page: number) {
+  if (page < 1 || page > totalPages(eventsPage.value) || page === eventsPage.value.page) return
+  await loadEvents(page)
+}
+
+async function changeRestrictionsPage(page: number) {
+  if (page < 1 || page > totalPages(restrictionsPage.value) || page === restrictionsPage.value.page) return
+  await loadRestrictions(page)
+}
+
+function setActiveTab(tab: TabKey) {
+  activeTab.value = tab
 }
 
 async function savePolicy() {
@@ -223,7 +324,7 @@ async function manualQos(item: ResourceRiskState) {
       restrictOrders
     })
     toast.success('已人工限速')
-    await loadAll()
+    await reloadOperationalLists()
   } catch (error: any) {
     toast.error(`人工限速失败：${error?.message || error}`)
   }
@@ -241,7 +342,7 @@ async function manualSuspend(item: ResourceRiskState) {
       notifyUser
     })
     toast.success('实例已人工封禁')
-    await loadAll()
+    await reloadOperationalLists()
   } catch (error: any) {
     toast.error(`人工封禁失败：${error?.message || error}`)
   }
@@ -257,7 +358,7 @@ async function manualUnsuspend(item: ResourceRiskState) {
       notifyUser
     })
     toast.success('实例已解除封禁')
-    await loadAll()
+    await reloadOperationalLists()
   } catch (error: any) {
     toast.error(`解除封禁失败：${error?.message || error}`)
   }
@@ -269,9 +370,26 @@ async function manualOrderRestrict(item: ResourceRiskState) {
   try {
     await api.resourceRisk.manualOrderRestrict(item.instanceId, reason)
     toast.success('已限制账号下单')
-    await loadAll()
+    await reloadOperationalLists()
   } catch (error: any) {
     toast.error(`限制下单失败：${error?.message || error}`)
+  }
+}
+
+async function releaseOrderRestrictionFromState(item: ResourceRiskState) {
+  const restriction = item.activeOrderRestriction
+  if (!restriction) return
+  const reason = window.prompt(`解除用户 ${item.user?.username || item.userId} 的下单限制原因`, '工单人工审核通过')
+  if (!reason?.trim()) return
+  try {
+    await api.resourceRisk.releaseRestriction(restriction.id, {
+      reason,
+      ticketId: restriction.ticketId
+    })
+    toast.success('下单限制已解除')
+    await reloadOperationalLists()
+  } catch (error: any) {
+    toast.error(`解除限单失败：${error?.message || error}`)
   }
 }
 
@@ -279,7 +397,7 @@ async function evaluateInstance(item: ResourceRiskState) {
   try {
     await api.resourceRisk.evaluateInstance(item.instanceId)
     toast.success('已重新评估实例风险')
-    await loadAll()
+    await reloadOperationalLists()
   } catch (error: any) {
     toast.error(`评估失败：${error?.message || error}`)
   }
@@ -291,7 +409,7 @@ async function releaseInstance(item: ResourceRiskState) {
   try {
     await api.resourceRisk.releaseInstance(item.instanceId, reason)
     toast.success('实例风控已解除')
-    await loadAll()
+    await reloadOperationalLists()
   } catch (error: any) {
     toast.error(`解除失败：${error?.message || error}`)
   }
@@ -306,7 +424,7 @@ async function releaseRestriction(item: UserOrderRestrictionRecord) {
       ticketId: item.ticketId
     })
     toast.success('下单限制已解除')
-    await loadAll()
+    await reloadOperationalLists()
   } catch (error: any) {
     toast.error(`解除失败：${error?.message || error}`)
   }
@@ -353,7 +471,7 @@ onMounted(() => {
             'px-3 py-2 text-sm font-medium',
             activeTab === tab.key ? 'border-b-2 border-blue-600 text-blue-600' : 'text-themed-muted hover:text-themed'
           ]"
-          @click="activeTab = tab.key"
+          @click="setActiveTab(tab.key)"
         >
           {{ tab.label }}
         </button>
@@ -388,11 +506,56 @@ onMounted(() => {
                 <td class="p-3">
                   <div class="flex flex-wrap justify-end gap-2">
                     <button class="btn-secondary px-3 py-1 text-xs" @click="evaluateInstance(item)">评估</button>
-                    <button class="btn-secondary px-3 py-1 text-xs" @click="manualQos(item)">限速</button>
-                    <button class="btn-danger px-3 py-1 text-xs" @click="manualSuspend(item)">封禁</button>
-                    <button class="btn-secondary px-3 py-1 text-xs" @click="manualUnsuspend(item)">解封</button>
-                    <button class="btn-secondary px-3 py-1 text-xs" @click="manualOrderRestrict(item)">限单</button>
-                    <button class="btn-primary px-3 py-1 text-xs" @click="releaseInstance(item)">解除风控</button>
+                    <button
+                      v-if="!isSuspendedRisk(item)"
+                      class="btn-secondary px-3 py-1 text-xs"
+                      @click="manualQos(item)"
+                    >
+                      限速
+                    </button>
+                    <button
+                      v-if="isSuspendedRisk(item)"
+                      class="btn-primary px-3 py-1 text-xs"
+                      @click="manualUnsuspend(item)"
+                    >
+                      解除封禁
+                    </button>
+                    <button
+                      v-else
+                      class="btn-danger px-3 py-1 text-xs"
+                      @click="manualSuspend(item)"
+                    >
+                      封禁
+                    </button>
+                    <button
+                      v-if="hasActiveOrderRestriction(item)"
+                      class="btn-primary px-3 py-1 text-xs"
+                      @click="releaseOrderRestrictionFromState(item)"
+                    >
+                      解除限单
+                    </button>
+                    <button
+                      v-else-if="hasOtherActiveOrderRestriction(item)"
+                      class="btn-secondary px-3 py-1 text-xs"
+                      disabled
+                      title="该账号存在其他实例触发的下单限制，请到下单限制列表按来源实例处理"
+                    >
+                      账号已限单
+                    </button>
+                    <button
+                      v-else
+                      class="btn-secondary px-3 py-1 text-xs"
+                      @click="manualOrderRestrict(item)"
+                    >
+                      限单
+                    </button>
+                    <button
+                      class="btn-secondary px-3 py-1 text-xs"
+                      :disabled="isNormalRisk(item)"
+                      @click="releaseInstance(item)"
+                    >
+                      解除风控
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -401,6 +564,26 @@ onMounted(() => {
               </tr>
             </tbody>
           </table>
+        </div>
+        <div class="flex flex-col gap-3 border-t border-themed px-4 py-3 text-sm text-themed-muted md:flex-row md:items-center md:justify-between">
+          <span>{{ pageSummary(instancesPage) }}</span>
+          <div class="flex items-center gap-2">
+            <button
+              class="btn-secondary px-3 py-1 text-xs"
+              :disabled="instancesPage.page <= 1"
+              @click="changeInstancesPage(instancesPage.page - 1)"
+            >
+              上一页
+            </button>
+            <span>第 {{ instancesPage.page }} / {{ totalPages(instancesPage) }} 页</span>
+            <button
+              class="btn-secondary px-3 py-1 text-xs"
+              :disabled="instancesPage.page >= totalPages(instancesPage)"
+              @click="changeInstancesPage(instancesPage.page + 1)"
+            >
+              下一页
+            </button>
+          </div>
         </div>
       </section>
 
@@ -433,6 +616,26 @@ onMounted(() => {
               </tr>
             </tbody>
           </table>
+        </div>
+        <div class="flex flex-col gap-3 border-t border-themed px-4 py-3 text-sm text-themed-muted md:flex-row md:items-center md:justify-between">
+          <span>{{ pageSummary(eventsPage) }}</span>
+          <div class="flex items-center gap-2">
+            <button
+              class="btn-secondary px-3 py-1 text-xs"
+              :disabled="eventsPage.page <= 1"
+              @click="changeEventsPage(eventsPage.page - 1)"
+            >
+              上一页
+            </button>
+            <span>第 {{ eventsPage.page }} / {{ totalPages(eventsPage) }} 页</span>
+            <button
+              class="btn-secondary px-3 py-1 text-xs"
+              :disabled="eventsPage.page >= totalPages(eventsPage)"
+              @click="changeEventsPage(eventsPage.page + 1)"
+            >
+              下一页
+            </button>
+          </div>
         </div>
       </section>
 
@@ -467,6 +670,26 @@ onMounted(() => {
               </tr>
             </tbody>
           </table>
+        </div>
+        <div class="flex flex-col gap-3 border-t border-themed px-4 py-3 text-sm text-themed-muted md:flex-row md:items-center md:justify-between">
+          <span>{{ pageSummary(restrictionsPage) }}</span>
+          <div class="flex items-center gap-2">
+            <button
+              class="btn-secondary px-3 py-1 text-xs"
+              :disabled="restrictionsPage.page <= 1"
+              @click="changeRestrictionsPage(restrictionsPage.page - 1)"
+            >
+              上一页
+            </button>
+            <span>第 {{ restrictionsPage.page }} / {{ totalPages(restrictionsPage) }} 页</span>
+            <button
+              class="btn-secondary px-3 py-1 text-xs"
+              :disabled="restrictionsPage.page >= totalPages(restrictionsPage)"
+              @click="changeRestrictionsPage(restrictionsPage.page + 1)"
+            >
+              下一页
+            </button>
+          </div>
         </div>
       </section>
 
