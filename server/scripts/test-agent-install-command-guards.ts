@@ -11,13 +11,14 @@ const installScriptSource = readFileSync(resolve(__dirname, '../templates/agent-
 const hostAgentCredentialsSource = readFileSync(resolve(__dirname, '../src/lib/host-agent-credentials.ts'), 'utf8')
 const agentBuildReleaseScriptSource = readFileSync(resolve(__dirname, '../../agent/scripts/build-release.sh'), 'utf8')
 const agentReleaseWorkflowSource = readFileSync(resolve(__dirname, '../../.github/workflows/agent-release.yml'), 'utf8')
+const retiredReleaseRepository = 'retired-release-repository'
 
 assert.ok(
   agentRouteSource.includes("const defaultAgentReleaseRepository = 'VipMaxxxx/payincus'"),
   'Agent release proxy must default to the current repository'
 )
 assert.ok(
-  !agentRouteSource.includes('retired-release-repository'),
+  !agentRouteSource.includes(retiredReleaseRepository),
   'Agent release proxy must not default to the retired repository'
 )
 assert.ok(

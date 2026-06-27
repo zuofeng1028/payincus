@@ -1,5 +1,5 @@
 # =====================================================
-# Incudal 项目 .gitignore
+# PayIncus 项目 .gitignore
 # =====================================================
 
 # ==================== 依赖 ====================
@@ -98,6 +98,16 @@ docs/
 !docs-site/docs/**
 !plugin-templates/ai-ticket-agent-plugin/docs/
 !plugin-templates/ai-ticket-agent-plugin/docs/**
+!plugin-templates/*/dist/
+!plugin-templates/*/dist/**
+!plugin-templates/*/docs/
+!plugin-templates/*/docs/**
+!theme-templates/*/dist/
+!theme-templates/*/dist/**
+!theme-templates/*/docs/
+!theme-templates/*/docs/**
 SDK/
+!docs-site/docs/public/sdk/
+!docs-site/docs/public/sdk/**
 SDKNEW/
 namecrane_modules/

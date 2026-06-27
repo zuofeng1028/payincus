@@ -1,5 +1,5 @@
 # ============================================================================
-# Incudal 预构建产物包发布工作流
+# PayIncus 预构建产物包发布工作流
 # 在推送版本 tag (v*) 或手动触发时，自动构建前后端并打包为 .tar.gz 发行包
 # 支持 amd64 和 arm64 双架构
 # ============================================================================
@@ -121,13 +121,13 @@ jobs:
         run: |
           cat > release/incudal.sh << 'SCRIPT'
           #!/bin/bash
-          # Incudal 快捷管理脚本
+          # PayIncus 快捷管理脚本
           set -e
           APP_DIR="$(cd "$(dirname "$0")" && pwd)"
 
           case "${1:-}" in
             start)
-              echo "🚀 启动 Incudal..."
+              echo "🚀 启动 PayIncus..."
               cd "$APP_DIR/server"
               pnpm exec prisma migrate deploy
               cd "$APP_DIR"
@@ -140,7 +140,7 @@ jobs:
               echo "✅ 迁移完成"
               ;;
             version)
-              echo "Incudal $(node -e "console.log(require('./package.json').version)")"
+              echo "PayIncus $(node -e "console.log(require('./package.json').version)")"
               ;;
             *)
               echo "用法: $0 {start|migrate|version}"

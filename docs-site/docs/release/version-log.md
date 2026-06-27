@@ -6,22 +6,16 @@
 
 ## 当前源码状态 / Current Source State
 
-- 当前 HEAD / Current HEAD: `3386291`
+- 当前 HEAD / Current HEAD: `66d286a`
 - 提交日期 / Commit date: 2026-06-27
-- 提交说明 / Commit subject: Normalize public contributor attribution
+- 提交说明 / Commit subject: Establish PayIncus project baseline
 - 最新 tag / Latest tag: `v0.8.7`
 
 ## 未发布变更 / Unreleased Changes
 
 ### 其他变更 / Other Changes
 
-- Normalize public contributor attribution `3386291`
-- Remove upstream project references from public docs `17eae5e`
-
-### 改进与调整 / Improvements and Adjustments
-
-- Update handoff after v0.8.7 OTA `f980e9a`
-- Update version log for v0.8.7 `1ab2452`
+- Establish PayIncus project baseline `66d286a`
 
 ## 历史版本 / Historical Versions
 

@@ -1,7 +1,7 @@
 {
-  "name": "incudal",
-  "version": "0.8.7",
-  "description": "Incudal 容器虚拟化管理平台",
+  "name": "payincus",
+  "version": "0.8.8",
+  "description": "PayIncus commercial Incus platform",
   "type": "module",
   "private": true,
   "scripts": {

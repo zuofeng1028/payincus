@@ -1,7 +1,7 @@
 {
   "name": "client",
-  "version": "0.8.7",
-  "description": "Incudal 前端客户端",
+  "version": "0.8.8",
+  "description": "PayIncus frontend client",
   "type": "module",
   "scripts": {
     "dev": "VITE_APP_ENTRY=user vite",

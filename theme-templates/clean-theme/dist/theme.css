@@ -1,0 +1,96 @@
+.payincus-clean-market-banner,
+.payincus-clean-extension-header,
+.payincus-clean-extension-banner,
+.payincus-clean-user-banner,
+.payincus-clean-admin-banner,
+.payincus-clean-admin-widgets,
+.payincus-clean-footer {
+  --payincus-theme-primary: var(--payincus-theme-brand-color, #0f766e);
+  border: 1px solid color-mix(in srgb, var(--payincus-theme-brand-color, #0f766e) 18%, transparent);
+  border-radius: var(--payincus-theme-radius, 8px);
+  background: color-mix(in srgb, var(--payincus-theme-surface, #ffffff) 94%, var(--payincus-theme-brand-color, #0f766e) 6%);
+  box-shadow: var(--payincus-theme-shadow, 0 10px 30px rgba(15, 23, 42, 0.08));
+  color: #0f172a;
+}
+
+.payincus-clean-market-banner,
+.payincus-clean-extension-header,
+.payincus-clean-extension-banner,
+.payincus-clean-user-banner,
+.payincus-clean-admin-banner {
+  padding: 20px;
+}
+
+.payincus-clean-market-banner__content,
+.payincus-clean-extension-header,
+.payincus-clean-admin-widgets {
+  display: grid;
+  gap: 14px;
+}
+
+.payincus-clean-market-banner__eyebrow,
+.payincus-clean-extension-header__eyebrow,
+.payincus-clean-extension-banner__eyebrow,
+.payincus-clean-user-banner__eyebrow,
+.payincus-clean-admin-banner__eyebrow,
+.payincus-clean-admin-widgets__eyebrow {
+  margin: 0;
+  color: var(--payincus-theme-brand-color, #0f766e);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.payincus-clean-market-banner__title,
+.payincus-clean-extension-header__title,
+.payincus-clean-extension-banner__title,
+.payincus-clean-user-banner__title,
+.payincus-clean-admin-banner__title,
+.payincus-clean-admin-widgets__title {
+  margin: 0;
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+.payincus-clean-market-banner__body,
+.payincus-clean-extension-banner__body,
+.payincus-clean-user-banner__body,
+.payincus-clean-admin-banner__body {
+  margin: 8px 0 0;
+  color: var(--payincus-theme-muted, #64748b);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.payincus-clean-extension-header__meta,
+.payincus-clean-admin-widgets__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.payincus-clean-extension-header__meta > *,
+.payincus-clean-admin-widgets__grid > * {
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.78);
+  padding: 12px;
+}
+
+.payincus-clean-admin-banner__list {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: var(--payincus-theme-muted, #64748b);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.payincus-clean-footer {
+  margin-top: 24px;
+  padding: 16px;
+  text-align: center;
+  color: var(--payincus-theme-muted, #64748b);
+}

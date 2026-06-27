@@ -1,4 +1,4 @@
-# PayIncus / Incudal Handoff
+# PayIncus Handoff
 
 Last updated: 2026-06-27 CST
 
@@ -10,7 +10,7 @@ This file is a handoff note for a new Codex conversation. Do not include server 
 - Main product repository: `git@github.com:VipMaxxxx/payincus.git`
 - Current local branch: `master`
 - Target remote branch: `payincus/main`
-- Upstream original project: `git@github.com:VipMaxxxx/payincus.git`
+- Repository history: default branch was rebuilt as an independent PayIncus baseline on 2026-06-27; a local mirror backup was kept for private audit traceability.
 - Important ledger: `docs/production-audit.md`
 - Commercial operation task ledger: `docs/commercial-operation-task-goals.md`
 
@@ -691,7 +691,7 @@ Key tags:
 - `v0.0.3`: git safe-directory fix.
 - `v0.0.7` / `v0.0.8`: verified OTA artifact path.
 - `v0.0.10` / `v0.0.11`: atomic OTA release layout and rollback proof.
-- `v0.0.12`: plugin center.
+- `v0.0.12`: extension center.
 - `v0.0.13`: production plugin OTA proof.
 - `v0.0.15`: atomic OTA install-root recovery.
 - `v0.0.16`: host panel trust certificate refresh.
@@ -747,7 +747,7 @@ Latest production proof:
 - A redacted server-side `PROOF_SINCE_HOURS=72 pnpm verify:production-proof-snapshot` emitted observational proof for two online hosts, two fresh online Agents, two ZFS storage pools, five running instances, one completed recharge/callback, SMTP/Lsky config presence, zero notification channels/logs, and missing lifecycle actions `instance.start`, `instance.restart`, `instance.recreate`, and `instance.delete`. The SSH session was manually interrupted after JSON output stopped, so treat it as observational evidence rather than a clean command-exit proof.
 - Production `/opt/incudal/current/server/package.json` reports `update:online:start` as `node dist/scripts/start-system-update-task.js`.
 - Production Nginx roots now point at `/opt/incudal/current/client/dist/user` and `/opt/incudal/current/client/dist/admin`, so frontend static assets follow atomic OTA releases.
-- Public `https://admin.payincus.com/admin/plugins` returns HTTP 200 and current admin JS assets contain `/admin/plugins`, `插件中心`, and `admin-instance-detail` markers.
+- Public `https://admin.payincus.com/admin/plugins` returns HTTP 200 and current admin JS assets contain `/admin/plugins`, `扩展中心`, and `admin-instance-detail` markers.
 - Latest public non-auth recheck passed: live health endpoints, protected adjustment-request API 401 protection, admin order page HTTP 200, docs TLS, `v0.2.4` release assets, public admin bundle marker scan, and public root/API security headers.
 - Public header checks on `https://pay.payincus.com/`, `https://admin.payincus.com/`, `https://pay.payincus.com/api/health`, and `https://admin.payincus.com/api/health` returned HSTS, CSP with `frame-ancestors 'none'`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, and `Referrer-Policy: strict-origin-when-cross-origin`.
 - `v0.1.8` public release asset availability was verified directly. GitHub Actions API polling hit an anonymous rate limit during that check, so the latest fully recorded Actions run IDs in this handoff remain the earlier `v0.1.6` chain.
@@ -799,7 +799,7 @@ Implemented backend scope:
 
 Implemented frontend scope:
 
-- Admin route `/admin/plugins` and plugin center page for upload install, market install, enable/disable/uninstall, config JSON and task log viewing.
+- Admin route `/admin/plugins` and extension center page for upload install, market install, enable/disable/uninstall, config JSON and task log viewing.
 - User route `/plugins/:pathMatch(.*)*` for plugin-provided user pages.
 - User sidebar extension point `user.sidebar.extra` rendered through sandboxed plugin frames.
 - User and admin API clients remain separated; user client does not expose `/admin/plugins`.
@@ -828,14 +828,14 @@ pnpm --filter server test:plugin-client-boundary-guards
 
 Release proof:
 
-- Commit: `0453d5a Add plugin center`
+- Commit: `0453d5a Add extension center`
 - Version log commit: `6e8ce21 Update version log for v0.0.12`
 - Tag: `v0.0.12`
 - GitHub Actions Build & Release run: `28026305328`
 - Release URL: `https://github.com/VipMaxxxx/payincus/releases/tag/v0.0.12`
 - Assets generated: linux amd64 tar.gz, linux arm64 tar.gz, both `.sha256` files, `incudal-v0.0.12-ota-manifest.json`, and `ota-manifest.json`.
 
-Production API proof has passed for the plugin center. Browser UI smoke for `/admin/plugins` iframe rendering and user `/plugins/smoke` rendering still needs a real session/Turnstile proof.
+Production API proof has passed for the extension center. Browser UI smoke for `/admin/plugins` iframe rendering and user `/plugins/smoke` rendering still needs a real session/Turnstile proof.
 
 Official AI plugin market proof:
 
@@ -866,11 +866,11 @@ Official AI plugin Chinese UI proof:
 - Production OTA task: `#49`, `v0.3.8 -> v0.3.9`, completed successfully.
 - Production version file reports `v0.3.9`, git commit `f009c7e01b5a`.
 - Production plugin market index URL has been updated in `.env` to `https://github.com/VipMaxxxx/payincus/releases/download/v0.3.9/plugin-market-index.json`, and backend health passed after restart.
-- Admin plugin center now:
+- Admin extension center now:
   - displays the known AI plugin as `AI 工单助手` even when an older installed manifest still has English text;
   - shows Chinese description and permission labels;
   - links enabled plugins with `admin.plugins.settings` to standalone settings routes;
-  - no longer embeds the settings iframe or raw config JSON in the plugin center detail panel.
+  - no longer embeds the settings iframe or raw config JSON in the extension center detail panel.
 
 Official AI plugin standalone settings proof:
 
@@ -878,7 +878,7 @@ Official AI plugin standalone settings proof:
 - Tag: `v0.4.0`
 - Release URL: `https://github.com/VipMaxxxx/payincus/releases/tag/v0.4.0`
 - Production version file reports `v0.4.0`, git commit `b4d4cce11319`.
-- Admin sidebar dynamically loads enabled plugins that declare `admin.plugins.settings` and inserts the settings entry after `插件中心`.
+- Admin sidebar dynamically loads enabled extensions that declare `admin.plugins.settings` and inserts the settings entry after `扩展中心`.
 - `AI 工单助手` now opens as `/admin/plugins/com.payincus.ai-ticket-agent/settings`.
 - The standalone page provides Chinese business controls for enablement, takeover mode, OpenAI-compatible model URL, model name, API key, temperature, timeout, auto-reply categories, confidence threshold, limits, cooldown, AI identity disclosure and custom system prompt.
 - Leaving the API key blank keeps the stored encrypted secret unchanged.

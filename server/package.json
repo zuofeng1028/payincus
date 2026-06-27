@@ -1,7 +1,7 @@
 {
   "name": "server",
-  "version": "0.8.7",
-  "description": "Incudal 后端服务",
+  "version": "0.8.8",
+  "description": "PayIncus backend service",
   "type": "module",
   "main": "dist/app.js",
   "types": "dist/app.d.ts",
