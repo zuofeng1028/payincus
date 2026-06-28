@@ -6,16 +6,30 @@ This page is generated from Git tags and commits to show system version history.
 
 ## Latest Release State / 最新发布状态
 
-- Latest Release Commit / 最新发布提交: `2bd25ba5a`
+- Latest Release Commit / 最新发布提交: `4d0dd50dd`
 - Commit date / 提交日期: 2026-06-29
-- Commit subject / 提交说明: Release v1.0.4 resource risk policy hardening
-- Latest tag / 最新 tag: `v1.0.4`
+- Commit subject / 提交说明: Release v1.0.5 flash sales
+- Latest tag / 最新 tag: `v1.0.5`
 
 ## Unreleased Changes / 未发布变更
 
 - This tag points to the same commit as the adjacent tag, so there are no additional Git commits.
 
 ## Historical Versions / 历史版本
+
+## v1.0.5
+
+- Release commit / 发布提交: `4d0dd50dd`
+- Commit date / 提交日期: 2026-06-29
+- Commit subject / 提交说明: Release v1.0.5 flash sales
+
+- Add flash sale campaigns, items, reservations, stock audit and guarded admin/user APIs.
+
+- Add user flash sale page and admin multi-item flash sale management.
+
+- Route flash sale purchases through the normal instance billing, Turnstile, risk restriction, stock lock and delivery compensation chain.
+
+- Add flash sale guard coverage and documentation.
 
 ## v1.0.4
 

@@ -6,16 +6,30 @@
 
 ## 最新发布状态 / Latest Release State
 
-- 最新发布提交 / Latest Release Commit: `2bd25ba5a`
+- 最新发布提交 / Latest Release Commit: `4d0dd50dd`
 - 提交日期 / Commit date: 2026-06-29
-- 提交说明 / Commit subject: Release v1.0.4 resource risk policy hardening
-- 最新 tag / Latest tag: `v1.0.4`
+- 提交说明 / Commit subject: Release v1.0.5 flash sales
+- 最新 tag / Latest tag: `v1.0.5`
 
 ## 未发布变更 / Unreleased Changes
 
 - 该 tag 与相邻 tag 指向同一提交，未产生额外 Git commit。
 
 ## 历史版本 / Historical Versions
+
+## v1.0.5
+
+- 发布提交 / Release commit: `4d0dd50dd`
+- 提交日期 / Commit date: 2026-06-29
+- 提交说明 / Commit subject: Release v1.0.5 flash sales
+
+- Add flash sale campaigns, items, reservations, stock audit and guarded admin/user APIs.
+
+- Add user flash sale page and admin multi-item flash sale management.
+
+- Route flash sale purchases through the normal instance billing, Turnstile, risk restriction, stock lock and delivery compensation chain.
+
+- Add flash sale guard coverage and documentation.
 
 ## v1.0.4
 
