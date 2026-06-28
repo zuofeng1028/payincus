@@ -19,7 +19,7 @@ This file is a handoff note for a new Codex conversation. Do not include server 
 Use `git log --oneline --decorate -5` as the authoritative current HEAD because this handoff may receive handoff-only commits after product releases. The latest product/docs release baseline at the time of this refresh was:
 
 ```text
-e64ad2c Release v0.9.9
+b701d32 Update version log for v1.0.2
 ```
 
 GitHub remote `payincus/main` should be aligned with the current local HEAD after each handoff-only refresh. Use `git status --short --branch` and `git ls-remote payincus refs/heads/main` as the source of truth instead of copying this note forward.
@@ -29,12 +29,12 @@ The current local tree should be clean after pulling `payincus/main`. Do not res
 Latest product/docs release boundary at the time of this refresh:
 
 ```text
-e64ad2c Release v0.9.9
+0836203 Release v1.0.2 welfare check-in
 ```
 
 ## Latest GitHub Release Work
 
-`v0.9.9` is published on GitHub, has release artifacts, and has been applied to production through the online update flow.
+`v1.0.2` is published on GitHub, has release artifacts, and has been applied to production through the online update flow.
 
 Release commits:
 
@@ -45,6 +45,8 @@ e41c909 Fix admin risk evidence drawer background
 a69542b Release v0.9.8
 e64ad2c Release v0.9.9
 105e980 Update version log for v0.9.9
+0836203 Release v1.0.2 welfare check-in
+b701d32 Update version log for v1.0.2
 ```
 
 GitHub workflow proof:
@@ -59,6 +61,9 @@ Docs Pages: run 28292112956 completed success for a69542b.
 Build & Release: run 28292774371 completed success for v0.9.9.
 CI: run 28292773068 completed success for e64ad2c.
 Docs Pages: run 28292773057 completed success for e64ad2c.
+Build & Release: run 28312345559 completed success for v1.0.2.
+CI: run 28312344323 completed success for main.
+Docs Pages: run 28312344320 completed success for main.
 ```
 
 Core release assets verified for `v0.9.9`:
@@ -69,6 +74,17 @@ incudal-v0.9.9-linux-amd64.tar.gz.sha256
 incudal-v0.9.9-linux-arm64.tar.gz
 incudal-v0.9.9-linux-arm64.tar.gz.sha256
 incudal-v0.9.9-ota-manifest.json
+ota-manifest.json
+```
+
+Core release assets verified for `v1.0.2`:
+
+```text
+incudal-v1.0.2-linux-amd64.tar.gz
+incudal-v1.0.2-linux-amd64.tar.gz.sha256
+incudal-v1.0.2-linux-arm64.tar.gz
+incudal-v1.0.2-linux-arm64.tar.gz.sha256
+incudal-v1.0.2-ota-manifest.json
 ota-manifest.json
 ```
 
@@ -179,24 +195,49 @@ Remaining before calling the whole commercial-operation objective complete:
   - CI run `28295942451` passed for `main`.
   - Pages run `28295942452` passed for `main`.
 
+## v1.0.2 Release Summary
+
+- Target version: `v1.0.2`.
+- Scope: Welfare daily check-in now grants random points instead of resource-pool credits, admin check-in settings/logs, database-backed daily claim guard, and instance card network/quota markers.
+- The daily claim guard uses `daily_checkins(user_id, date_key)` plus per-user points locking, so concurrent requests cannot double-claim the same Beijing calendar day.
+- Local validation completed:
+  - `DATABASE_URL='postgresql://user:pass@127.0.0.1:5432/payincus' pnpm --filter server exec prisma generate` passed.
+  - `pnpm --filter server type-check` passed.
+  - `pnpm --filter client type-check` passed.
+  - `pnpm --filter server test:entertainment-route-guards` passed.
+  - `pnpm --filter server test:admin-entertainment-route-guards` passed.
+  - `pnpm --filter server test:frontend-i18n-keys` passed.
+  - `pnpm --filter server test:points-mutation-amount-guards` passed.
+  - `DATABASE_URL='postgresql://user:pass@127.0.0.1:5432/payincus' pnpm --filter server exec prisma validate` passed.
+  - `pnpm --filter server test:frontend-dist-boundary-guards` passed.
+  - `pnpm --filter client build` passed.
+  - `pnpm --filter server build` passed.
+  - `pnpm --dir docs-site --ignore-workspace build` passed.
+- GitHub checks completed:
+  - Build & Release run `28312345559` passed for tag `v1.0.2`.
+  - CI run `28312344323` passed for `main`.
+  - Pages run `28312344320` passed for `main`.
+
 ## Latest Production OTA Proof
 
-- Production version: `v1.0.1`
-- Release tag commit: `eca273ce`
-- Current production symlink: `/opt/incudal/current -> /opt/incudal/releases/v1.0.1-20260627171035`
-- OTA task: `105`, status `success`; backup path `/opt/incudal/releases/v1.0.0-20260627155441`; log path `/opt/incudal/update-logs/system-update-105.log`.
-- GitHub Release assets for `v1.0.1` are available, including linux amd64/arm64 tarballs, sha256 files, `incudal-v1.0.1-ota-manifest.json`, `ota-manifest.json`, AI ticket extension assets, and plugin market index.
-- Production checks passed during and after OTA: split host verification, `pnpm verify:production`, health checks for user/admin/backend APIs, Agent manifest check, and Agent binary sha256 download check.
+- Production version: `v1.0.2`
+- Release tag commit: `08362032`
+- Current production symlink: `/opt/incudal/current -> /opt/incudal/releases/v1.0.2-20260628052356`
+- OTA task: `106`, status `success`; backup path `/opt/incudal/releases/v1.0.1-20260627171035`; log path `/opt/incudal/update-logs/system-update-106.log`.
+- GitHub Release assets for `v1.0.2` are available, including linux amd64/arm64 tarballs, sha256 files, `incudal-v1.0.2-ota-manifest.json`, `ota-manifest.json`, AI ticket extension assets, and plugin market index.
+- Production checks passed during and after OTA: split host verification, `pnpm verify:production`, health checks for user/admin/backend APIs, and Agent manifest check.
 - Independent checks after OTA:
   - `https://pay.payincus.com/api/health` returned HTTP 200.
   - `https://admin.payincus.com/api/health` returned HTTP 200.
   - Local backend `http://127.0.0.1:3001/api/health` returned HTTP 200.
-  - `package.json` under `/opt/incudal/current` reports `1.0.1`.
+  - `package.json` under `/opt/incudal/current` reports `1.0.2`.
   - OTA log shows `System update completed successfully`.
-  - Task `105` database row is `success` with `errorMessage=null`.
+  - Task `106` database row is `success` with `errorMessage=null`.
+  - Production DB contains `daily_checkins`.
+  - Production system configs contain `checkin_enabled=true`, `checkin_min_points=1`, `checkin_max_points=500`, and `checkin_require_instance=false`.
   - Production DB contains `public_ipv4_pools` and `public_ipv4_addresses`.
   - `pnpm verify:production` on production passes and records the empty payment callback IP whitelist as an intentional policy because `PAYMENT_CALLBACK_IP_WHITELIST_REQUIRED=false` is set.
-  - Online docs `https://payincus.com/release/version-log` and `https://payincus.com/en/release/version-log` contain `v1.0.1`.
+  - Online docs `https://payincus.com/release/version-log` and `https://payincus.com/en/release/version-log` contain `v1.0.2`.
   - Deployed admin bundle contains `resource-risk-evidence-panel` and generated CSS with `background-color:#fff;opacity:1`, plus dark-mode opaque surface/code backgrounds.
   - Public API `https://pay.payincus.com/api/packages/public` returns `HKCMI soldOut=false`; `DEBGP` is no longer returned after package `#3` was set `active=false`.
 
