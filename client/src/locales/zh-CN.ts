@@ -1061,6 +1061,8 @@ export default {
             instanceNamePlaceholder: 'my-instance',
             regenerateName: '重新生成',
             autoNameHint: '系统会按地区、用户和时间自动生成实例名称，您也可以手动修改。',
+            turnstileRequiredTitle: '需要人机验证',
+            turnstileRequiredDesc: '点击创建实例时会先完成人机验证，通过后再提交订单。',
             selectPackage: '请选择套餐',
             selectSshKey: '请选择 SSH 密钥',
             creating: '创建中...',

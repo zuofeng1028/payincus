@@ -1204,6 +1204,8 @@ export default {
             instanceNamePlaceholder: 'my-instance',
             regenerateName: '重新生成',
             autoNameHint: '系統會依地區、使用者和時間自動生成實例名稱，您也可以手動修改。',
+            turnstileRequiredTitle: '需要人機驗證',
+            turnstileRequiredDesc: '點擊建立實例時會先完成人機驗證，通過後再提交訂單。',
             selectPackage: '請選擇方案',
             selectSshKey: '請選擇 SSH 金鑰',
             creating: '建立中...',

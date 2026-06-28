@@ -1057,6 +1057,8 @@ export default {
             instanceNamePlaceholder: 'my-instance',
             regenerateName: 'Regenerate',
             autoNameHint: 'The system generates a name from region, user, and time. You can still edit it manually.',
+            turnstileRequiredTitle: 'Verification required',
+            turnstileRequiredDesc: 'Verification runs before the instance order is submitted.',
             selectPackage: 'Please select a package',
             selectSshKey: 'Please select an SSH key',
             creating: 'Creating...',

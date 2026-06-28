@@ -1017,7 +1017,7 @@ async function handleSubmit(): Promise<void> {
     }
 
     const flashSaleId = flashSaleItemId.value
-    const turnstileToken = flashSaleId ? await getTurnstileToken('flash_sale_create_instance') : undefined
+    const turnstileToken = await getTurnstileToken(flashSaleId ? 'flash_sale_create_instance' : 'create_instance')
     const requestPayload: CreateInstanceRequest = {
       name: form.value.name.trim(),
       packageId: form.value.packageId,
@@ -1375,6 +1375,14 @@ async function createRiskReviewTicket(): Promise<void> {
             </div>
             <div v-if="prerequisiteMissing" class="p-3 rounded-lg border" :class="themeStore.isDark ? 'bg-amber-900/20 border-amber-500/30' : 'bg-amber-50 border-amber-200'">
               <p class="text-sm font-medium" :class="themeStore.isDark ? 'text-amber-400' : 'text-amber-700'">{{ prerequisiteMessage }}</p>
+            </div>
+            <div
+              v-if="configStore.turnstileEnabled && configStore.turnstileSiteKey"
+              class="p-3 rounded-lg border text-sm"
+              :class="themeStore.isDark ? 'bg-blue-900/20 border-blue-500/30 text-blue-300' : 'bg-blue-50 border-blue-200 text-blue-700'"
+            >
+              <p class="font-medium">{{ $t('instance.createPage.turnstileRequiredTitle') }}</p>
+              <p class="mt-1 text-xs opacity-80">{{ $t('instance.createPage.turnstileRequiredDesc') }}</p>
             </div>
             <div
               v-if="activeOrderRiskRestriction"

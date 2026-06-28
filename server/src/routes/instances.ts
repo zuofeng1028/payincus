@@ -53,6 +53,7 @@ import {
   markFlashSaleDelivered,
   markFlashSaleFailed
 } from '../services/flash-sales.js'
+import { turnstileVerifier } from '../lib/turnstile.js'
 import { customAlphabet } from 'nanoid'
 
 // 自定义 nanoid，只使用小写字母和数字（Incus 不允许下划线）
@@ -1233,6 +1234,12 @@ export default async function instanceRoutes(fastify: FastifyInstance) {
 
     // ==================== 阶段一: 验证与校验 ====================
     name = typeof name === 'string' ? name.trim() : ''
+
+    // 普通实例创建受全局 Turnstile 保护；秒杀下单由秒杀活动配置在业务层单独校验，避免同一 token 被重复消费。
+    if (flashSaleItemId === undefined) {
+      await turnstileVerifier(request, reply)
+      if (reply.sent) return
+    }
 
     try {
       await assertUserCanCreateInstance(user.id)

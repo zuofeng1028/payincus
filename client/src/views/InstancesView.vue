@@ -2157,12 +2157,12 @@ async function confirmBatchDestroy(): Promise<void> {
         <TransitionGroup
           name="instance-card-order"
           tag="div"
-          class="hidden sm:grid grid-cols-1 gap-4 2xl:grid-cols-2"
+          class="hidden sm:grid grid-cols-1 gap-4 xl:grid-cols-2 2xl:grid-cols-3"
         >
           <article
             v-for="instance in instances"
             :key="instance.id"
-            class="group relative max-w-[640px] rounded-lg border p-4 shadow-sm transition-colors duration-200"
+            class="group relative min-w-0 rounded-lg border p-4 shadow-sm transition-colors duration-200"
             :class="[
               instance.status?.toLowerCase() === 'creating' ? 'creating-card' : '',
               recentlyOrderedInstanceId === instance.id ? (themeStore.isDark ? 'is-order-feedback-dark' : 'is-order-feedback-light') : '',
@@ -2175,7 +2175,7 @@ async function confirmBatchDestroy(): Promise<void> {
             <div class="flex items-start justify-between gap-4">
               <button type="button" class="min-w-0 flex-1 text-left" @click="openInstanceDetail(instance.id)">
                 <h2
-                  class="truncate text-[22px] font-bold leading-7"
+                  class="truncate text-xl font-bold leading-7"
                   :class="themeStore.isDark ? 'text-gray-50' : 'text-gray-950'"
                   :title="instance.name"
                 >
@@ -2222,7 +2222,7 @@ async function confirmBatchDestroy(): Promise<void> {
               </button>
             </div>
 
-            <dl class="mt-3 grid grid-cols-[112px_minmax(0,1fr)] gap-y-1.5 text-[14px] leading-6">
+            <dl class="mt-3 grid grid-cols-[86px_minmax(0,1fr)] gap-y-1.5 text-[14px] leading-6">
               <dt class="font-semibold" :class="themeStore.isDark ? 'text-gray-200' : 'text-gray-800'">{{ $t('instance.card.region') }}</dt>
               <dd class="min-w-0 truncate" :class="themeStore.isDark ? 'text-gray-400' : 'text-gray-600'">
                 <FlagIcon :code="getInstanceRegionCode(instance)" size="xs" class="mr-1 inline-flex align-[-1px]" />
@@ -2295,7 +2295,7 @@ async function confirmBatchDestroy(): Promise<void> {
                 <span class="truncate text-sm font-semibold" :class="getInstanceStatusTextClass(instance)">{{ getStatusInfo(instance.status, t).label }}</span>
               </div>
 
-              <div class="flex shrink-0 items-center gap-2">
+              <div class="flex shrink-0 flex-wrap items-center justify-end gap-2">
                 <InstanceOrderMenu
                   v-if="canReorderInstances"
                   :actions="INSTANCE_ORDER_ACTIONS"
