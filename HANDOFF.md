@@ -19,8 +19,8 @@ This file is a handoff note for a new Codex conversation. Do not include server 
 Use `git log --oneline --decorate -5` as the authoritative current HEAD because this handoff may receive handoff-only commits after product releases. The latest product/docs release baseline at the time of this refresh was:
 
 ```text
-aee882fa Update version log for v1.2.4
-7fd01ea Release v1.2.4 exchange lock polish
+c9834a3e Update version log for v1.2.5
+30e81c4 Release v1.2.5 exchange manual settlement
 ```
 
 GitHub remote `payincus/main` should be aligned with the current local HEAD after each handoff-only refresh. Use `git status --short --branch` and `git ls-remote payincus refs/heads/main` as the source of truth instead of copying this note forward.
@@ -30,10 +30,40 @@ The current local tree should be clean after pulling `payincus/main`. Do not res
 Latest product/docs release boundary at the time of this refresh:
 
 ```text
-7fd01ea Release v1.2.4 exchange lock polish
+30e81c4 Release v1.2.5 exchange manual settlement
 ```
 
 ## Latest GitHub Release Work
+
+`v1.2.5` is published on GitHub and has release artifacts. Production OTA task `#128` deployed `v1.2.5` successfully and switched `/opt/incudal/current` to `/opt/incudal/releases/v1.2.5-20260629142322`.
+
+`v1.2.5` adds the ordinary Exchange order manual-release path for admin order management. Admins can release escrow for confirming/delivered/manual-review orders through the normal escrow settlement chain, while orders with active disputes must still be handled in dispute management so dispute freezes are not bypassed.
+
+Release proof for `v1.2.5`:
+
+```text
+OTA manifest v1.2.5 commit 30e81c43908d
+amd64 sha256 c9806489fdade1c114d626996044f4b8c230f59bebb1932767288aff6c6c63cf
+arm64 sha256 8d22f3cd43b5a6267ee2001b2a3cd972e732d7ec4331636591e7536f440916b0
+GitHub Build & Release run 28378596567 -> success
+GitHub CI run 28378567213 -> success for release commit
+GitHub Pages run 28378567197 -> success for release commit
+Version-log commit c9834a3e generated docs/release/version-log.md and docs/en/release/version-log.md for v1.2.5
+GitHub CI run 28378653354 -> success for version-log commit
+GitHub Pages run 28378653359 -> success for version-log commit
+/opt/incudal/current -> /opt/incudal/releases/v1.2.5-20260629142322
+/opt/incudal/current/package.json version 1.2.5
+/opt/incudal/current/server/package.json version 1.2.5
+/opt/incudal/current/version.json -> version/tag v1.2.5, commit 30e81c43908d, deployedAt 2026-06-29T14:23:48.898Z
+systemctl is-active incudal-backend -> active
+public https://pay.payincus.com/api/health -> HTTP 200 status ok
+public https://admin.payincus.com/api/health -> HTTP 200 status ok
+system-update-128.log -> System update completed successfully
+system_update_tasks #128 -> status success, fromVersion v1.2.4, targetVersion v1.2.5, backupPath /opt/incudal/releases/v1.2.4-20260629133409, finishedAt 2026-06-29T14:24:58.019Z
+current-release verify-split-host -> passed during OTA
+current-release verify:production -> passed during OTA
+current-release verify:log-header -> passed during OTA
+```
 
 `v1.2.4` is published on GitHub and has release artifacts. Production OTA task `#127` deployed `v1.2.4` successfully and switched `/opt/incudal/current` to `/opt/incudal/releases/v1.2.4-20260629133409`.
 
@@ -94,9 +124,9 @@ GitHub Pages run 28371822840 -> success
 
 ## Active Exchange Marketplace Work
 
-The current production release contains the `v1.2.4` Exchange Marketplace implementation. Code, release, OTA, non-destructive production checks, and real production Exchange delivery/dispute/refund/rollback evidence have been proven. Remaining proof is narrower: keep capturing seller settlement after confirmation/administrator release and withdrawal review evidence as those paths are exercised.
+The current production release contains the `v1.2.5` Exchange Marketplace implementation. Code, release, OTA, non-destructive production checks, and real production Exchange delivery/dispute/refund/rollback evidence have been proven. `v1.2.5` also adds the ordinary admin order manual-release path needed to settle confirming non-dispute orders without waiting for the confirmation timer. Do not perform real manual release or withdrawals without explicit user authorization because those mutate financial state. Remaining proof is narrower: keep capturing seller settlement after confirmation/authorized administrator release and withdrawal review evidence as those paths are exercised.
 
-Latest production Exchange data snapshot after `v1.2.4` OTA:
+Latest production Exchange data snapshot after `v1.2.5` OTA:
 
 ```text
 exchange_listings count 5; statuses: sold 1, delisted 1, force_delisted 3
