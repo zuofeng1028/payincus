@@ -19,7 +19,7 @@ This file is a handoff note for a new Codex conversation. Do not include server 
 Use `git log --oneline --decorate -5` as the authoritative current HEAD because this handoff may receive handoff-only commits after product releases. The latest product/docs release baseline at the time of this refresh was:
 
 ```text
-e831c5505 Update version log for v1.2.0
+34f07dd6e Update version log for v1.2.1
 ```
 
 GitHub remote `payincus/main` should be aligned with the current local HEAD after each handoff-only refresh. Use `git status --short --branch` and `git ls-remote payincus refs/heads/main` as the source of truth instead of copying this note forward.
@@ -29,38 +29,38 @@ The current local tree should be clean after pulling `payincus/main`. Do not res
 Latest product/docs release boundary at the time of this refresh:
 
 ```text
-377f7f449 Release v1.2.0 exchange hardening
+6fcf173f1 Release v1.2.1 exchange withdrawal hardening
 ```
 
 ## Latest GitHub Release Work
 
-`v1.2.0` is published on GitHub and has release artifacts. Production OTA task `#123` deployed `v1.2.0` successfully and switched `/opt/incudal/current` to `/opt/incudal/releases/v1.2.0-20260629111508`.
+`v1.2.1` is published on GitHub and has release artifacts. Production OTA task `#124` deployed `v1.2.1` successfully and switched `/opt/incudal/current` to `/opt/incudal/releases/v1.2.1-20260629113553`.
 
-`v1.2.0` consolidates the post-`v1.1.9` Exchange Marketplace hardening into one OTA: inactive or sold-out package snapshots can still trade as existing instance rights, delivery cleanup tolerates remote port/proxy cleanup failures while auditing warnings, already-refunded dispute repair returns delivered instances to the original seller, buyer-facing copy states traffic is not reset during trading, and the customer instance list now reads listing state per visible instance instead of the first 100 seller listings.
+`v1.2.1` hardens the Exchange Marketplace withdrawal path after the `v1.2.0` rollout: admin withdrawal action buttons are status-driven, completed/rejected terminal withdrawals no longer expose action buttons, and completing a withdrawal now requires a payment proof URL or transfer reference in both the admin UI and backend route.
 
-Production proof for task `#123`:
+Production proof for task `#124`:
 
 ```text
-OTA manifest v1.2.0 commit 377f7f4491db
-amd64 sha256 2c9e35a9732b38fd5cad9253a473c2db12149727e685b094b5cab83b1ccf3945
-arm64 sha256 63c94e550e2bc3db53f24088952a8fe71659168854874da2f0d9e366fe20b466
-/opt/incudal/current -> /opt/incudal/releases/v1.2.0-20260629111508
-/opt/incudal/current/package.json version 1.2.0
-/opt/incudal/current/server/package.json version 1.2.0
+OTA manifest v1.2.1 commit 6fcf173f1018
+amd64 sha256 e85bf6a3c8b6f8c419cddf857eb871790cf8a2c6a46d56e84173471fbe1e10de
+arm64 sha256 554a2af3394328c097c31dd3320fd34dc469998a12100d39c46bff43c24e4281
+/opt/incudal/current -> /opt/incudal/releases/v1.2.1-20260629113553
+/opt/incudal/current/package.json version 1.2.1
+/opt/incudal/current/server/package.json version 1.2.1
 systemctl is-active incudal-backend -> active
 local http://127.0.0.1:3001/api/health -> status ok
 public https://pay.payincus.com/api/health -> HTTP 200 status ok
 public https://admin.payincus.com/api/health -> HTTP 200 status ok
-system-update-123.log -> System update completed successfully
-system_update_tasks #123 -> status success, fromVersion v1.1.9, targetVersion v1.2.0, backupPath /opt/incudal/releases/v1.1.9-20260629104412, finishedAt 2026-06-29T11:16:43.212Z
+system-update-124.log -> System update completed successfully
+system_update_tasks #124 -> status success, fromVersion v1.2.0, targetVersion v1.2.1, backupPath /opt/incudal/releases/v1.2.0-20260629111508, finishedAt 2026-06-29T11:37:25.755Z
 current-release pnpm verify:production -> passed
 current-release pnpm verify:log-header -> passed
-docs https://payincus.com/release/version-log.html contains v1.2.0 and Release v1.2.0 exchange hardening
+docs version-log source contains v1.2.1 and Release v1.2.1 exchange withdrawal hardening
 ```
 
 ## Active Exchange Marketplace Work
 
-The current worktree contains the `v1.2.0` Exchange Marketplace implementation. Code, release, OTA, non-destructive production checks, and at least one real production Exchange delivery path have been proven. Remaining proof is narrower: keep capturing real dispute refund/release, seller settlement, withdrawal review, and rollback/retry evidence as those paths are exercised.
+The current worktree contains the `v1.2.1` Exchange Marketplace implementation. Code, release, OTA, non-destructive production checks, and at least one real production Exchange delivery path have been proven. Remaining proof is narrower: keep capturing real dispute refund/release, seller settlement, withdrawal review, and rollback/retry evidence as those paths are exercised.
 
 Implemented local scope:
 
