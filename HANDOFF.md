@@ -19,7 +19,7 @@ This file is a handoff note for a new Codex conversation. Do not include server 
 Use `git log --oneline --decorate -5` as the authoritative current HEAD because this handoff may receive handoff-only commits after product releases. The latest product/docs release baseline at the time of this refresh was:
 
 ```text
-9f589937 Update version log for v1.0.9
+0c1eaa0be Release v1.1.0 exchange delivery fix
 ```
 
 GitHub remote `payincus/main` should be aligned with the current local HEAD after each handoff-only refresh. Use `git status --short --branch` and `git ls-remote payincus refs/heads/main` as the source of truth instead of copying this note forward.
@@ -29,16 +29,16 @@ The current local tree should be clean after pulling `payincus/main`. Do not res
 Latest product/docs release boundary at the time of this refresh:
 
 ```text
-9f589937 Update version log for v1.0.9
+0c1eaa0be Release v1.1.0 exchange delivery fix
 ```
 
 ## Latest GitHub Release Work
 
-`v1.0.9` is published on GitHub and has release artifacts. Production OTA task `#113` updated production from `v1.0.8` to `v1.0.9` and ended with status `success`.
+`v1.1.0` is published on GitHub and has release artifacts. Production OTA task `#115` updated production from `v1.0.9` to `v1.1.0` and ended with status `success`.
 
 ## Active Exchange Marketplace Work
 
-The current worktree contains the `v1.0.9` Exchange Marketplace implementation. The code, release, OTA, and non-destructive production checks are complete; the remaining proof gap is a real buyer/seller Exchange delivery run with live accounts and a sacrificial instance.
+The current worktree contains the `v1.1.0` Exchange Marketplace implementation. The code, release, OTA, and non-destructive production checks are complete; the remaining proof gap is a fresh real buyer/seller Exchange delivery run with live accounts and a sacrificial instance, because the failed live orders from the v1.0.9 run were manually cancelled after rollback.
 
 Implemented local scope:
 
@@ -195,6 +195,26 @@ Production public https://pay.payincus.com/api/health returned HTTP 200 status o
 Production public https://admin.payincus.com/api/health returned HTTP 200 status ok after v1.0.9 OTA
 Production public Exchange market API returned package categories and first listing snapshot with host.name, package.name, packagePlan.name, billingPrice, limitsEgress, and limitsIngress visible without exposing original instance id/name
 SMOKE_API_BASE_URL=https://pay.payincus.com pnpm smoke:exchange-marketplace passed in read-only mode after v1.0.9 OTA
+Production Exchange delivery failure root cause found before v1.1.0: forced reinstall task completed and started the instance, then Exchange delivery tried to rename the running Incus instance, causing Incus error `Renaming of running instance not allowed`.
+pnpm --filter server test:exchange-marketplace-guards passed for v1.1.0 after adding stop-before-rename coverage and public Exchange policy UI coverage
+pnpm --filter server type-check passed for v1.1.0
+pnpm --filter client type-check passed for v1.1.0
+DATABASE_URL='postgresql://user:pass@localhost:5432/incudal' pnpm --filter server exec prisma validate passed for v1.1.0
+pnpm --dir docs-site --ignore-workspace exec vitepress build docs passed for v1.1.0
+pnpm build passed for v1.1.0
+pnpm test passed for v1.1.0
+git diff --check passed for v1.1.0
+GitHub Build & Release run 28357393592 completed success for v1.1.0 release commit 0c1eaa0be
+Production OTA task #114 for v1.1.0 failed before switching current because `pnpm install --prod --frozen-lockfile --force` ran `prisma generate` and the 4GB server had no swap; exit code 137.
+Production server now has persistent 2GB swap file `/swapfile-payincus-ota` to prevent future OTA install OOM during Prisma generation.
+Production OTA task #115 status success, fromVersion v1.0.9, targetVersion v1.1.0, finishedAt 2026-06-29T08:10:31.527Z by OTA log
+Production current symlink resolves to /opt/incudal/releases/v1.1.0-20260629080814
+Production root package version reports 1.1.0
+Production systemctl is-active incudal-backend returned active after v1.1.0 OTA
+Production public https://pay.payincus.com/api/health returned HTTP 200 status ok after v1.1.0 OTA
+Production public https://admin.payincus.com/api/health returned HTTP 200 status ok after v1.1.0 OTA
+Production public https://pay.payincus.com/api/exchange/config returned the expanded public policy summary including minRemainingDays, expiringSoonDays, maxMarkupPercent, autoConfirmEnabled, dailyWithdrawalCountLimit, maxActiveListingsPerUser, maxPurchasesPerUserPerDay, and disputeTimeoutHours
+SMOKE_API_BASE_URL=https://pay.payincus.com pnpm --filter server smoke:exchange-marketplace passed in read-only mode after v1.1.0 OTA
 ```
 
 Latest create-instance Turnstile fix:
@@ -214,6 +234,8 @@ Latest registration Turnstile fix:
 
 Latest Exchange Marketplace hardening:
 
+- `v1.1.0` fixes forced-reinstall delivery after a real production failure: delivery now stops the rebuilt Incus instance before rename/ownership transfer and persists the delivered instance as `stopped`, because Incus refuses to rename a running instance.
+- Exchange public config now exposes a fuller non-sensitive policy summary for users: listing age windows, markup cap, confirmation policy, IP transfer policy, withdrawal daily limits, max active listings, max daily purchases, and dispute timeout.
 - Exchange purchase secondary verification now treats `exchange_purchase` as an account operation with listing-ID scoping, so the verification modal can send and verify codes without `Resource ID is not allowed for this operation`.
 - Anonymous public Exchange snapshots now keep safe nested host/package/package-plan display data and renewal billing price while still hiding the original instance ID/name and user identity fields.
 - Exchange market API and UI now expose/filter by package categories from visible listing snapshots, and cards/details show node, package, plan and renewal price with safer fallbacks.
