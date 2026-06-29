@@ -3885,6 +3885,13 @@ function formatShortDate(dateStr: string | null | undefined): string {
                     : $t('instance.subscription.autoRenewDisabled') }}
                 </span>
               </div>
+              <div
+                v-if="isExchangeLocked"
+                class="mb-4 rounded-lg border px-3 py-2 text-sm"
+                :class="themeStore.isDark ? 'border-amber-500/40 bg-amber-500/10 text-amber-200' : 'border-amber-200 bg-amber-50 text-amber-700'"
+              >
+                交易所挂牌或交割期间不能修改自动续费策略，请先下架或等待交割完成。
+              </div>
               <!-- 说明 -->
               <p
                 class="text-sm mb-4"
@@ -3926,7 +3933,8 @@ function formatShortDate(dateStr: string | null | undefined): string {
                 :class="themeStore.isDark
                   ? 'bg-red-600 hover:bg-red-700 text-white'
                   : 'bg-red-500 hover:bg-red-600 text-white'"
-                :disabled="autoRenewLoading"
+                :disabled="autoRenewLoading || isExchangeLocked"
+                :title="isExchangeLocked ? '交易所挂牌或交割期间不能修改自动续费策略' : undefined"
                 @click="handleSetAutoRenew(false)"
               >
                 <span v-if="autoRenewLoading" class="flex items-center justify-center gap-2">
@@ -3944,7 +3952,8 @@ function formatShortDate(dateStr: string | null | undefined): string {
                 :class="themeStore.isDark
                   ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
                   : 'bg-emerald-500 hover:bg-emerald-600 text-white'"
-                :disabled="autoRenewLoading"
+                :disabled="autoRenewLoading || isExchangeLocked"
+                :title="isExchangeLocked ? '交易所挂牌或交割期间不能修改自动续费策略' : undefined"
                 @click="handleSetAutoRenew(true)"
               >
                 <span v-if="autoRenewLoading" class="flex items-center justify-center gap-2">

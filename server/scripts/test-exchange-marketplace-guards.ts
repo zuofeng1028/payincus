@@ -1306,6 +1306,8 @@ assert(
 	    instanceDetailViewSource.includes('warnExchangeLockedOperation') &&
 	    instanceDetailViewSource.includes(':exchange-locked="isExchangeLocked"') &&
 	    instanceDetailViewSource.includes('交易所挂牌或交割期间不能续费') &&
+	    instanceDetailViewSource.includes('交易所挂牌或交割期间不能修改自动续费策略') &&
+	    countOccurrences(instanceDetailViewSource, ':disabled="autoRenewLoading || isExchangeLocked"') >= 2 &&
 	    instanceDetailViewSource.includes('交易所挂牌或交割期间不能升级配置') &&
 	    instanceDetailViewSource.includes('交易所挂牌或交割期间不能销毁实例') &&
 	    instanceDetailViewSource.includes('requestAddPort') &&
