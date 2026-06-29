@@ -517,9 +517,15 @@ assert(
 	    exchangeDeliveryWorkerSource.includes('restoredFrom: Prisma.JsonNull') &&
 	    exchangeDeliveryWorkerSource.includes('trafficUsagePreserved: true') &&
 	    !exchangeDeliveryWorkerSource.includes('monthlyTrafficUsed: 0') &&
+	    !exchangeDeliveryWorkerSource.includes('monthlyTrafficUsed: BigInt(0)') &&
+	    !exchangeDeliveryWorkerSource.includes('monthlyTrafficUsed: 0n') &&
 	    !exchangeDeliveryWorkerSource.includes("trafficStatus: 'NORMAL'") &&
 	    !exchangeDeliveryWorkerSource.includes('trafficSnapshotsRemoved') &&
 	    !exchangeDeliveryWorkerSource.includes('dailyTrafficRowsRemoved') &&
+	    !exchangeDeliveryWorkerSource.includes('reset_traffic_baseline') &&
+	    !adminExchangeRouteSource.includes('reset_traffic_baseline') &&
+	    !userExchangeViewSource.includes('重置流量基线') &&
+	    !adminExchangeViewSource.includes('重置流量基线') &&
 	    instanceTaskWorkerSource.includes('const exchangeDeliveryTask = await prisma.exchangeDeliveryTask.findUnique') &&
 	    instanceTaskWorkerSource.includes('where: { instanceTaskId: task.id }') &&
 	    instanceTaskWorkerSource.includes('if (!exchangeDeliveryTask)') &&
