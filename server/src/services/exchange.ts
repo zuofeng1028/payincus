@@ -2333,6 +2333,7 @@ function serializePublicListing(listing: Parameters<typeof serializeListing>[0])
     eligibilitySnapshot: _eligibilitySnapshot,
     instance: _instance,
     snapshot: _snapshot,
+    sellerReceivesAmount: _sellerReceivesAmount,
     ...publicListing
   } = serialized
   const publicSnapshot = sanitizePublicInstanceSnapshot(serialized.snapshot as Prisma.JsonValue)
@@ -2384,7 +2385,7 @@ function serializeOrder(order: {
     status: order.status,
     price: toNumber(order.price),
     feeAmount: toNumber(order.feeAmount),
-    sellerReceivesAmount: toNumber(order.sellerReceivesAmount),
+    ...(viewerRole === 'seller' ? { sellerReceivesAmount: toNumber(order.sellerReceivesAmount) } : {}),
     escrowAmount: toNumber(order.escrowAmount),
     confirmationDueAt: toDateIso(order.confirmationDueAt),
     completedAt: toDateIso(order.completedAt),

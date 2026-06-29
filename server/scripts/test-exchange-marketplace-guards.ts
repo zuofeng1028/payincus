@@ -654,6 +654,11 @@ assert(
 const publicListingReturnSection = sourceBetween(exchangeServiceSource, 'function serializePublicListing', 'function serializeOrder')
 const orderReturnSection = sourceBetween(exchangeServiceSource, 'function serializeOrder', 'function serializeWithdrawal').split('return {')[1] || ''
 const disputeReturnSection = sourceBetween(exchangeServiceSource, 'export async function listExchangeDisputes', 'function serializeWallet').split('items: items.map')[1] || ''
+assert(
+  publicListingReturnSection.includes('sellerReceivesAmount: _sellerReceivesAmount') &&
+    orderReturnSection.includes("...(viewerRole === 'seller' ? { sellerReceivesAmount: toNumber(order.sellerReceivesAmount) } : {})"),
+  'public exchange listings and buyer-view orders must not expose the seller net settlement amount; only seller-view order/listing responses may include sellerReceivesAmount'
+)
 for (const strippedRootSnapshotField of ['instanceId', 'name']) {
   assert(
     exchangeServiceSource.includes(`'${strippedRootSnapshotField}'`) && exchangeServiceSource.includes('publicSnapshotRootForbiddenFields.has(key)'),
@@ -1063,7 +1068,7 @@ assert(
 					userExchangeViewSource.includes('剩余有效期') &&
 					userExchangeViewSource.includes('开始：{{ formatDate(order.deliveryTask.startedAt) }}') &&
 					userExchangeViewSource.includes('平台手续费 {{ money(selectedListing.feeAmount) }}') &&
-					userExchangeViewSource.includes('卖家预计到账 {{ money(selectedListing.sellerReceivesAmount) }}') &&
+					!userExchangeViewSource.includes('卖家预计到账 {{ money(selectedListing.sellerReceivesAmount) }}') &&
 					userExchangeViewSource.includes('购买后获得的是实例剩余使用权') &&
 					userExchangeViewSource.includes('不包含卖家原系统、原数据、账号信息或历史订单') &&
 					userExchangeViewSource.includes('买卖双方前台互不可见') &&

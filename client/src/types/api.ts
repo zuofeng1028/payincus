@@ -1930,7 +1930,7 @@ export interface ExchangeListing {
   status: ExchangeListingStatus
   price: number
   feeAmount: number
-  sellerReceivesAmount: number
+  sellerReceivesAmount?: number
   description: string | null
   autoDelistAt: string | null
   listedAt: string
@@ -1969,7 +1969,7 @@ export interface ExchangeOrder {
   status: ExchangeOrderStatus
   price: number
   feeAmount: number
-  sellerReceivesAmount: number
+  sellerReceivesAmount?: number
   escrowAmount: number
   createdAt: string
   paidAt?: string | null
