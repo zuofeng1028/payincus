@@ -1107,7 +1107,16 @@ assert(
 	    userExchangeViewSource.includes('confirmStopBeforeListing') &&
 	    userExchangeViewSource.includes('api.exchange.stopForListing') &&
 	    userExchangeViewSource.includes('挂牌期间保持暂停/锁定') &&
-	    userExchangeViewSource.includes('清理 SSH key') &&
+			userExchangeViewSource.includes('清理 SSH key') &&
+	    userExchangeViewSource.includes('deliveryPolicyCheckKeys') &&
+	    userExchangeViewSource.includes('admissionEligibilityChecks') &&
+	    userExchangeViewSource.includes('deliveryPolicyEligibilityChecks') &&
+	    userExchangeViewSource.includes('准入检测结果') &&
+	    userExchangeViewSource.includes('交割清理和转移策略') &&
+	    userExchangeViewSource.includes("'cleanup_port_mappings'") &&
+	    userExchangeViewSource.includes("'cleanup_proxy_sites'") &&
+	    userExchangeViewSource.includes("'cleanup_snapshots'") &&
+	    userExchangeViewSource.includes("'cleanup_backup_policy'") &&
 	    userExchangeViewSource.includes('冻结卖家访问') &&
 	    userExchangeViewSource.includes('清理控制台 token') &&
 	    userExchangeViewSource.includes('重建账单和续费归属') &&

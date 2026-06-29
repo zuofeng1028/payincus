@@ -212,6 +212,13 @@ const deliveryStepLabels: Record<string, string> = {
   complete: '交割完成',
   manual_review: '人工审核'
 }
+const deliveryPolicyCheckKeys = new Set([
+  'public_ip_transfer_allowed',
+  'cleanup_port_mappings',
+  'cleanup_proxy_sites',
+  'cleanup_snapshots',
+  'cleanup_backup_policy'
+])
 
 const activeInstanceId = computed(() => Number(route.query.instanceId || 0))
 
@@ -228,6 +235,14 @@ function pageSummary(total: number, page: number, size: number): string {
   const start = (page - 1) * size + 1
   const end = Math.min(total, page * size)
   return `第 ${start}-${end} 条 / 共 ${total} 条`
+}
+
+function admissionEligibilityChecks(result: ExchangeEligibilityResult): ExchangeEligibilityResult['checks'] {
+  return result.checks.filter(check => !deliveryPolicyCheckKeys.has(check.key))
+}
+
+function deliveryPolicyEligibilityChecks(result: ExchangeEligibilityResult): ExchangeEligibilityResult['checks'] {
+  return result.checks.filter(check => deliveryPolicyCheckKeys.has(check.key))
 }
 
 function cardClass(extra = ''): string {
@@ -1347,14 +1362,32 @@ onMounted(async () => {
               上架交易所前必须先暂停实例。暂停后实例将停止运行，挂牌期间保持暂停/锁定；成交后会强制重装并交割给买家，原数据不可恢复。
             </div>
 
-            <div v-if="eligibilityMap[instance.id]" class="mt-4 grid gap-2 md:grid-cols-2">
-              <div
-                v-for="check in eligibilityMap[instance.id].checks"
-                :key="check.key"
-                class="rounded border px-3 py-2 text-xs"
-                :class="check.passed ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-red-200 bg-red-50 text-red-700'"
-              >
-                <span class="font-medium">{{ check.label }}</span>：{{ check.message }}
+            <div v-if="eligibilityMap[instance.id]" class="mt-4 space-y-3">
+              <div>
+                <div class="mb-2 text-xs font-semibold text-themed">准入检测结果</div>
+                <div class="grid gap-2 md:grid-cols-2">
+                  <div
+                    v-for="check in admissionEligibilityChecks(eligibilityMap[instance.id])"
+                    :key="check.key"
+                    class="rounded border px-3 py-2 text-xs"
+                    :class="check.passed ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-red-200 bg-red-50 text-red-700'"
+                  >
+                    <span class="font-medium">{{ check.label }}</span>：{{ check.message }}
+                  </div>
+                </div>
+              </div>
+              <div v-if="deliveryPolicyEligibilityChecks(eligibilityMap[instance.id]).length">
+                <div class="mb-2 text-xs font-semibold text-themed">交割清理和转移策略</div>
+                <div class="grid gap-2 md:grid-cols-2">
+                  <div
+                    v-for="check in deliveryPolicyEligibilityChecks(eligibilityMap[instance.id])"
+                    :key="check.key"
+                    class="rounded border px-3 py-2 text-xs"
+                    :class="check.passed ? 'border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-800 dark:bg-sky-950/30 dark:text-sky-200' : 'border-red-200 bg-red-50 text-red-700'"
+                  >
+                    <span class="font-medium">{{ check.label }}</span>：{{ check.message }}
+                  </div>
+                </div>
               </div>
             </div>
 
