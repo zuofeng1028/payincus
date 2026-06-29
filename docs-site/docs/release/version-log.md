@@ -6,16 +6,36 @@
 
 ## 最新发布状态 / Latest Release State
 
-- 最新发布提交 / Latest Release Commit: `9009dcf8a`
+- 最新发布提交 / Latest Release Commit: `9c5425c60`
 - 提交日期 / Commit date: 2026-06-29
-- 提交说明 / Commit subject: Release v1.1.6 exchange traffic audit wording
-- 最新 tag / Latest tag: `v1.1.6`
+- 提交说明 / Commit subject: Release v1.1.7 exchange seller settlement privacy
+- 最新 tag / Latest tag: `v1.1.7`
 
 ## 未发布变更 / Unreleased Changes
 
 - 该 tag 与相邻 tag 指向同一提交，未产生额外 Git commit。
 
 ## 历史版本 / Historical Versions
+
+## v1.1.7
+
+- 发布提交 / Release commit: `9c5425c60`
+- 提交日期 / Commit date: 2026-06-29
+- 提交说明 / Commit subject: Release v1.1.7 exchange seller settlement privacy
+
+# v1.1.7
+
+## 修复
+
+- 收紧交易所公开市场和买家订单视角的数据最小化规则：公开挂牌响应不再返回卖家预计到账金额。
+- 买家视角订单响应不再返回 `sellerReceivesAmount`；该字段仅保留给卖家视角、后台管理和内部结算使用。
+- 用户侧商品详情只展示售价和平台手续费，不再向买家展示卖家净收入，进一步符合匿名交易和交易双方信息隔离原则。
+
+## 验证
+
+- `pnpm --filter server test:exchange-marketplace-guards`
+- `pnpm --filter server type-check`
+- `pnpm --filter client type-check`
 
 ## v1.1.6
 
