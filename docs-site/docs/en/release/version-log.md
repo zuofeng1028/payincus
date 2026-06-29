@@ -6,20 +6,59 @@ This page is generated from Git tags and commits to show system version history.
 
 ## Latest Release State / 最新发布状态
 
-- Latest Release Commit / 最新发布提交: `c9ed099fc`
+- Latest Release Commit / 最新发布提交: `7fd01ea2b`
 - Commit date / 提交日期: 2026-06-29
-- Commit subject / 提交说明: Release v1.2.2 exchange listing hardening
-- Latest tag / 最新 tag: `v1.2.2`
+- Commit subject / 提交说明: Release v1.2.4 exchange lock polish
+- Latest tag / 最新 tag: `v1.2.4`
 
 ## Unreleased Changes / 未发布变更
 
-### Other Changes / 其他变更
-
-- Show exchange market delivery method `929383933`
-- Show exchange delivery escrow details `3277a2793`
-- Clarify exchange listing eligibility sections `90cb29104`
+- This tag points to the same commit as the adjacent tag, so there are no additional Git commits.
 
 ## Historical Versions / 历史版本
+
+## v1.2.4
+
+- Release commit / 发布提交: `7fd01ea2b`
+- Commit date / 提交日期: 2026-06-29
+- Commit subject / 提交说明: Release v1.2.4 exchange lock polish
+
+# v1.2.4
+
+## 修复
+
+- 实例详情页在交易所挂牌或交割锁定期间，现在会在自动续费弹窗内明确提示不能修改自动续费策略，并直接禁用开启/关闭按钮，避免用户从详情页绕过交易锁入口误操作。
+- 加固交易所交割回归保护：交割流程继续保留实例当前已用流量和剩余额度，禁止重新引入“重置流量基线”步骤或将月流量清零。
+- 补强交易所匿名与状态锁定守卫，确保前台接口类型、交割进度文案和详情页操作入口持续符合匿名交易与暂停锁定规则。
+
+## 验证
+
+- `pnpm --filter server test:exchange-marketplace-guards`
+- `pnpm --filter server test:exchange-lifecycle-guards`
+- `pnpm --filter server type-check`
+- `pnpm --filter client type-check`
+- `git diff --check`
+
+## v1.2.3
+
+- Release commit / 发布提交: `a34afc734`
+- Commit date / 提交日期: 2026-06-29
+- Commit subject / 提交说明: Release v1.2.3 exchange marketplace polish
+
+# v1.2.3
+
+## 修复
+
+- 优化交易所挂牌检测展示：将实例准入检测和交割清理策略分组展示，避免用户把“能否上架”和“成交后会清理什么”混在一起理解。
+- 补齐交易所市场卡片和详情页交割说明：明确标注“暂停锁定后强制重装”，让买家在购买前看到成交后的真实交割方式。
+- 补齐交易所后台交割任务资金信息：交割任务列表展示订单金额、平台手续费和卖家托管净额，方便人工复核交割、争议和结算。
+
+## 验证
+
+- `pnpm --filter server test:exchange-marketplace-guards`
+- `pnpm --filter server type-check`
+- `pnpm --filter client type-check`
+- `git diff --check`
 
 ## v1.2.2
 
