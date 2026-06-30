@@ -3,7 +3,7 @@
  * 提升二次加载速度，支持离线访问静态资源
  */
 
-const CACHE_NAME = 'incudal-cache-v2'
+const CACHE_NAME = 'incudal-cache-v1.2.8'
 
 // 需要缓存的静态资源类型
 const CACHEABLE_EXTENSIONS = ['.js', '.css', '.woff', '.woff2', '.ttf', '.svg', '.png', '.jpg', '.jpeg', '.gif', '.ico']
@@ -80,30 +80,12 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // 可缓存的静态资源 - 缓存优先策略（Stale While Revalidate）
+  // 可缓存的静态资源 - 网络优先，缓存兜底。
+  // OTA 后旧客户端可能还持有上一版 worker；网络优先可以避免继续使用旧 chunk/CSS。
   if (shouldCache(url)) {
     event.respondWith(
-      caches.match(event.request).then(cachedResponse => {
-        if (cachedResponse) {
-          // 返回缓存，同时在后台更新
-          event.waitUntil(
-            fetch(event.request)
-              .then(networkResponse => {
-                if (networkResponse && networkResponse.status === 200) {
-                  return caches.open(CACHE_NAME).then(cache => {
-                    cache.put(event.request, networkResponse.clone())
-                  })
-                }
-              })
-              .catch(() => {
-                // 后台更新失败，忽略
-              })
-          )
-          return cachedResponse
-        }
-
-        // 没有缓存，从网络获取并缓存
-        return fetch(event.request).then(networkResponse => {
+      fetch(event.request)
+        .then(networkResponse => {
           if (networkResponse && networkResponse.status === 200) {
             const responseToCache = networkResponse.clone()
             event.waitUntil(
@@ -114,7 +96,9 @@ self.addEventListener('fetch', (event) => {
           }
           return networkResponse
         })
-      })
+        .catch(() => {
+          return caches.match(event.request).then(cachedResponse => cachedResponse || Response.error())
+        })
     )
     return
   }

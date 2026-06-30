@@ -443,8 +443,8 @@ async function handleRegister(): Promise<void> {
               <button
                 type="button"
                 class="btn-secondary w-full whitespace-nowrap px-4 sm:w-auto"
-                :disabled="sendingCode || codeCountdown > 0 || !form.email || (turnstileEnabled && !turnstileToken)"
-                :title="!form.email ? $t('auth.enterEmailFirst') : (turnstileEnabled && !turnstileToken) ? $t('auth.turnstileRequired') : ''"
+                :disabled="sendingCode || codeCountdown > 0 || !form.email"
+                :title="!form.email ? $t('auth.enterEmailFirst') : ''"
                 @click="handleSendCodeClick"
               >
                 <template v-if="sendingCode">

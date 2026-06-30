@@ -52,6 +52,13 @@ configStore.loadPublicConfig().then(() => {
 app.mount('#app')
 
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  let refreshingForNewWorker = false
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshingForNewWorker) return
+    refreshingForNewWorker = true
+    window.location.reload()
+  })
+
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
       .then(registration => {
@@ -62,7 +69,7 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('有新版本可用，刷新页面后生效')
+                console.log('有新版本可用，正在刷新页面')
               }
             })
           }

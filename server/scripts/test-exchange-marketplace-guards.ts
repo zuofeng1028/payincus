@@ -1705,7 +1705,8 @@ assert(
 
 assert(
 	  adminExchangeRouteSource.includes('const nextPolicy = {') &&
-	    adminExchangeRouteSource.includes('enabled: Boolean(body.enabled),\n        forceStoppedRequired: true,') &&
+	    adminExchangeRouteSource.includes('enabled: Boolean(body.enabled),') &&
+	    adminExchangeRouteSource.includes('forceStoppedRequired: true') &&
 	    adminExchangeRouteSource.includes('function normalizeIdList') &&
 	    adminExchangeRouteSource.includes("packageAllowlist: normalizeIdList(body.packageAllowlist, '允许交易套餐')") &&
 	    adminExchangeRouteSource.includes("hostAllowlist: normalizeIdList(body.hostAllowlist, '允许交易节点')") &&
@@ -1715,11 +1716,11 @@ assert(
     adminExchangeRouteSource.includes('最高手续费不能低于最低手续费') &&
     adminExchangeRouteSource.includes('即将到期阈值不能小于最低剩余有效期') &&
     adminExchangeRouteSource.includes('data: nextPolicy') &&
+    !adminExchangeRouteSource.includes('forceStoppedRequired: true,\n        minRemainingDays') &&
     adminExchangeRouteSource.includes('autoConfirmEnabled: body.autoConfirmEnabled !== false') &&
     exchangeDeliveryWorkerSource.includes('!policy.autoConfirmEnabled') &&
     adminExchangeViewSource.includes('强制暂停状态上架：固定开启，不可关闭') &&
     adminExchangeViewSource.includes('自动确认规则：可配置') &&
-    adminExchangeViewSource.includes('forceStoppedRequired: true') &&
     adminExchangeViewSource.includes('policy.autoConfirmEnabled'),
   'admin exchange config must keep force-stopped listing fixed, validate cross-field policy ranges, and expose real configurable auto-confirm rules'
 )

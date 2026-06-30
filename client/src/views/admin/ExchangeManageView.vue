@@ -782,7 +782,6 @@ async function saveConfig(): Promise<void> {
   try {
     const payload = {
       ...policy.value,
-      forceStoppedRequired: true,
       packageAllowlist: textToIdList(policy.value.packageAllowlistText ?? policy.value.packageAllowlist),
       hostAllowlist: textToIdList(policy.value.hostAllowlistText ?? policy.value.hostAllowlist)
     }
