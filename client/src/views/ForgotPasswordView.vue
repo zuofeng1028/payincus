@@ -6,6 +6,7 @@ import { useThemeStore } from '@/stores/theme'
 import { useToast } from '@/stores/toast'
 import ThemeTemplateSlot from '@/components/theme/ThemeTemplateSlot.vue'
 import TurnstileWidget from '@/components/TurnstileWidget.vue'
+import { focusTurnstileSection, readTurnstileToken } from '@/utils/turnstile'
 import api from '@/api'
 import { useBrand } from '@/composables/useBrand'
 
@@ -30,6 +31,7 @@ const turnstileEnabled = ref<boolean>(false)
 const turnstileSiteKey = ref<string>('')
 const turnstileToken = ref<string>('')
 const turnstileRef = ref<InstanceType<typeof TurnstileWidget> | null>(null)
+const turnstileSectionRef = ref<HTMLElement | null>(null)
 
 onMounted(async (): Promise<void> => {
   try {
@@ -45,23 +47,35 @@ function onTurnstileExpire() {
   turnstileToken.value = ''
 }
 
+function getForgotPasswordTurnstileToken(): string | null | undefined {
+  if (!turnstileEnabled.value) return undefined
+
+  const token = readTurnstileToken(turnstileRef.value, turnstileToken.value)
+  if (token) {
+    turnstileToken.value = token
+    return token
+  }
+
+  focusTurnstileSection(turnstileSectionRef.value)
+  error.value = t('auth.turnstileRequired')
+  return null
+}
+
 async function sendVerificationCode(): Promise<void> {
   if (!email.value || !email.value.includes('@')) {
     error.value = t('auth.invalidEmail')
     return
   }
 
-  if (turnstileEnabled.value && !turnstileToken.value) {
-    error.value = t('auth.turnstileRequired')
-    return
-  }
+  const verificationToken = getForgotPasswordTurnstileToken()
+  if (verificationToken === null) return
 
   sendingCode.value = true
   error.value = ''
   success.value = ''
 
   try {
-    await api.auth.sendForgotPasswordCode(email.value, turnstileEnabled.value ? turnstileToken.value : undefined)
+    await api.auth.sendForgotPasswordCode(email.value, verificationToken || undefined)
     success.value = t('auth.forgotPassword.codeSent')
     step.value = 'verify'
     // Reset turnstile
@@ -112,10 +126,8 @@ async function resetPassword(): Promise<void> {
     return
   }
 
-  if (turnstileEnabled.value && !turnstileToken.value) {
-    error.value = t('auth.turnstileRequired')
-    return
-  }
+  const verificationToken = getForgotPasswordTurnstileToken()
+  if (verificationToken === null) return
 
   loading.value = true
   error.value = ''
@@ -126,7 +138,7 @@ async function resetPassword(): Promise<void> {
       email.value,
       code.value,
       password.value,
-      turnstileEnabled.value ? turnstileToken.value : undefined
+      verificationToken || undefined
     )
     
     toast.success(t('auth.forgotPassword.resetSuccess'))
@@ -215,14 +227,21 @@ function backToEmail() {
           </div>
 
           <!-- Turnstile 验证 -->
-          <TurnstileWidget
+          <div
             v-if="turnstileEnabled && turnstileSiteKey"
-            ref="turnstileRef"
-            v-model="turnstileToken"
-            :site-key="turnstileSiteKey"
-            :theme="themeStore.isDark ? 'dark' : 'light'"
-            @expire="onTurnstileExpire"
-          />
+            ref="turnstileSectionRef"
+            tabindex="-1"
+            class="rounded-lg border p-3"
+            :class="themeStore.isDark ? 'border-blue-500/30 bg-blue-900/20' : 'border-blue-200 bg-blue-50'"
+          >
+            <TurnstileWidget
+              ref="turnstileRef"
+              v-model="turnstileToken"
+              :site-key="turnstileSiteKey"
+              :theme="themeStore.isDark ? 'dark' : 'light'"
+              @expire="onTurnstileExpire"
+            />
+          </div>
 
           <!-- 错误提示 -->
           <div v-if="error" class="text-sm text-red-500">
@@ -316,14 +335,21 @@ function backToEmail() {
           </div>
 
           <!-- Turnstile 验证 -->
-          <TurnstileWidget
+          <div
             v-if="turnstileEnabled && turnstileSiteKey"
-            ref="turnstileRef"
-            v-model="turnstileToken"
-            :site-key="turnstileSiteKey"
-            :theme="themeStore.isDark ? 'dark' : 'light'"
-            @expire="onTurnstileExpire"
-          />
+            ref="turnstileSectionRef"
+            tabindex="-1"
+            class="rounded-lg border p-3"
+            :class="themeStore.isDark ? 'border-blue-500/30 bg-blue-900/20' : 'border-blue-200 bg-blue-50'"
+          >
+            <TurnstileWidget
+              ref="turnstileRef"
+              v-model="turnstileToken"
+              :site-key="turnstileSiteKey"
+              :theme="themeStore.isDark ? 'dark' : 'light'"
+              @expire="onTurnstileExpire"
+            />
+          </div>
 
           <!-- 错误提示 -->
           <div v-if="error" class="text-sm text-red-500">

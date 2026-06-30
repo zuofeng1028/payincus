@@ -26,6 +26,7 @@ const adminAppSource = readRepoFile('client/src/admin/AdminApp.vue')
 const authStoreSource = readRepoFile('client/src/stores/auth.ts')
 const appLayoutSource = readRepoFile('client/src/components/layout/AppLayout.vue')
 const notificationBellSource = readRepoFile('client/src/components/NotificationBell.vue')
+const mainSource = readRepoFile('client/src/main.ts')
 const adminMainSource = readRepoFile('client/src/admin/main.ts')
 const publicHeaderSource = readRepoFile('client/src/components/public/PublicSiteHeader.vue')
 const publicFooterSource = readRepoFile('client/src/components/public/PublicSiteFooter.vue')
@@ -54,6 +55,7 @@ const portalViewSource = readRepoFile('client/src/views/PortalView.vue')
 const loginViewSource = readRepoFile('client/src/views/LoginView.vue')
 const adminLoginViewSource = readRepoFile('client/src/views/admin/AdminLoginView.vue')
 const registerViewSource = readRepoFile('client/src/views/RegisterView.vue')
+const forgotPasswordViewSource = readRepoFile('client/src/views/ForgotPasswordView.vue')
 const userApiSource = readRepoFile('client/src/api/index.ts')
 const adminApiSource = readRepoFile('client/src/api/admin.ts')
 const appPathsSource = readRepoFile('client/src/utils/app-paths.ts')
@@ -250,6 +252,15 @@ assert.ok(
     !userRouterSource.includes('@/views/admin/PluginCenterView.vue'),
   'plugin center must keep admin management under /admin/plugins, expose formal admin theme/integration entries, and expose only user plugin pages in the customer router'
 )
+assert.ok(
+  userRouterSource.includes("path: '/forgot-password'") &&
+    userRouterSource.includes("name: 'forgot-password'") &&
+    userRouterSource.includes('@/views/ForgotPasswordView.vue') &&
+    userRouterSource.includes('meta: { guest: true }') &&
+    appSource.includes("const noLayoutRoutes: string[] = ['login', 'register', 'forgot-password']") &&
+    appSource.includes("!noLayoutRoutes.some(name => route.name === name)"),
+  'forgot-password must remain a guest auth page without customer app layout or stale-session redirects'
+)
 assert.deepEqual(
   userAuthenticatedRoutesWithoutUserGuard,
   [],
@@ -439,6 +450,31 @@ assert.ok(
     registerViewSource.includes('resetTurnstileChallenge()') &&
     registerViewSource.includes('error.value = translateError(err)\n    resetTurnstileChallenge()'),
   'RegisterView must reset only the Turnstile challenge after register failures so invite-code correction keeps the filled form'
+)
+for (const [viewName, source, helperName] of [
+  ['LoginView', loginViewSource, 'getLoginTurnstileToken'],
+  ['RegisterView', registerViewSource, 'getRegisterTurnstileToken'],
+  ['ForgotPasswordView', forgotPasswordViewSource, 'getForgotPasswordTurnstileToken']
+] as const) {
+  assert.ok(
+    source.includes("from '@/utils/turnstile'") &&
+      source.includes('const turnstileSectionRef = ref<HTMLElement | null>(null)') &&
+      source.includes(`function ${helperName}`) &&
+      source.includes('readTurnstileToken(turnstileRef.value, turnstileToken.value)') &&
+      source.includes('focusTurnstileSection(turnstileSectionRef.value)') &&
+      source.includes('ref="turnstileSectionRef"') &&
+      source.includes('tabindex="-1"'),
+    `${viewName} must read Turnstile tokens from the widget/hidden input and focus the visible challenge when missing`
+  )
+}
+assert.ok(
+  mainSource.includes("import clientPackage from '../package.json'") &&
+    mainSource.includes('const serviceWorkerUrl = `/sw.js?v=${encodeURIComponent(clientPackage.version)}`') &&
+    mainSource.includes("navigator.serviceWorker.register(serviceWorkerUrl, { updateViaCache: 'none' })") &&
+    adminMainSource.includes("import clientPackage from '../../package.json'") &&
+    adminMainSource.includes('const serviceWorkerUrl = `/sw.js?v=${encodeURIComponent(clientPackage.version)}`') &&
+    adminMainSource.includes("navigator.serviceWorker.register(serviceWorkerUrl, { updateViaCache: 'none' })"),
+  'user and admin entries must register a versioned Service Worker URL with updateViaCache disabled so edge-cached /sw.js cannot pin old chunks'
 )
 assert.ok(
   adminUsersViewSource.includes('import.meta.env.VITE_CUSTOMER_BASE_URL') &&

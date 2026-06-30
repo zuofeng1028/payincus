@@ -7,6 +7,7 @@ import { useThemeStore } from '@/stores/theme'
 import ThemeTemplateSlot from '@/components/theme/ThemeTemplateSlot.vue'
 import TurnstileWidget from '@/components/TurnstileWidget.vue'
 import { getSafeRedirectUrl } from '@/utils/validation'
+import { focusTurnstileSection, readTurnstileToken } from '@/utils/turnstile'
 import api from '@/api'
 import { useBrand } from '@/composables/useBrand'
 import { buildApiUrl } from '@/utils/api-url'
@@ -31,6 +32,7 @@ const turnstileEnabled = ref<boolean>(false)
 const turnstileSiteKey = ref<string>('')
 const turnstileToken = ref<string>('')
 const turnstileRef = ref<InstanceType<typeof TurnstileWidget> | null>(null)
+const turnstileSectionRef = ref<HTMLElement | null>(null)
 void turnstileRef.value // 模板中通过 ref 使用
 const footerContactEmail = ref<string | null>(null)
 const registrationEnabled = ref<boolean>(true)
@@ -73,6 +75,20 @@ function onTurnstileExpire() {
   turnstileToken.value = ''
 }
 
+function getLoginTurnstileToken(): string | null | undefined {
+  if (!turnstileEnabled.value) return undefined
+
+  const token = readTurnstileToken(turnstileRef.value, turnstileToken.value)
+  if (token) {
+    turnstileToken.value = token
+    return token
+  }
+
+  focusTurnstileSection(turnstileSectionRef.value)
+  error.value = t('auth.turnstileRequired')
+  return null
+}
+
 function checkOAuthErrors(): void {
   const urlError = route.query.error as string | undefined
   const provider = route.query.provider as string | undefined
@@ -100,10 +116,8 @@ async function handleLogin(): Promise<void> {
   }
 
   // 检查 Turnstile 验证
-  if (turnstileEnabled.value && !turnstileToken.value) {
-    error.value = t('auth.turnstileRequired')
-    return
-  }
+  const verificationToken = getLoginTurnstileToken()
+  if (verificationToken === null) return
 
   loading.value = true
   error.value = ''
@@ -115,7 +129,7 @@ async function handleLogin(): Promise<void> {
       password.value, 
       !useRecoveryCode.value && totpCode.value ? totpCode.value : undefined,
       useRecoveryCode.value && recoveryCode.value ? recoveryCode.value : undefined,
-      turnstileEnabled.value ? turnstileToken.value : undefined
+      verificationToken || undefined
     )
     
     if (authStore.isAdmin) {
@@ -290,14 +304,21 @@ function getProviderInfo(provider: string): ProviderInfo {
           </div>
 
           <!-- Turnstile 验证 -->
-          <TurnstileWidget
+          <div
             v-if="turnstileEnabled && turnstileSiteKey"
-            ref="turnstileRef"
-            v-model="turnstileToken"
-            :site-key="turnstileSiteKey"
-            :theme="themeStore.isDark ? 'dark' : 'light'"
-            @expire="onTurnstileExpire"
-          />
+            ref="turnstileSectionRef"
+            tabindex="-1"
+            class="rounded-lg border p-3"
+            :class="themeStore.isDark ? 'border-blue-500/30 bg-blue-900/20' : 'border-blue-200 bg-blue-50'"
+          >
+            <TurnstileWidget
+              ref="turnstileRef"
+              v-model="turnstileToken"
+              :site-key="turnstileSiteKey"
+              :theme="themeStore.isDark ? 'dark' : 'light'"
+              @expire="onTurnstileExpire"
+            />
+          </div>
 
           <!-- 错误提示 -->
           <div v-if="error" class="text-sm text-red-500">

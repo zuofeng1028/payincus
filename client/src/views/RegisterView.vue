@@ -7,6 +7,7 @@ import { useThemeStore } from '@/stores/theme'
 import ThemeTemplateSlot from '@/components/theme/ThemeTemplateSlot.vue'
 import { validateIdentifier, containsDangerousChars } from '@/utils/validation'
 import { translateError } from '@/utils/errorHandler'
+import { focusTurnstileSection, readTurnstileToken } from '@/utils/turnstile'
 import TurnstileWidget from '@/components/TurnstileWidget.vue'
 import TermsOfServiceModal from '@/components/TermsOfServiceModal.vue'
 import api from '@/api'
@@ -83,6 +84,7 @@ const turnstileEnabled = ref<boolean>(false)
 const turnstileSiteKey = ref<string>('')
 const turnstileToken = ref<string>('')
 const turnstileRef = ref<InstanceType<typeof TurnstileWidget> | null>(null)
+const turnstileSectionRef = ref<HTMLElement | null>(null)
 void turnstileRef.value // 模板中通过 ref 使用
 
 // Terms of Service
@@ -100,6 +102,20 @@ function resetTurnstileChallenge(): void {
   if (!turnstileEnabled.value) return
   turnstileToken.value = ''
   turnstileRef.value?.reset?.()
+}
+
+function getRegisterTurnstileToken(): string | null | undefined {
+  if (!turnstileEnabled.value) return undefined
+
+  const token = readTurnstileToken(turnstileRef.value, turnstileToken.value)
+  if (token) {
+    turnstileToken.value = token
+    return token
+  }
+
+  focusTurnstileSection(turnstileSectionRef.value)
+  error.value = t('auth.turnstileRequired')
+  return null
 }
 
 // Show email confirmation before sending code
@@ -122,10 +138,7 @@ function handleSendCodeClick(): void {
   }
 
   // Check Turnstile if enabled
-  if (turnstileEnabled.value && !turnstileToken.value) {
-    error.value = t('auth.turnstileRequired')
-    return
-  }
+  if (getRegisterTurnstileToken() === null) return
 
   // Show confirmation modal
   showEmailConfirmModal.value = true
@@ -267,10 +280,8 @@ async function handleRegister(): Promise<void> {
   }
 
   // 检查 Turnstile 验证
-  if (turnstileEnabled.value && !turnstileToken.value) {
-    error.value = t('auth.turnstileRequired')
-    return
-  }
+  const verificationToken = getRegisterTurnstileToken()
+  if (verificationToken === null) return
 
   // 检查是否同意服务条款
   if (!agreedToTerms.value) {
@@ -287,7 +298,7 @@ async function handleRegister(): Promise<void> {
       email: form.value.email,
       password: form.value.password,
       inviteCode: form.value.inviteCode,
-      turnstileToken: turnstileEnabled.value ? turnstileToken.value : undefined,
+      turnstileToken: verificationToken || undefined,
       emailCode: emailVerificationEnabled.value ? form.value.emailCode : undefined
     })
     localStorage.setItem('token', response.token)
@@ -488,14 +499,21 @@ async function handleRegister(): Promise<void> {
           </div>
 
           <!-- Turnstile 验证 -->
-          <TurnstileWidget
+          <div
             v-if="turnstileEnabled && turnstileSiteKey"
-            ref="turnstileRef"
-            v-model="turnstileToken"
-            :site-key="turnstileSiteKey"
-            :theme="themeStore.isDark ? 'dark' : 'light'"
-            @expire="onTurnstileExpire"
-          />
+            ref="turnstileSectionRef"
+            tabindex="-1"
+            class="rounded-lg border p-3"
+            :class="themeStore.isDark ? 'border-blue-500/30 bg-blue-900/20' : 'border-blue-200 bg-blue-50'"
+          >
+            <TurnstileWidget
+              ref="turnstileRef"
+              v-model="turnstileToken"
+              :site-key="turnstileSiteKey"
+              :theme="themeStore.isDark ? 'dark' : 'light'"
+              @expire="onTurnstileExpire"
+            />
+          </div>
 
           <!-- 服务条款 -->
           <div class="flex items-start gap-2">

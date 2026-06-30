@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import router from '../router/admin'
 import i18n, { getLocale } from '../locales'
 import App from './AdminApp.vue'
+import clientPackage from '../../package.json'
 import '../styles/main.css'
 import 'flag-icons/css/flag-icons.min.css'
 
@@ -52,6 +53,7 @@ configStore.loadPublicConfig().then(() => {
 app.mount('#app')
 
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  const serviceWorkerUrl = `/sw.js?v=${encodeURIComponent(clientPackage.version)}`
   let refreshingForNewWorker = false
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     if (refreshingForNewWorker) return
@@ -60,7 +62,7 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
   })
 
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
+    navigator.serviceWorker.register(serviceWorkerUrl, { updateViaCache: 'none' })
       .then(registration => {
         console.log('Service Worker 注册成功:', registration.scope)
 

@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import router from './router/user'
 import i18n, { getLocale } from './locales'
 import App from './App.vue'
+import clientPackage from '../package.json'
 import './styles/main.css'
 import 'flag-icons/css/flag-icons.min.css'
 
@@ -57,6 +58,7 @@ app.mount('#app')
 
 // 注册 Service Worker（仅生产环境）
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  const serviceWorkerUrl = `/sw.js?v=${encodeURIComponent(clientPackage.version)}`
   let refreshingForNewWorker = false
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     if (refreshingForNewWorker) return
@@ -65,7 +67,7 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
   })
 
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
+    navigator.serviceWorker.register(serviceWorkerUrl, { updateViaCache: 'none' })
       .then(registration => {
         console.log('Service Worker 注册成功:', registration.scope)
         

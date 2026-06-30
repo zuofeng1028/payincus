@@ -26,7 +26,7 @@ const hiddenHostingRouteNames = new Set([
 ])
 
 // 不需要布局的页面
-const noLayoutRoutes: string[] = ['login', 'register']
+const noLayoutRoutes: string[] = ['login', 'register', 'forgot-password']
 const publicSiteRouteNames = new Set(['portal', 'market', 'help', 'help-article'])
 const showLayout = computed<boolean>(() => {
   return authStore.isAuthenticated && !noLayoutRoutes.includes(route.name as string) && !showPublicSiteLayout.value
@@ -77,7 +77,7 @@ async function handleVisibilityChange() {
       // 使用 try-catch 防止网络错误导致跳转
       try {
         const isValid = await authStore.checkSession()
-        if (!isValid && !window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/register')) {
+        if (!isValid && !noLayoutRoutes.some(name => route.name === name)) {
           // 会话已过期，跳转到登录页
           window.location.href = '/login'
         } else if (isValid) {
@@ -146,7 +146,7 @@ onMounted(() => {
     if (authStore.isAuthenticated && document.visibilityState === 'visible') {
       try {
         const isValid = await authStore.checkSession()
-        if (!isValid && !window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/register')) {
+        if (!isValid && !noLayoutRoutes.some(name => route.name === name)) {
           // 会话已过期，跳转到登录页
           window.location.href = '/login'
         } else if (isValid) {
