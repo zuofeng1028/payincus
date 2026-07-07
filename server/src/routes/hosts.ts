@@ -145,6 +145,18 @@ function formatStoragePoolCreateError(error: unknown): string {
     ].join(' ')
   }
 
+  if (
+    lowerMessage.includes('required tool') &&
+    lowerMessage.includes('lvm') &&
+    lowerMessage.includes('missing')
+  ) {
+    return [
+      '宿主机缺少 LVM 管理工具，当前系统无法创建 LVM 存储池。',
+      '请先在宿主机执行 apt-get update && apt-get install -y lvm2，并确认 which lvm / lvm version 正常后再重试。原始错误:',
+      message
+    ].join(' ')
+  }
+
   if (lowerMessage.includes('not authorized')) {
     return [
       'Incus 拒绝了面板客户端证书，当前节点的 Incus trust 中没有信任面板证书或仍在使用旧证书。',

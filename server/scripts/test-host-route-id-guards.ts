@@ -126,10 +126,15 @@ assert.ok(
     source.includes('error loading "zfs" module') &&
     source.includes("error loading 'zfs' module") &&
     source.includes('宿主机未加载 ZFS 内核模块') &&
+    source.includes("lowerMessage.includes('required tool')") &&
+    source.includes("lowerMessage.includes('lvm')") &&
+    source.includes("lowerMessage.includes('missing')") &&
+    source.includes('宿主机缺少 LVM 管理工具') &&
+    source.includes('apt-get update && apt-get install -y lvm2') &&
     source.includes("lowerMessage.includes('not authorized')") &&
     source.includes('Incus 拒绝了面板客户端证书') &&
     source.includes('formatStoragePoolCreateError(err)'),
-  'host storage pool creation must return actionable guidance for missing ZFS modules and Incus trust failures'
+  'host storage pool creation must return actionable guidance for missing ZFS modules, missing LVM tooling, and Incus trust failures'
 )
 
 assert.ok(

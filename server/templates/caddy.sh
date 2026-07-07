@@ -72,6 +72,7 @@ mkdir -p /var/log/caddy
 cat > /etc/caddy/Caddyfile <<EOF
 {
     admin localhost:2019
+    auto_https disable_redirects
 }
 
 :${CADDY_PORT} {

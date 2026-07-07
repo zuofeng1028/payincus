@@ -6,6 +6,7 @@ import { dirname, resolve } from 'node:path'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 const source = readFileSync(resolve(__dirname, '../src/routes/instances.ts'), 'utf8')
+const kvmProxyStrategySource = readFileSync(resolve(__dirname, '../src/lib/proxy/KvmProxyStrategy.ts'), 'utf8')
 
 function sectionBetween(startMarker: string, endMarker: string): string {
   const start = source.indexOf(startMarker)
@@ -63,6 +64,11 @@ assert.ok(
   batchPortSection.includes('throw new PortMappingValidationError') &&
     batchPortSection.includes('error instanceof PortMappingValidationError'),
   'batch port mapping validation failures must enter the rollback catch path and still return 400'
+)
+assert.ok(
+  kvmProxyStrategySource.includes('当前宿主机没有可用于 KVM 端口映射的本机 IPv4 监听地址') &&
+    kvmProxyStrategySource.includes('nat_bind_ip'),
+  'KVM port mapping validation must tell operators to configure nat_bind_ip instead of surfacing a generic Invalid parameters error'
 )
 assert.ok(
   !batchPortSection.includes("return reply.code(400).send(apiError(ErrorCode.INVALID_PARAMS, proxyDeviceRes.errorMessage || '代理对象工厂拦截异常'))"),

@@ -7,6 +7,7 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
 const hostInstallScript = readFileSync(resolve(__dirname, '../templates/install.sh'), 'utf8')
+const caddyInstallScript = readFileSync(resolve(__dirname, '../templates/caddy.sh'), 'utf8')
 const hostRoutes = readFileSync(resolve(__dirname, '../src/routes/hosts.ts'), 'utf8')
 const zhCnLocale = readFileSync(resolve(__dirname, '../../client/src/locales/zh-CN.ts'), 'utf8')
 const zhTwLocale = readFileSync(resolve(__dirname, '../../client/src/locales/zh-TW.ts'), 'utf8')
@@ -43,6 +44,13 @@ assert.ok(
     hostInstallScript.includes('incus config trust add-certificate "$cert_file" --name panel') &&
     !hostInstallScript.includes('面板证书已存在，跳过导入'),
   'host install script must refresh the panel trust certificate instead of skipping stale panel entries'
+)
+
+assert.ok(
+  caddyInstallScript.includes('auto_https disable_redirects') &&
+    caddyInstallScript.indexOf('auto_https disable_redirects') > caddyInstallScript.indexOf('admin localhost:2019') &&
+    caddyInstallScript.indexOf('auto_https disable_redirects') < caddyInstallScript.indexOf(':${CADDY_PORT} {'),
+  'Caddy install script must disable automatic HTTP to HTTPS redirects so it does not bind port 80 on shared hosts'
 )
 
 assert.ok(
