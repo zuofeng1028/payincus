@@ -509,9 +509,11 @@ assert.ok(
     registerViewSource.includes('api.auth.register') &&
     registerViewSource.includes('authStore.syncToken()') &&
     registerViewSource.includes('authStore.fetchCurrentUser()') &&
-    registerViewSource.includes('router.push(dashboardPath())') &&
+    loginViewSource.includes('await router.replace(safeRedirect)') &&
+    registerViewSource.includes('await router.replace(dashboardPath())') &&
     registerViewSource.includes('router.push(loginPath())') &&
     registerViewSource.includes(':to="loginPath()"') &&
+    userRouterSource.includes("next({ name: 'dashboard', replace: true })") &&
     !registerViewSource.includes("router.push('/dashboard')") &&
     !registerViewSource.includes("router.push('/login')") &&
     !registerViewSource.includes('to="/login"'),
