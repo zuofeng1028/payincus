@@ -6,16 +6,32 @@
 
 ## 最新发布状态 / Latest Release State
 
-- 最新发布提交 / Latest Release Commit: `df34eacf9`
+- 最新发布提交 / Latest Release Commit: `edd97236f`
 - 提交日期 / Commit date: 2026-07-08
-- 提交说明 / Commit subject: Release v1.2.12 UI and stability fixes
-- 最新 tag / Latest tag: `v1.2.12`
+- 提交说明 / Commit subject: Release v1.3.1 auth redirect fixes
+- 最新 tag / Latest tag: `v1.3.1`
 
 ## 未发布变更 / Unreleased Changes
 
 - 该 tag 与相邻 tag 指向同一提交，未产生额外 Git commit。
 
 ## 历史版本 / Historical Versions
+
+## v1.3.1
+
+- 发布提交 / Release commit: `edd97236f`
+- 提交日期 / Commit date: 2026-07-08
+- 提交说明 / Commit subject: Release v1.3.1 auth redirect fixes
+
+# v1.3.1
+
+## 修复
+
+- 合并 PR #8：登录成功后使用 `router.replace()` 跳转，等待导航完成并避免登录页留在历史记录中。
+- 注册成功后在同步认证状态并加载当前用户后立即跳转客户控制台，不再依赖延迟 `setTimeout()`。
+- 已登录用户访问登录/注册等游客页时使用 `replace` 跳转到控制台，避免返回按钮回到已失效的认证页。
+- 同步前端路由守卫测试，覆盖登录、注册和游客页重定向的新跳转语义。
+- 同步 Service Worker 静态缓存名到 `v1.3.1`，确保 OTA 后客户端获取新版本静态资源。
 
 ## v1.2.12
 

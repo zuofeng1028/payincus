@@ -6,16 +6,32 @@ This page is generated from Git tags and commits to show system version history.
 
 ## Latest Release State / 最新发布状态
 
-- Latest Release Commit / 最新发布提交: `df34eacf9`
+- Latest Release Commit / 最新发布提交: `edd97236f`
 - Commit date / 提交日期: 2026-07-08
-- Commit subject / 提交说明: Release v1.2.12 UI and stability fixes
-- Latest tag / 最新 tag: `v1.2.12`
+- Commit subject / 提交说明: Release v1.3.1 auth redirect fixes
+- Latest tag / 最新 tag: `v1.3.1`
 
 ## Unreleased Changes / 未发布变更
 
 - This tag points to the same commit as the adjacent tag, so there are no additional Git commits.
 
 ## Historical Versions / 历史版本
+
+## v1.3.1
+
+- Release commit / 发布提交: `edd97236f`
+- Commit date / 提交日期: 2026-07-08
+- Commit subject / 提交说明: Release v1.3.1 auth redirect fixes
+
+# v1.3.1
+
+## 修复
+
+- 合并 PR #8：登录成功后使用 `router.replace()` 跳转，等待导航完成并避免登录页留在历史记录中。
+- 注册成功后在同步认证状态并加载当前用户后立即跳转客户控制台，不再依赖延迟 `setTimeout()`。
+- 已登录用户访问登录/注册等游客页时使用 `replace` 跳转到控制台，避免返回按钮回到已失效的认证页。
+- 同步前端路由守卫测试，覆盖登录、注册和游客页重定向的新跳转语义。
+- 同步 Service Worker 静态缓存名到 `v1.3.1`，确保 OTA 后客户端获取新版本静态资源。
 
 ## v1.2.12
 

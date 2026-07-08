@@ -1,6 +1,6 @@
 # PayIncus Handoff
 
-Last updated: 2026-07-08 03:45 CST
+Last updated: 2026-07-08 16:17 CST
 
 This file is a handoff note for a new Codex conversation. Do not include server passwords or other secrets in this file.
 
@@ -12,11 +12,63 @@ Give the next Codex session this file first. The active working directory is:
 /Users/max/.codex/worktrees/payincus-release-v124
 ```
 
-Production is currently on `v1.2.12`. The latest shipped work released the current UI/stability fix set, including instance change-plan price-unit correction, safe plugin/theme market fallback, registration/forgot-password/wallet/resource/admin layout and route fixes, and the Service Worker cache name bump to `incudal-cache-v1.2.12`.
+Production is currently on `v1.3.1`. The latest shipped work released the login/register redirect fix from PR #8, including awaited `router.replace()` navigation after successful login/register, guest-route replacement redirects for already-authenticated users, frontend route-guard test coverage, and the Service Worker cache name bump to `incudal-cache-v1.3.1`.
 
-The release commit/tag and OTA evidence below are production proof for `v1.2.12`. Remaining untracked `.ui-scan/` output is local-only evidence and should not be treated as tracked release content.
+The release commit/tag and OTA evidence below are production proof for `v1.3.1`. Remaining untracked `.ui-scan/` output is local-only evidence and should not be treated as tracked release content.
 
-### Current v1.2.12 Production / OTA Status
+### Current v1.3.1 Production / OTA Status
+
+- PR #8 was merged into `main` as merge commit `0c3a27c9e` before the release. It changed login/register success redirects and guest-route redirects to use replacement navigation semantics.
+- `v1.3.1` release commit: `edd97236f` (`Release v1.3.1 auth redirect fixes`).
+- `payincus/main` and tag `v1.3.1` were pushed successfully.
+- GitHub Actions for `edd97236f` completed successfully:
+  - `Build & Release` run `28927677925` for tag `v1.3.1`: `构建 (arm64) -> success`, `构建 (amd64) -> success`, `发布 Release -> success`.
+  - `CI` run `28927678125` on `main` -> success.
+  - `Deploy docs site to GitHub Pages` run `28927678097` on `main` -> success.
+- GitHub Release `v1.3.1` exists with amd64/arm64 tarballs, SHA256 files, `incudal-v1.3.1-ota-manifest.json`, `ota-manifest.json`, plugin assets, and `plugin-market-index.json`.
+- OTA manifest proof:
+  - version/tag `v1.3.1`
+  - gitCommit `edd97236fbc4`
+  - manifest asset sha256 `02572214303dcd4a51f56d5873be2252b6e5334a31b8ad3cac968d71d59f7d42`
+  - amd64 sha256 `1bea29d6a30baa00cc869094279d6e8213b735fa94b5d857a67ddcbae1a7a82e`
+  - arm64 sha256 `82f843af0df6a1cd9200733bcadf47e22ed83b8975784f50733f4264fa61e72b`
+- Production preflight before OTA:
+  - current symlink was `/opt/incudal/releases/v1.2.12-20260707194253`
+  - `/opt/incudal/current/version.json` reported `v1.2.12`
+  - `systemctl is-active incudal-backend -> active`
+  - `https://pay.payincus.com/api/health` and `https://admin.payincus.com/api/health` returned `{"status":"ok",...}`
+- OTA task `#137`: `v1.2.12 -> v1.3.1`, status `success`, log `/opt/incudal/update-logs/system-update-137.log`, completed in the log at `2026-07-08T08:17:09.712Z`.
+- Production current symlink: `/opt/incudal/current -> /opt/incudal/releases/v1.3.1-20260708081533`.
+- Production `/opt/incudal/current/version.json`:
+  - version `v1.3.1`
+  - gitTag `v1.3.1`
+  - gitCommit `edd97236fbc4`
+  - buildTime `2026-07-08T08:12:37.365Z`
+  - deployedAt `2026-07-08T08:16:00.305Z`
+  - changelog `Release v1.3.1 auth redirect fixes`
+- OTA log proof included artifact SHA256 verification, switch to `/opt/incudal/releases/v1.3.1-20260708081533`, `verify-split-host`, `verify:production`, `verify:log-header`, and `System update completed successfully`.
+- Production backend service check: `systemctl is-active incudal-backend -> active`.
+- Production health checks:
+  - `https://pay.payincus.com/api/health -> {"status":"ok",...}`
+  - `https://admin.payincus.com/api/health -> {"status":"ok",...}`
+- Service worker proof: `https://pay.payincus.com/sw.js?v=1.3.1` contains `const CACHE_NAME = 'incudal-cache-v1.3.1'`.
+- Post-OTA split-host verification passed:
+  - OTA task `#137` ran `bash scripts/verify-split-host.sh` with backend direct API `http://127.0.0.1:3001`.
+  - `pnpm verify:production -> passed` with existing warnings for stale DE-01 Agent heartbeat, one HKCMI public package that online bound hosts cannot satisfy, and sold-out public packages `HKCN2` / `DEBGP`.
+  - `pnpm verify:log-header -> passed`; it confirmed the backend root did not serve frontend HTML and current secret values were not present in scanned logs.
+
+### Completed v1.3.1 Local / Release Verification
+
+```text
+pnpm test -> passed
+pnpm build -> passed
+pnpm --dir docs-site --ignore-workspace build -> passed after tag
+git diff --check -> passed
+git diff --cached --check -> passed before release commit
+GitHub Actions CI / Build & Release / Docs Pages -> passed
+```
+
+### Previous v1.2.12 Production / OTA Status
 
 - `v1.2.12` release commit: `df34eacf9` (`Release v1.2.12 UI and stability fixes`).
 - `payincus/main` and tag `v1.2.12` were pushed successfully.
@@ -104,7 +156,7 @@ pnpm --filter server exec tsx scripts/test-content-route-guards.ts -> passed
 pnpm --filter client build:user -> passed
 pnpm build -> passed
 git diff --check -> passed
-pnpm verify:split:host / verify:production / verify:log-header -> passed inside OTA task #136
+pnpm verify:split:host / verify:production / verify:log-header -> passed inside OTA task #137
 ```
 
 ### Important Constraints
