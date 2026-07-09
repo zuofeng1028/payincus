@@ -1,6 +1,6 @@
 # PayIncus Handoff
 
-Last updated: 2026-07-09 22:10 CST
+Last updated: 2026-07-09 22:29 CST
 
 This file is a handoff note for a new Codex conversation. Do not include server passwords or other secrets in this file.
 
@@ -12,13 +12,63 @@ Give the next Codex session this file first. The active working directory is:
 /Users/max/.codex/worktrees/payincus-release-v133
 ```
 
-Production is currently on `v1.3.3`. The first OTA attempt `#139` failed production readiness and auto-rolled back because the active Epay/yipay provider API URL `https://max.xinyuqicheng.cn/plugin/EpayApi/GatewayV1` cannot be resolved from production. The user then explicitly said payment judgement is not needed, so OTA task `#140` was rerun with `RUN_DB_CHECKS=0`; it passed static production environment checks, split-host checks, Agent manifest check, log/header exposure checks, and completed successfully. Payment runtime signature/status/amount/idempotency checks were not changed.
+Production is currently on `v1.3.4`. This is a hotfix for the homepage/login/register/admin pages self-refreshing after the `v1.3.3` UI rollout. Root cause: Service Worker `controllerchange` and stale-asset recovery reload guards were in-memory only, so a page reload could reset the guard and allow repeated automatic reloads. `v1.3.4` stores one-shot reload guards in `sessionStorage` by client version / asset signature.
 
-The latest shipped work adds demo login/read-only safeguards, demo data redaction guards, UI polish, release notes, and bumps the Service Worker cache name to `incudal-cache-v1.3.3`.
+The latest shipped work adds the reload-loop guard, bumps the Service Worker cache name to `incudal-cache-v1.3.4`, and keeps the `v1.3.3` demo login/read-only safeguards, demo data redaction guards, and UI polish.
 
-The release commit/tag and OTA evidence below are production proof for `v1.3.3`. Remaining untracked `.ui-scan/` output is local-only evidence and should not be treated as tracked release content.
+The release commit/tag and OTA evidence below are production proof for `v1.3.4`. Remaining untracked `.ui-scan/` output is local-only evidence and should not be treated as tracked release content.
 
-### Current v1.3.3 Production / OTA Status
+### Current v1.3.4 Production / OTA Status
+
+- `v1.3.4` release commit/tag: `bd0a36c69` (`Release v1.3.4 reload loop guard`).
+- `payincus/main` and tag `v1.3.4` were pushed successfully.
+- GitHub Actions for `bd0a36c695fb4b3e6e6a145768f70781219ed645` completed successfully:
+  - `Build & Release` run `29024974687` -> success.
+  - `CI` run `29024974735` -> success.
+  - `Deploy docs site to GitHub Pages` run `29024974844` -> success.
+- GitHub Release `v1.3.4` exists with amd64/arm64 tarballs, SHA256 files, `incudal-v1.3.4-ota-manifest.json`, `ota-manifest.json`, plugin assets, and `plugin-market-index.json`.
+- OTA manifest proof:
+  - version/tag `v1.3.4`
+  - gitCommit `bd0a36c695fb`
+  - buildTime `2026-07-09T14:23:43.612Z`
+  - manifest asset sha256 `8db6ec1cd8fe6dc9c19043cb4d77b4e8e38deba7bbb445aa9d5884c2ce1847c7`
+  - amd64 sha256 `6972880a4ef0a4ca5de3f392aa03f7c69b35a13e42ede467f9d271a97f5b4b95`
+  - arm64 sha256 `48c35c45a8623aed2e34b8b19e0ab9db4cc6cf8d1ec31df14cf007f50911f79e`
+- Final OTA task `#141`: `v1.3.3 -> v1.3.4`, log `/opt/incudal/update-logs/system-update-141.log`, ran with `RUN_DB_CHECKS=0` because the user explicitly said payment judgement is not needed.
+  - OTA artifact verified: amd64 sha256 `6972880a4ef0a4ca5de3f392aa03f7c69b35a13e42ede467f9d271a97f5b4b95`.
+  - Prisma migrate deploy found no pending migrations.
+  - The updater switched current to `/opt/incudal/releases/v1.3.4-20260709142531`.
+  - Backend health became ready after 2 attempts.
+  - `bash scripts/verify-split-host.sh` passed for user/admin frontend assets, proxied API, proxied WebSocket, and backend direct API.
+  - `pnpm verify:production` passed with `Database checks skipped because RUN_DB_CHECKS=0`, static production environment checks passed, split-host checks passed, and Agent manifest check passed.
+  - `pnpm verify:log-header` passed; it confirmed the backend root did not serve frontend HTML and current secret values were not present in scanned logs.
+  - Log contains `System update completed successfully`.
+- Current production state after task `#141`:
+  - `systemctl is-active incudal-backend -> active`
+  - `/opt/incudal/current -> /opt/incudal/releases/v1.3.4-20260709142531`
+  - `/opt/incudal/current/version.json` reports version/tag `v1.3.4`, gitCommit `bd0a36c695fb`, buildTime `2026-07-09T14:22:47.515Z`, deployedAt `2026-07-09T14:25:56.593Z`
+  - `https://pay.payincus.com/api/health` and `https://admin.payincus.com/api/health` returned `{"status":"ok",...}`
+  - `https://pay.payincus.com/sw.js?v=1.3.4` contains `incudal-cache-v1.3.4`
+  - Live user bundle `/assets/CFLuGaVF.js` and admin bundle `/assets/CaYbAfxE.js` contain the new reload guard keys `incudal:service-worker-controller-reloaded` and `incudal:stale-asset-reload-signature`.
+- Browser-level observation was not completed in Codex because the in-app browser backend was unavailable (`agent.browsers.list() -> []`). HTTP/live asset evidence confirms the fix is deployed; if a real browser still refreshes repeatedly, inspect that browser's Service Worker/Application state and console next.
+
+### Completed v1.3.4 Local / Release Verification
+
+```text
+pnpm --filter client type-check -> passed
+pnpm --filter server test:frontend-route-guards -> passed
+pnpm --filter server type-check -> passed
+pnpm --filter client build -> passed
+pnpm --dir docs-site --ignore-workspace changelog -> passed
+pnpm --dir docs-site --ignore-workspace build -> passed
+git diff --check -> passed
+pnpm build -> passed
+pnpm test -> passed
+GitHub Actions CI / Build & Release / Docs Pages -> passed
+Production OTA task #141 with RUN_DB_CHECKS=0 -> passed
+```
+
+### Previous v1.3.3 Production / OTA Status
 
 - `v1.3.3` release commit/tag: `f32e44e02` (`Release v1.3.3 demo safeguards and UI polish`).
 - `payincus/main` and tag `v1.3.3` were pushed successfully.
