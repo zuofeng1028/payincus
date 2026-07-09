@@ -1,6 +1,6 @@
 # PayIncus Handoff
 
-Last updated: 2026-07-08 20:23 CST
+Last updated: 2026-07-09 21:55 CST
 
 This file is a handoff note for a new Codex conversation. Do not include server passwords or other secrets in this file.
 
@@ -9,12 +9,69 @@ This file is a handoff note for a new Codex conversation. Do not include server 
 Give the next Codex session this file first. The active working directory is:
 
 ```text
-/Users/max/.codex/worktrees/payincus-release-v124
+/Users/max/.codex/worktrees/payincus-release-v133
 ```
 
-Production is currently on `v1.3.2`. The latest shipped work adds stale frontend asset recovery for user/admin shells, router and Vue dynamic-import failures, fixes the Turnstile verified/pending/expired/error status presentation, removes the Figma capture script from the production HTML shell, extends frontend route-guard coverage, and bumps the Service Worker cache name to `incudal-cache-v1.3.2`.
+Production is currently still on `v1.3.2`. `v1.3.3` has been merged locally, committed, pushed to `payincus/main`, tagged, and released on GitHub, but it has not shipped to production because OTA task `#139` failed production readiness and auto-rolled back. The blocker is the active Epay/yipay provider API URL `https://max.xinyuqicheng.cn/plugin/EpayApi/GatewayV1`: production cannot resolve `max.xinyuqicheng.cn`, so `verify:production` fails the payment-provider safe outbound URL check. Do not bypass this check for release; fix or intentionally disable/update the payment provider configuration first.
+
+The latest shipped work remains `v1.3.2`, which adds stale frontend asset recovery for user/admin shells, router and Vue dynamic-import failures, fixes the Turnstile verified/pending/expired/error status presentation, removes the Figma capture script from the production HTML shell, extends frontend route-guard coverage, and bumps the Service Worker cache name to `incudal-cache-v1.3.2`.
 
 The release commit/tag and OTA evidence below are production proof for `v1.3.2`. Remaining untracked `.ui-scan/` output is local-only evidence and should not be treated as tracked release content.
+
+### v1.3.3 Pushed / Release Ready, OTA Blocked
+
+- `v1.3.3` release commit/tag: `f32e44e02` (`Release v1.3.3 demo safeguards and UI polish`).
+- `payincus/main` and tag `v1.3.3` were pushed successfully.
+- GitHub Actions for `f32e44e020774a8c968f29f5ab226018875809c6` completed successfully:
+  - `Build & Release` run `29022542025` -> success.
+  - `CI` run `29022542341` -> success.
+  - `Deploy docs site to GitHub Pages` run `29022542842` -> success.
+- GitHub Release `v1.3.3` exists with amd64/arm64 tarballs, SHA256 files, `incudal-v1.3.3-ota-manifest.json`, `ota-manifest.json`, plugin assets, and `plugin-market-index.json`.
+- OTA manifest proof:
+  - version/tag `v1.3.3`
+  - gitCommit `f32e44e02077`
+  - buildTime `2026-07-09T13:47:52.516Z`
+  - manifest asset sha256 `1750bfe58bfd49fe48a3a2c3dcb36e7b13dd634d64c20ac86a3fffd0241b66c4`
+  - amd64 sha256 `44ccd47c588db0bbc69e72922fe583258bab6e2d71f3737df8a34f17a54bd2ac`
+  - arm64 sha256 `a043c64697ebe1ad9b7738af77174d1f1fb842b66b484fa85ae5e0db8a68f716`
+- Production preflight before OTA:
+  - current symlink was `/opt/incudal/releases/v1.3.2-20260708121306`
+  - `/opt/incudal/current/version.json` reported `v1.3.2`
+  - `systemctl is-active incudal-backend -> active`
+  - `https://pay.payincus.com/api/health` and `https://admin.payincus.com/api/health` returned `{"status":"ok",...}`
+  - `/opt/incudal` could resolve tag `v1.3.3` to `f32e44e`
+- OTA task `#139`: `v1.3.2 -> v1.3.3`, log `/opt/incudal/update-logs/system-update-139.log`, failed during `pnpm verify:production`.
+  - The OTA package downloaded and verified successfully.
+  - The updater switched current to `/opt/incudal/releases/v1.3.3-20260709135116`.
+  - Backend health became ready after 2 attempts.
+  - `bash scripts/verify-split-host.sh` passed for user/admin frontend assets, proxied API, proxied WebSocket, and backend direct API.
+  - `pnpm verify:production` failed because active payment provider `#1` (`Epay`, `yipay`) has an API URL whose hostname cannot be resolved from production: `max.xinyuqicheng.cn`.
+  - Existing warnings also appeared for stale DE-01 Agent heartbeat, running instances on hosts without fresh heartbeat, one HKCMI public package whose online bound hosts cannot satisfy its minimum requirement, and sold-out public packages `HKCN2` / `DEBGP`.
+  - The updater auto-rolled back to `/opt/incudal/releases/v1.3.2-20260708121306`.
+- Post-failure production state:
+  - `systemctl is-active incudal-backend -> active`
+  - `/opt/incudal/current -> /opt/incudal/releases/v1.3.2-20260708121306`
+  - `/opt/incudal/current/version.json` reports version/tag `v1.3.2`, gitCommit `62338ac31e5e`
+  - `https://pay.payincus.com/api/health` and `https://admin.payincus.com/api/health` returned `{"status":"ok",...}`
+  - `https://pay.payincus.com/sw.js` still contains `const CACHE_NAME = 'incudal-cache-v1.3.2'`
+
+### Completed v1.3.3 Local / Release Verification
+
+```text
+pnpm --filter client type-check -> passed
+pnpm --filter server type-check -> passed
+pnpm --filter server test:demo-account-safety-guards -> passed
+pnpm --filter server test:demo-notification-redaction-guards -> passed
+pnpm --filter server test:demo-readonly-redaction-guards -> passed
+pnpm --filter server test:frontend-route-guards -> passed
+pnpm build -> passed
+pnpm --dir docs-site install --ignore-workspace -> completed to restore missing docs-site deps
+pnpm --dir docs-site --ignore-workspace build -> passed
+pnpm test -> passed
+git diff --check -> passed
+GitHub Actions CI / Build & Release / Docs Pages -> passed
+Production OTA task #139 -> failed and auto-rolled back because payment provider DNS readiness failed
+```
 
 ### Current v1.3.2 Production / OTA Status
 
@@ -196,12 +253,12 @@ The latest local UI scan reruns reported 108/108 public/customer/resource-owner 
 Run these before editing:
 
 ```bash
-cd /Users/max/.codex/worktrees/payincus-release-v124
+cd /Users/max/.codex/worktrees/payincus-release-v133
 git status --short
 sed -n '1,140p' HANDOFF.md
 git diff --stat
 git log --oneline --decorate -10
-git diff -- client/src/views/HelpView.vue client/src/views/OAuthAuthorizeView.vue server/src/routes/help.ts client/public/sw.js
+git diff -- client/src/views/LoginView.vue client/src/views/AdminLoginView.vue server/src/lib/demo-safety.ts server/src/routes/auth.ts server/src/routes/users.ts client/public/sw.js
 ```
 
 If visual QA is needed, start the client locally:
