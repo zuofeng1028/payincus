@@ -1,6 +1,6 @@
 # PayIncus Handoff
 
-Last updated: 2026-07-09 22:29 CST
+Last updated: 2026-07-10 05:02 CST
 
 This file is a handoff note for a new Codex conversation. Do not include server passwords or other secrets in this file.
 
@@ -12,11 +12,39 @@ Give the next Codex session this file first. The active working directory is:
 /Users/max/.codex/worktrees/payincus-release-v133
 ```
 
-Production is currently on `v1.3.4`. This is a hotfix for the homepage/login/register/admin pages self-refreshing after the `v1.3.3` UI rollout. Root cause: Service Worker `controllerchange` and stale-asset recovery reload guards were in-memory only, so a page reload could reset the guard and allow repeated automatic reloads. `v1.3.4` stores one-shot reload guards in `sessionStorage` by client version / asset signature.
+Production is currently on `v1.3.5`. This release contains the audited security, payment, OTA, task-scheduler, authentication, UI, installer, and documentation fixes completed after `v1.3.4`.
 
-The latest shipped work adds the reload-loop guard, bumps the Service Worker cache name to `incudal-cache-v1.3.4`, and keeps the `v1.3.3` demo login/read-only safeguards, demo data redaction guards, and UI polish.
+The Service Worker now derives its cache name from the registered client version, the documentation site has a task-oriented responsive layout, and the production artifact includes the v1.3.5 security and accounting fixes.
 
-The release commit/tag and OTA evidence below are production proof for `v1.3.4`. Remaining untracked `.ui-scan/` output is local-only evidence and should not be treated as tracked release content.
+The release commit/tag and OTA evidence below are production proof for `v1.3.5`. Local `.codex-run/` screenshots and logs are local-only evidence and are not tracked release content.
+
+### Current v1.3.5 Production / OTA Status
+
+- `v1.3.5` release commit/tag: `7f6f6b8c1070` (`Release v1.3.5 security hardening and UI refresh`).
+- Follow-up main commits `aef6d75` and `0f422e0` removed duplicate tag-triggered Pages deploys and aligned the docs guard; the release tag was not moved.
+- GitHub Actions:
+  - release commit CI run `29048467146` -> success.
+  - Build & Release run `29048469099` -> success.
+  - final main CI run `29048963373` -> success.
+  - final Pages run `29048963424` -> success.
+- GitHub Release `v1.3.5` contains amd64/arm64 tarballs, both SHA256 files, versioned and generic OTA manifests, plugin assets, and `plugin-market-index.json`.
+- OTA manifest proof: version/tag `v1.3.5`, gitCommit `7f6f6b8c1070`, buildTime `2026-07-09T20:38:15.203Z`, amd64 sha256 `ffcf0f17e1290ec2ed43d7c02f3e37993d2df70b92d4b680353932e014ac7fea`, arm64 sha256 `0de3811af00f92d34187cb60fc4c764ccbd9a62ae9237a6b3d4c94a21ebf2a2b`.
+- Standard OTA task `#143` safely auto-rolled back because active payment provider `#1` could not resolve its configured API hostname. Rollback restored v1.3.4 and all split-host/health checks passed.
+- Final OTA task `#144`: `v1.3.4 -> v1.3.5`, status `success`, log `/opt/incudal/update-logs/system-update-144.log`, backup `/opt/incudal/releases/v1.3.4-20260709142531`.
+  - Ran with `RUN_DB_CHECKS=0` after explicit owner approval.
+  - Artifact SHA256, dependency install, Prisma migration status (187 migrations, schema current), atomic switch, backend health, split-host assets/API/WebSocket, Agent manifest, static production readiness, and log/header secret scan passed.
+  - Log contains `System update completed successfully` at `2026-07-09T20:59:24.406Z`.
+- Current production state:
+  - `/opt/incudal/current -> /opt/incudal/releases/v1.3.5-20260709205805`
+  - `version.json`: v1.3.5, commit `7f6f6b8c1070`, deployedAt `2026-07-09T20:58:29.960Z`
+  - `incudal-backend` is enabled and active.
+  - local, public user, and public admin `/api/health` returned HTTP 200.
+  - Chinese/English docs version logs return HTTP 200 and contain v1.3.5.
+- Sanitized production configuration audit:
+  - all five secret-type system settings are configured; optional empty settings are limited to notice/promo/plugin-public-base/Lsky target fields.
+  - one plugin is installed and enabled; zero themes are installed; one Telegram notification channel is enabled; no OAuth providers are configured.
+  - known operational issues: payment provider hostname remains unresolved; `DE-01` Agent heartbeat is stale; readiness also warns about one package without sufficient host capacity and two sold-out package groups.
+- Standing owner directive from 2026-07-10: all future PayIncus OTA runs should use `RUN_DB_CHECKS=0`; do not ask again for the DB/payment readiness waiver. Continue running artifact, migration, static config, split-host, Agent, service health, and log/header checks.
 
 ### Current v1.3.4 Production / OTA Status
 
