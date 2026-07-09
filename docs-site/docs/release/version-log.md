@@ -13,7 +13,13 @@
 
 ## 未发布变更 / Unreleased Changes
 
-- 该 tag 与相邻 tag 指向同一提交，未产生额外 Git commit。
+### 其他变更 / Other Changes
+
+- feat: 全量改造UI为二次元动漫风格 `f9df2160c`
+
+### 新增能力 / New Capabilities
+
+- Add demo login and read-only safeguards / 新增演示登录与只读保护 `81641a7a9`
 
 ## 历史版本 / Historical Versions
 

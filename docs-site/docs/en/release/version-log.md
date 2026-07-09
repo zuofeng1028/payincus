@@ -13,7 +13,13 @@ This page is generated from Git tags and commits to show system version history.
 
 ## Unreleased Changes / 未发布变更
 
-- This tag points to the same commit as the adjacent tag, so there are no additional Git commits.
+### Other Changes / 其他变更
+
+- feat: 全量改造UI为二次元动漫风格 `f9df2160c`
+
+### New Capabilities / 新增能力
+
+- Add demo login and read-only safeguards / 新增演示登录与只读保护 `81641a7a9`
 
 ## Historical Versions / 历史版本
 
