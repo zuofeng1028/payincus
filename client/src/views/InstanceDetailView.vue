@@ -2819,7 +2819,7 @@ function formatShortDate(dateStr: string | null | undefined): string {
             v-if="canSuspend && !isSuspended"
             :disabled="suspendLoading"
             class="btn-sm sm:btn inline-flex rounded-lg"
-            :class="themeStore.isDark ? 'bg-orange-600 hover:bg-orange-700 text-white' : 'bg-orange-500 hover:bg-orange-600 text-white'"
+            :class="themeStore.isDark ? 'bg-warning hover:bg-warning/90 text-white' : 'bg-warning hover:bg-warning/90 text-white'"
             :title="$t('instance.detail.actions.suspend')"
             @click="handleSuspend"
           >
@@ -3678,7 +3678,7 @@ function formatShortDate(dateStr: string | null | undefined): string {
           <div class="modal-backdrop" @click="showSuspendModal = false"></div>
           <div class="modal-content max-w-md">
             <div class="modal-header">
-              <h3 class="modal-title text-orange-500">{{ $t('instance.detail.actions.suspend') }}</h3>
+              <h3 class="modal-title text-warning">{{ $t('instance.detail.actions.suspend') }}</h3>
               <button
                 class="text-themed-muted hover:text-themed"
                 :disabled="suspendLoading"
@@ -3691,8 +3691,8 @@ function formatShortDate(dateStr: string | null | undefined): string {
             </div>
             <div class="modal-body space-y-4">
               <p class="text-themed">{{ $t('instance.detail.actions.confirmSuspend', { name: instance?.name || '' }) }}</p>
-              <div class="p-3 rounded-lg" :class="themeStore.isDark ? 'bg-orange-500/10 border border-orange-500/20' : 'bg-orange-50 border border-orange-200'">
-                <p class="text-sm" :class="themeStore.isDark ? 'text-orange-400' : 'text-orange-600'">
+              <div class="p-3 rounded-lg" :class="themeStore.isDark ? 'bg-warning/10 border border-warning/20' : 'bg-warning/10 border border-warning/30'">
+                <p class="text-sm" :class="themeStore.isDark ? 'text-warning' : 'text-warning'">
                   {{ $t('instance.detail.actions.confirmSuspendNotice') }}
                 </p>
               </div>
@@ -3719,7 +3719,7 @@ function formatShortDate(dateStr: string | null | undefined): string {
               <button
                 :disabled="suspendLoading"
                 class="text-white"
-                :class="themeStore.isDark ? 'bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-lg' : 'bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-lg'"
+                :class="themeStore.isDark ? 'bg-warning hover:bg-warning/90 px-4 py-2 rounded-lg' : 'bg-warning hover:bg-warning/90 px-4 py-2 rounded-lg'"
                 @click="confirmSuspend"
               >
                 <svg v-if="suspendLoading" class="w-4 h-4 mr-1 inline animate-spin" fill="none" viewBox="0 0 24 24">

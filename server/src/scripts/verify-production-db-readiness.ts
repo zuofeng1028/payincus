@@ -3,6 +3,7 @@ import { closePrismaDatabase, prisma } from '../db/prisma.js'
 import { getAllPaymentProviders } from '../db/payment-providers.js'
 import { getSystemConfig } from '../db/system-config.js'
 import { assertSafeHttpUrl } from '../lib/outbound-security.js'
+import { buildAntomConfig } from '../lib/antom.js'
 
 type CheckLevel = 'warn' | 'fail'
 
@@ -92,8 +93,14 @@ async function checkPaymentProviders(): Promise<void> {
     const config = provider.config as Record<string, unknown>
     const prefix = `Payment provider #${provider.id} (${provider.name}, ${provider.type})`
 
-    if (provider.type !== 'yipay' && provider.type !== 'heleket') {
+    if (provider.type !== 'yipay' && provider.type !== 'heleket' && provider.type !== 'antom') {
       fail(`${prefix} uses unsupported provider type for recharge`)
+      continue
+    }
+
+    if (provider.type === 'antom') {
+      const antom = buildAntomConfig(config)
+      if (!antom.valid) fail(`${prefix} configuration is invalid: ${antom.error || 'unknown error'}`)
       continue
     }
 

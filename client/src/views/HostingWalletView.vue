@@ -567,7 +567,7 @@ function getFlowCardClass(index: number): string {
 
 function getFlowIndexClass(index: number): string {
   const classes = [
-    'bg-blue-600 text-white dark:bg-blue-500',
+    'bg-accent text-white dark:text-black',
     'bg-amber-500 text-white',
     'bg-emerald-600 text-white dark:bg-emerald-500'
   ]

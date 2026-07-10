@@ -22,6 +22,8 @@ import {
 } from '@/utils/publicCatalog'
 import { freeSiteCopy, getFreeSiteBillingCycleLabel } from '@/utils/freeSiteFun'
 import { instanceCreatePath, loginPath } from '@/utils/app-paths'
+import { useReveal } from '@/composables/useReveal'
+import { PackageOpen, SearchX } from 'lucide-vue-next'
 
 defineOptions({
   name: 'MarketView'
@@ -34,6 +36,9 @@ const authStore = useAuthStore()
 const configStore = useConfigStore()
 const brand = useBrand()
 void configStore.loadPublicConfig()
+
+const revealRoot = ref<HTMLElement | null>(null)
+useReveal(revealRoot)
 
 type PublicPackageSource = 'official' | 'market'
 
@@ -554,48 +559,41 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="kawaii-page kawaii-market-page relative">
-    <section class="kawaii-market-hero relative px-4 pb-10 pt-14 sm:px-6 lg:px-8">
+  <div ref="revealRoot" class="kawaii-page kawaii-market-page relative">
+    <section class="market-hero relative px-4 pb-8 pt-14 sm:px-6 lg:px-8">
       <div class="relative mx-auto max-w-7xl">
-        <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,0.72fr)] lg:items-end">
-          <div class="max-w-3xl">
-            <div
-              class="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium"
-              :class="ui.badge"
-            >
-              <span class="h-1.5 w-1.5 rounded-full" :class="ui.badgeDot"></span>
-              {{ t('publicSite.market.badge') }}
-            </div>
+        <div class="max-w-3xl" data-reveal>
+          <div
+            class="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium"
+            :class="ui.badge"
+          >
+            <span class="h-1.5 w-1.5 rounded-full" :class="ui.badgeDot"></span>
+            {{ t('publicSite.market.badge') }}
+          </div>
 
-            <h1 class="mt-6 text-4xl font-extrabold tracking-normal sm:text-5xl lg:text-[3.65rem] lg:leading-[1.05]" :class="ui.title">
-              {{ t('publicSite.market.title') }}
-            </h1>
-            <p class="mt-5 max-w-2xl text-base leading-7 sm:text-lg sm:leading-8" :class="ui.body">
-              {{ t('publicSite.market.description') }}
-            </p>
+          <h1 class="mt-6 text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-[2.9rem] lg:leading-[1.06]" :class="ui.title">
+            {{ t('publicSite.market.title') }}
+          </h1>
+          <p class="mt-4 max-w-2xl text-base leading-7 sm:text-lg sm:leading-8" :class="ui.body">
+            {{ t('publicSite.market.description') }}
+          </p>
 
-            <div class="kawaii-market-hero-notice mt-8 flex items-start gap-3 px-4 py-3.5 text-sm leading-6" :class="ui.infoBanner">
-              <svg class="mt-0.5 h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>{{ infoBannerText }}</span>
+          <div class="market-stat-strip mt-7 flex flex-wrap items-center" data-reveal>
+            <div v-for="card in summaryCards" :key="card.label" class="market-stat">
+              <span class="market-stat-value" :class="ui.summaryValue">{{ card.value }}</span>
+              <span class="market-stat-label" :class="ui.summaryLabel">{{ card.label }}</span>
             </div>
           </div>
 
-          <div class="kawaii-market-summary-grid grid grid-cols-2 gap-3">
-            <div
-              v-for="card in summaryCards"
-              :key="card.label"
-              class="kawaii-market-summary-card"
-              :class="ui.summaryCard"
-            >
-              <div class="text-xs font-semibold" :class="ui.summaryLabel">
-                {{ card.label }}
-              </div>
-              <div class="mt-2 text-2xl font-extrabold tracking-normal" :class="ui.summaryValue">
-                {{ card.value }}
-              </div>
-            </div>
+          <div
+            v-if="!authStore.isAuthenticated && parsePackageIdQuery(route.query.package)"
+            class="mt-7 flex items-start gap-3 rounded-xl px-4 py-3.5 text-sm leading-6"
+            :class="ui.infoBanner"
+          >
+            <svg class="mt-0.5 h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{{ infoBannerText }}</span>
           </div>
         </div>
       </div>
@@ -608,62 +606,60 @@ onUnmounted(() => {
 
     <section class="relative px-4 pb-20 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-7xl">
-        <div class="kawaii-market-filter-panel" :class="ui.filterWrap">
-          <div class="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-            <div class="min-w-0">
-              <div class="inline-flex overflow-hidden rounded-full bg-themed-secondary p-1">
-                <button
-                  class="h-10 rounded-full px-5 text-sm font-semibold tracking-normal transition-colors duration-150"
-                  :class="packageSource === 'official' ? ui.chipActive : ui.chipIdle"
-                  @click="switchSource('official')"
-                >
-                  {{ t('publicSite.market.official') }}
-                </button>
-                <button
-                  class="h-10 rounded-full px-5 text-sm font-semibold tracking-normal transition-colors duration-150"
-                  :class="packageSource === 'market' ? ui.chipActive : ui.chipIdle"
-                  @click="switchSource('market')"
-                >
-                  {{ t('publicSite.market.market') }}
-                </button>
-              </div>
-
-              <div v-if="regions.length > 0" class="mt-4 flex flex-wrap gap-2">
-                <button
-                  class="inline-flex h-9 items-center rounded-xl px-3.5 text-sm font-semibold transition-colors duration-150"
-                  :class="selectedRegion === null ? ui.chipActive : ui.chipIdle"
-                  @click="selectRegion(null)"
-                >
-                  <svg v-if="selectedRegion === null" class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-                  </svg>
-                  {{ t('publicSite.market.allRegions') }}
-                </button>
-
-                <button
-                  v-for="region in regions"
-                  :key="region.code"
-                  class="inline-flex h-9 items-center gap-1.5 rounded-xl px-3.5 text-sm font-semibold transition-colors duration-150"
-                  :class="selectedRegion === region.code ? ui.chipActive : ui.chipIdle"
-                  @click="selectRegion(region.code)"
-                >
-                  <svg v-if="selectedRegion === region.code" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <FlagIcon :code="region.code" class="h-3 w-4" />
-                  <span>{{ getRegionLabel(region.code) }}</span>
-                </button>
-              </div>
+        <div class="market-toolbar" data-reveal>
+          <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-4">
+            <div class="market-seg inline-flex shrink-0 rounded-xl p-1">
+              <button
+                class="h-9 rounded-lg px-4 text-sm font-semibold tracking-normal transition-colors duration-150"
+                :class="packageSource === 'official' ? ui.chipActive : ui.chipIdle"
+                @click="switchSource('official')"
+              >
+                {{ t('publicSite.market.official') }}
+              </button>
+              <button
+                class="h-9 rounded-lg px-4 text-sm font-semibold tracking-normal transition-colors duration-150"
+                :class="packageSource === 'market' ? ui.chipActive : ui.chipIdle"
+                @click="switchSource('market')"
+              >
+                {{ t('publicSite.market.market') }}
+              </button>
             </div>
 
-            <div class="relative w-full xl:max-w-md">
+            <div v-if="regions.length > 0" class="market-chips flex min-w-0 flex-1 gap-2 overflow-x-auto">
+              <button
+                class="inline-flex h-9 shrink-0 items-center rounded-xl px-3.5 text-sm font-semibold transition-colors duration-150"
+                :class="selectedRegion === null ? ui.chipActive : ui.chipIdle"
+                @click="selectRegion(null)"
+              >
+                <svg v-if="selectedRegion === null" class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                </svg>
+                {{ t('publicSite.market.allRegions') }}
+              </button>
+
+              <button
+                v-for="region in regions"
+                :key="region.code"
+                class="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl px-3.5 text-sm font-semibold transition-colors duration-150"
+                :class="selectedRegion === region.code ? ui.chipActive : ui.chipIdle"
+                @click="selectRegion(region.code)"
+              >
+                <svg v-if="selectedRegion === region.code" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                </svg>
+                <FlagIcon :code="region.code" class="h-3 w-4" />
+                <span>{{ getRegionLabel(region.code) }}</span>
+              </button>
+            </div>
+
+            <div class="market-search relative w-full lg:w-72 lg:shrink-0">
               <svg class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2" :class="ui.searchClear" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M11 19a8 8 0 110-16 8 8 0 010 16z" />
               </svg>
               <input
                 v-model="searchQuery"
                 type="text"
-                class="h-12 w-full rounded-full border pl-11 pr-12 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-accent/30"
+                class="h-11 w-full rounded-xl border pl-11 pr-12 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-accent/30"
                 :class="ui.searchInput"
                 :placeholder="t('publicSite.market.searchPlaceholder')"
                 @input="handleSearchInput"
@@ -701,14 +697,16 @@ onUnmounted(() => {
           <div class="h-[36rem] animate-pulse rounded-lg" :class="ui.skeleton"></div>
         </div>
 
-        <div v-else-if="packages.length === 0" class="mt-7 rounded-lg border border-dashed px-6 py-16 text-center" :class="ui.emptyState">
-          {{ t('publicSite.market.noPackages') }}
+        <div v-else-if="packages.length === 0" class="market-empty mt-8" :class="ui.emptyState">
+          <PackageOpen class="market-empty-ic" :size="44" :stroke-width="1.6" aria-hidden="true" />
+          <div class="market-empty-title" :class="ui.emptyStateTitle">{{ t('publicSite.market.noPackages') }}</div>
         </div>
 
         <div v-else class="kawaii-market-catalog-layout mt-7 grid items-start gap-6 lg:grid-cols-[minmax(0,1.18fr)_minmax(22rem,0.82fr)]">
           <div class="min-w-0">
-            <div v-if="filteredPackages.length === 0" class="rounded-lg border border-dashed px-6 py-16 text-center" :class="ui.emptyState">
-              <div class="text-base font-semibold" :class="ui.emptyStateTitle">
+            <div v-if="filteredPackages.length === 0" class="market-empty" :class="ui.emptyState">
+              <SearchX class="market-empty-ic" :size="44" :stroke-width="1.6" aria-hidden="true" />
+              <div class="market-empty-title" :class="ui.emptyStateTitle">
                 {{ t('publicSite.market.noResults') }}
               </div>
               <button
@@ -990,3 +988,75 @@ onUnmounted(() => {
     </section>
   </div>
 </template>
+
+<style scoped>
+/* 去掉全站遗留的背景网格装饰（本页） */
+.kawaii-page::before {
+  content: none !important;
+  background: none !important;
+}
+
+/* Hero 内联指标条 */
+.market-stat-strip {
+  gap: 0;
+}
+.market-stat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 0 16px;
+}
+.market-stat:first-child {
+  padding-left: 0;
+}
+.market-stat + .market-stat {
+  border-left: 1px solid var(--kawaii-line);
+}
+.market-stat-value {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+.market-stat-label {
+  font-size: 13px;
+}
+
+/* 筛选工具栏：干净一行，无装饰接缝 */
+.market-toolbar {
+  padding: 14px 0;
+  border-top: 1px solid var(--kawaii-line);
+  border-bottom: 1px solid var(--kawaii-line);
+}
+.market-seg {
+  background: var(--kawaii-surface-soft);
+}
+.market-chips {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 2px;
+}
+.market-chips::-webkit-scrollbar {
+  display: none;
+}
+
+/* 克制版空状态 */
+.market-empty {
+  border: 1px dashed var(--kawaii-line-strong) !important;
+  border-radius: 16px;
+  padding: 36px 24px !important;
+  text-align: center;
+}
+.market-empty-ic {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--kawaii-surface-soft);
+  padding: 10px;
+  color: var(--kawaii-muted);
+  margin: 0 auto 12px;
+}
+.market-empty-title {
+  font-size: 15px;
+  font-weight: 700;
+}
+</style>

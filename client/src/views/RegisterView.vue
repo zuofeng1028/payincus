@@ -13,6 +13,7 @@ import TermsOfServiceModal from '@/components/TermsOfServiceModal.vue'
 import api from '@/api'
 import { useBrand } from '@/composables/useBrand'
 import { dashboardPath, loginPath } from '@/utils/app-paths'
+import { useReveal } from '@/composables/useReveal'
 
 const isAdminEntry = import.meta.env.VITE_APP_ENTRY === 'admin'
 
@@ -22,6 +23,9 @@ const { t } = useI18n()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
 const brand = useBrand()
+
+const revealRoot = ref<HTMLElement | null>(null)
+useReveal(revealRoot)
 
 interface RegisterForm {
   username: string
@@ -333,7 +337,7 @@ async function handleRegister(): Promise<void> {
 </script>
 
 <template>
-  <div class="kawaii-public-shell kawaii-auth-shell kawaii-user-auth min-h-screen flex items-center justify-center p-4">
+  <div ref="revealRoot" class="kawaii-public-shell kawaii-auth-shell kawaii-user-auth min-h-screen flex items-center justify-center p-4">
     <div class="w-full max-w-lg">
       <ThemeTemplateSlot
         slot-name="public.auth.aside"
@@ -341,7 +345,7 @@ async function handleRegister(): Promise<void> {
       />
 
       <!-- Logo -->
-      <div class="text-center mb-8">
+      <div class="text-center mb-8" data-reveal>
         <img
           :src="brand.brandLogoUrl"
           :alt="brand.brandName"
@@ -390,7 +394,7 @@ async function handleRegister(): Promise<void> {
       </div>
 
       <!-- 注册表单 -->
-      <div v-else class="card p-6">
+      <div v-else class="card p-6" data-reveal>
         <form class="space-y-4" @submit.prevent="handleRegister">
           <div v-if="requireInviteCode">
             <label 

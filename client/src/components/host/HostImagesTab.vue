@@ -163,7 +163,7 @@ watch(() => props.hostId, () => {
             <div
               class="w-5 h-5 rounded-full border flex items-center justify-center"
               :class="useDefaultMode
-                ? 'border-blue-500 bg-blue-500 text-white'
+                ? 'border-accent bg-accent text-white dark:text-black'
                 : (themeStore.isDark ? 'border-gray-700 text-transparent' : 'border-gray-300 text-transparent')"
             >
               <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -189,7 +189,7 @@ watch(() => props.hostId, () => {
             <div
               class="w-5 h-5 rounded-full border flex items-center justify-center"
               :class="!useDefaultMode
-                ? 'border-blue-500 bg-blue-500 text-white'
+                ? 'border-accent bg-accent text-white dark:text-black'
                 : (themeStore.isDark ? 'border-gray-700 text-transparent' : 'border-gray-300 text-transparent')"
             >
               <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -254,7 +254,7 @@ watch(() => props.hostId, () => {
                   <div
                     class="w-5 h-5 rounded-full border flex-shrink-0 flex items-center justify-center"
                     :class="isSelected(image.id)
-                      ? 'border-blue-500 bg-blue-500 text-white'
+                      ? 'border-accent bg-accent text-white dark:text-black'
                       : (themeStore.isDark ? 'border-gray-700 text-transparent' : 'border-gray-300 text-transparent')"
                   >
                     <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">

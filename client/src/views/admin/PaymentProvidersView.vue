@@ -43,7 +43,7 @@ const formData = ref({
 
 const DEFAULT_YIPAY_METHODS = ['alipay', 'wxpay']
 const YIPAY_METHODS = ['alipay', 'wxpay', 'qqpay']
-const IMPLEMENTED_PROVIDER_TYPES = new Set(['yipay', 'heleket', 'plugin_gateway', 'manual'])
+const IMPLEMENTED_PROVIDER_TYPES = new Set(['yipay', 'heleket', 'antom', 'plugin_gateway', 'manual'])
 
 function getConfigMethodFees(config: Record<string, unknown>): Record<string, { feeRate?: number; feeFixed?: number }> {
   const raw = (config as any).methodFees
@@ -116,6 +116,7 @@ function getSecretHint(key: string, fallback: string): string {
 const providerTypes = computed(() => [
   { value: 'yipay', label: t('admin.paymentProviders.providerTypes.yipay') },
   { value: 'heleket', label: t('admin.paymentProviders.providerTypes.heleket') },
+  { value: 'antom', label: t('admin.paymentProviders.providerTypes.antom') },
   { value: 'stripe', label: t('admin.paymentProviders.providerTypes.stripe') },
   { value: 'alipay_direct', label: t('admin.paymentProviders.providerTypes.alipayDirect') },
   { value: 'wechat_direct', label: t('admin.paymentProviders.providerTypes.wechatDirect') },
@@ -186,6 +187,24 @@ function getDefaultConfig(type: string, version?: string): Record<string, unknow
         api_key: '',
         currency: 'CNY',
         lifetime: 3600
+      }
+    case 'antom':
+      return {
+        environment: 'sandbox',
+        apiurl: 'https://open-sea-global.alipay.com',
+        clientId: '',
+        antom_public_key: '',
+        merchant_private_key: '',
+        keyVersion: 1,
+        currency: 'USD',
+        currencyRate: 1,
+        currencyExponent: 2,
+        merchantRegion: '',
+        settlementCurrency: '',
+        merchantAccountId: '',
+        locale: 'zh_CN',
+        orderDescription: 'PayIncus account recharge',
+        sessionExpiryMinutes: 30
       }
     case 'stripe':
       return {
@@ -644,6 +663,82 @@ function togglePaymentMethod(method: string) {
                 <label class="label">{{ $t('admin.paymentProviders.config.heleketLifetime') }}</label>
                 <input v-model.number="(formData.config as any).lifetime" type="number" class="input w-full" min="300" max="43200" step="1" placeholder="3600" />
                 <p class="text-xs text-themed-muted mt-1">{{ $t('admin.paymentProviders.config.heleketLifetimeHint') }}</p>
+              </div>
+            </template>
+
+            <!-- Antom Hosted Checkout 配置 -->
+            <template v-else-if="formData.type === 'antom'">
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label class="label">{{ $t('admin.paymentProviders.config.antomEnvironment') }} *</label>
+                  <select v-model="(formData.config as any).environment" class="input w-full">
+                    <option value="sandbox">{{ $t('admin.paymentProviders.config.antomSandbox') }}</option>
+                    <option value="production">{{ $t('admin.paymentProviders.config.antomProduction') }}</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="label">{{ $t('admin.paymentProviders.config.antomEndpoint') }} *</label>
+                  <select v-model="(formData.config as any).apiurl" class="input w-full">
+                    <option value="https://open-sea-global.alipay.com">Asia</option>
+                    <option value="https://open-na-global.alipay.com">North America</option>
+                    <option value="https://open.antglobal-us.com">US Merchant</option>
+                    <option value="https://open-de-global.alipay.com">Europe</option>
+                  </select>
+                </div>
+              </div>
+              <p class="text-xs text-themed-muted">{{ $t('admin.paymentProviders.config.antomEnvironmentHint') }}</p>
+
+              <div>
+                <label class="label">Client ID *</label>
+                <input v-model="(formData.config as any).clientId" type="text" class="input w-full font-mono" placeholder="SANDBOX_..." />
+              </div>
+              <div>
+                <label class="label">{{ $t('admin.paymentProviders.config.antomPublicKey') }} *</label>
+                <textarea v-model="(formData.config as any).antom_public_key" class="input h-28 w-full resize-none font-mono text-xs" :placeholder="$t('admin.paymentProviders.config.antomPublicKeyPlaceholder')"></textarea>
+                <p class="mt-1 text-xs text-themed-muted">{{ $t('admin.paymentProviders.config.antomPublicKeyHint') }}</p>
+              </div>
+              <div>
+                <label class="label">{{ $t('admin.paymentProviders.config.merchantPrivateKey') }} *</label>
+                <textarea v-model="(formData.config as any).merchant_private_key" class="input h-28 w-full resize-none font-mono text-xs" :placeholder="getSecretPlaceholder('merchant_private_key', $t('admin.paymentProviders.config.merchantPrivateKeyPlaceholder'))"></textarea>
+                <p class="mt-1 text-xs text-themed-muted">{{ getSecretHint('merchant_private_key', $t('admin.paymentProviders.config.antomPrivateKeyHint')) }}</p>
+              </div>
+
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div>
+                  <label class="label">{{ $t('admin.paymentProviders.config.antomCurrency') }} *</label>
+                  <input v-model="(formData.config as any).currency" type="text" class="input w-full uppercase" placeholder="USD" maxlength="3" />
+                </div>
+                <div>
+                  <label class="label">{{ $t('admin.paymentProviders.config.antomCurrencyRate') }} *</label>
+                  <input v-model.number="(formData.config as any).currencyRate" type="number" class="input w-full" min="0.000001" step="0.000001" />
+                </div>
+                <div>
+                  <label class="label">{{ $t('admin.paymentProviders.config.antomCurrencyExponent') }} *</label>
+                  <input v-model.number="(formData.config as any).currencyExponent" type="number" class="input w-full" min="0" max="3" step="1" />
+                </div>
+              </div>
+              <p class="text-xs text-themed-muted">{{ $t('admin.paymentProviders.config.antomCurrencyHint') }}</p>
+
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label class="label">{{ $t('admin.paymentProviders.config.antomMerchantRegion') }}</label>
+                  <input v-model="(formData.config as any).merchantRegion" type="text" class="input w-full uppercase" placeholder="SG" maxlength="2" />
+                </div>
+                <div>
+                  <label class="label">{{ $t('admin.paymentProviders.config.antomSettlementCurrency') }}</label>
+                  <input v-model="(formData.config as any).settlementCurrency" type="text" class="input w-full uppercase" placeholder="USD" maxlength="3" />
+                </div>
+                <div>
+                  <label class="label">Key Version</label>
+                  <input v-model.number="(formData.config as any).keyVersion" type="number" class="input w-full" min="0" max="999" step="1" />
+                </div>
+                <div>
+                  <label class="label">{{ $t('admin.paymentProviders.config.antomSessionExpiry') }}</label>
+                  <input v-model.number="(formData.config as any).sessionExpiryMinutes" type="number" class="input w-full" min="5" max="60" step="1" />
+                </div>
+              </div>
+              <div class="rounded-lg bg-themed-secondary px-3 py-2 text-xs text-themed-muted">
+                {{ $t('admin.paymentProviders.config.antomCallbackHint') }}
               </div>
             </template>
             

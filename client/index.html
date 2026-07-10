@@ -28,16 +28,16 @@
         resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       }
       document.documentElement.classList.add(resolved);
-      document.querySelector('meta[name="theme-color"]').setAttribute('content', resolved === 'dark' ? '#0a0a0a' : '#ffffff');
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', resolved === 'dark' ? '#000000' : '#f5f5f7');
     })();
   </script>
   <style>
     html.dark body {
-      background: #0a0a0a;
+      background: #000000;
     }
 
     html.light body {
-      background: #ffffff;
+      background: #f5f5f7;
     }
   </style>
 </head>

@@ -680,7 +680,7 @@ onActivated(() => {
             class="min-w-[32px] px-2 py-1 rounded transition-colors"
             :class="[
               p === page
-                ? (themeStore.isDark ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')
+                ? (themeStore.isDark ? 'bg-accent text-white dark:text-black' : 'bg-accent text-white dark:text-black')
                 : (themeStore.isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-100')
             ]"
             @click="goToPage(p)"

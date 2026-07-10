@@ -1270,7 +1270,7 @@ async function runAuditKillProcess() {
         <button
           type="button"
           class="px-4 py-2 text-sm rounded-md transition"
-          :class="activeOpsMenu === 'actions' ? 'bg-blue-600 text-white' : 'text-themed-muted hover:text-themed'"
+          :class="activeOpsMenu === 'actions' ? 'bg-accent text-white dark:text-black' : 'text-themed-muted hover:text-themed'"
           @click="activeOpsMenu = 'actions'"
         >
           实例操作
@@ -1278,7 +1278,7 @@ async function runAuditKillProcess() {
         <button
           type="button"
           class="px-4 py-2 text-sm rounded-md transition"
-          :class="activeOpsMenu === 'audit' ? 'bg-blue-600 text-white' : 'text-themed-muted hover:text-themed'"
+          :class="activeOpsMenu === 'audit' ? 'bg-accent text-white dark:text-black' : 'text-themed-muted hover:text-themed'"
           @click="activeOpsMenu = 'audit'"
         >
           实例审查
@@ -1542,10 +1542,10 @@ async function runAuditKillProcess() {
 
     <div v-if="activeOpsMenu === 'audit'" class="space-y-6">
       <div class="inline-flex rounded-lg border p-1" :class="themeStore.isDark ? 'border-gray-800 bg-gray-900' : 'border-gray-200 bg-gray-50'">
-        <button type="button" class="px-3 py-1.5 rounded-md text-sm font-medium transition" :class="auditPanel === 'scan' ? 'bg-blue-600 text-white' : 'text-themed-muted hover:text-themed'" @click="auditPanel = 'scan'">审查扫描</button>
-        <button type="button" class="px-3 py-1.5 rounded-md text-sm font-medium transition" :class="auditPanel === 'rules' ? 'bg-blue-600 text-white' : 'text-themed-muted hover:text-themed'" @click="auditPanel = 'rules'">规则库</button>
-        <button type="button" class="px-3 py-1.5 rounded-md text-sm font-medium transition" :class="auditPanel === 'whitelist' ? 'bg-blue-600 text-white' : 'text-themed-muted hover:text-themed'" @click="auditPanel = 'whitelist'">白名单</button>
-        <button type="button" class="px-3 py-1.5 rounded-md text-sm font-medium transition" :class="auditPanel === 'history' ? 'bg-blue-600 text-white' : 'text-themed-muted hover:text-themed'" @click="auditPanel = 'history'">审查历史</button>
+        <button type="button" class="px-3 py-1.5 rounded-md text-sm font-medium transition" :class="auditPanel === 'scan' ? 'bg-accent text-white dark:text-black' : 'text-themed-muted hover:text-themed'" @click="auditPanel = 'scan'">审查扫描</button>
+        <button type="button" class="px-3 py-1.5 rounded-md text-sm font-medium transition" :class="auditPanel === 'rules' ? 'bg-accent text-white dark:text-black' : 'text-themed-muted hover:text-themed'" @click="auditPanel = 'rules'">规则库</button>
+        <button type="button" class="px-3 py-1.5 rounded-md text-sm font-medium transition" :class="auditPanel === 'whitelist' ? 'bg-accent text-white dark:text-black' : 'text-themed-muted hover:text-themed'" @click="auditPanel = 'whitelist'">白名单</button>
+        <button type="button" class="px-3 py-1.5 rounded-md text-sm font-medium transition" :class="auditPanel === 'history' ? 'bg-accent text-white dark:text-black' : 'text-themed-muted hover:text-themed'" @click="auditPanel = 'history'">审查历史</button>
       </div>
 
       <div v-if="auditPanel === 'scan'" class="card p-5 space-y-4">

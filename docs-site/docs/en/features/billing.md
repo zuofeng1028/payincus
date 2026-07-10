@@ -29,6 +29,16 @@ Billing covers recharges, balance changes, orders, plan consumption, affiliate r
 - Gift card management at `/admin/gift-cards`, including single or batch generation, stats, redacted lists, and enable/disable/delete for unused cards.
 - Redeem code creation, disabling and usage records.
 
+## Antom Hosted Checkout
+
+1. Prepare the Client ID, Antom platform public key, and corresponding merchant RSA private key in the Antom developer portal.
+2. Create an `Antom Hosted Checkout` provider at `/admin/payment-providers`; start with sandbox and select the official regional gateway for the merchant account.
+3. Enter the payment currency, currency amount per 1 CNY, and currency decimal places. For example, when `1 CNY = 0.14 USD`, enter `USD`, `0.14`, and `2`.
+4. Ensure `PAYMENT_CALLBACK_BASE_URL` is the public HTTPS user-portal domain. PayIncus generates `/api/recharge/callback/<providerId>` and sends it to Antom with each order.
+5. Validate redirect, successful notification, duplicate notification, invalid signature/amount rejection, and active inquiry in sandbox before switching to production.
+
+PayIncus creates Hosted Checkout sessions through `createPaymentSession` and actively verifies orders through `inquiryPayment`. RSA-SHA256 signatures are verified on API responses and asynchronous notifications; local order ID, payment currency, minor-unit amount, and idempotency records are checked before crediting. The built-in Antom provider does not currently automate original-route refunds, so refunds continue through order refund approval or manual balance adjustment.
+
 ## Callback Boundary
 
 - Payment callbacks should use the user portal domain, for example `https://panel.example.com/api/...`.

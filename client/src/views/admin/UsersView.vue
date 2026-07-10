@@ -2477,28 +2477,28 @@ function _getQuotaPercent(used, limit) {
             <div class="flex gap-1 border-b border-themed px-4">
               <button
                 class="px-3 py-2 text-sm font-medium transition-colors border-b-2 -mb-px"
-                :class="balanceTab === 'overview' ? 'border-blue-500 text-blue-500' : 'border-transparent text-themed-muted hover:text-themed'"
+                :class="balanceTab === 'overview' ? 'border-accent text-accent' : 'border-transparent text-themed-muted hover:text-themed'"
                 @click="switchBalanceTab('overview')"
               >
                 {{ t('admin.users.balanceOverview') }}
               </button>
               <button
                 class="px-3 py-2 text-sm font-medium transition-colors border-b-2 -mb-px"
-                :class="balanceTab === 'logs' ? 'border-blue-500 text-blue-500' : 'border-transparent text-themed-muted hover:text-themed'"
+                :class="balanceTab === 'logs' ? 'border-accent text-accent' : 'border-transparent text-themed-muted hover:text-themed'"
                 @click="switchBalanceTab('logs')"
               >
                 {{ t('admin.users.balanceLogs') }}
               </button>
               <button
                 class="px-3 py-2 text-sm font-medium transition-colors border-b-2 -mb-px"
-                :class="balanceTab === 'recharge' ? 'border-blue-500 text-blue-500' : 'border-transparent text-themed-muted hover:text-themed'"
+                :class="balanceTab === 'recharge' ? 'border-accent text-accent' : 'border-transparent text-themed-muted hover:text-themed'"
                 @click="switchBalanceTab('recharge')"
               >
                 {{ t('admin.users.rechargeRecords') }}
               </button>
               <button
                 class="px-3 py-2 text-sm font-medium transition-colors border-b-2 -mb-px"
-                :class="balanceTab === 'adjust' ? 'border-blue-500 text-blue-500' : 'border-transparent text-themed-muted hover:text-themed'"
+                :class="balanceTab === 'adjust' ? 'border-accent text-accent' : 'border-transparent text-themed-muted hover:text-themed'"
                 @click="switchBalanceTab('adjust')"
               >
                 {{ t('admin.users.adjustBalance') }}
@@ -2824,21 +2824,21 @@ function _getQuotaPercent(used, limit) {
             <div class="flex gap-1 border-b border-themed px-4">
               <button
                 class="px-3 py-2 text-sm font-medium transition-colors border-b-2 -mb-px"
-                :class="hostingBalanceTab === 'overview' ? 'border-blue-500 text-blue-500' : 'border-transparent text-themed-muted hover:text-themed'"
+                :class="hostingBalanceTab === 'overview' ? 'border-accent text-accent' : 'border-transparent text-themed-muted hover:text-themed'"
                 @click="switchHostingBalanceTab('overview')"
               >
                 {{ t('admin.users.hostingBalanceOverview') }}
               </button>
               <button
                 class="px-3 py-2 text-sm font-medium transition-colors border-b-2 -mb-px"
-                :class="hostingBalanceTab === 'logs' ? 'border-blue-500 text-blue-500' : 'border-transparent text-themed-muted hover:text-themed'"
+                :class="hostingBalanceTab === 'logs' ? 'border-accent text-accent' : 'border-transparent text-themed-muted hover:text-themed'"
                 @click="switchHostingBalanceTab('logs')"
               >
                 {{ t('admin.users.hostingBalanceLogs') }}
               </button>
               <button
                 class="px-3 py-2 text-sm font-medium transition-colors border-b-2 -mb-px"
-                :class="hostingBalanceTab === 'adjust' ? 'border-blue-500 text-blue-500' : 'border-transparent text-themed-muted hover:text-themed'"
+                :class="hostingBalanceTab === 'adjust' ? 'border-accent text-accent' : 'border-transparent text-themed-muted hover:text-themed'"
                 @click="switchHostingBalanceTab('adjust')"
               >
                 {{ t('admin.users.adjustHostingBalance') }}

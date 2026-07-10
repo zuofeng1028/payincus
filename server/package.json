@@ -1,6 +1,6 @@
 {
   "name": "server",
-  "version": "1.3.5",
+  "version": "1.3.6",
   "description": "PayIncus backend service",
   "type": "module",
   "main": "dist/app.js",
@@ -151,6 +151,7 @@
     "test:friend-route-guards": "node --import tsx scripts/test-friend-route-guards.ts",
     "test:payment-provider-secret-redaction": "node --import tsx scripts/test-payment-provider-secret-redaction.ts",
     "test:manual-payment-provider-guards": "node --import tsx scripts/test-manual-payment-provider-guards.ts",
+    "test:antom-payment-guards": "node --import tsx scripts/test-antom-payment-guards.ts",
     "test:production-proof-snapshot-redaction": "node --import tsx scripts/test-production-proof-snapshot-redaction.ts",
     "test:payment-provider-outbound-guard": "node --import tsx scripts/test-payment-provider-outbound-guard.ts",
     "test:plan-bandwidth-limit-guards": "node --import tsx scripts/test-plan-bandwidth-limit-guards.ts",

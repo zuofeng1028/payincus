@@ -18,9 +18,13 @@ import { getRandomFunnyQuote } from '@/data/funnyQuotes'
 import { freeSiteCopy } from '@/utils/freeSiteFun'
 import { getVipBadgeInlineStyle, normalizeVipBadgeStyle, type VipBadgeStyle } from '@/utils/vipBadge'
 import { entertainmentPath, instanceCreatePath, instanceDetailPath, instancesPath } from '@/utils/app-paths'
+import { useReveal } from '@/composables/useReveal'
 
 // 为 KeepAlive include 匹配定义组件名称（必须在所有 import 之后）
 defineOptions({ name: 'DashboardView' })
+
+const revealRoot = ref<HTMLElement | null>(null)
+useReveal(revealRoot)
 
 // 遮蔽 IPv4 地址后两位，例如：1.2.3.4 -> 1.2.*.*
 function maskIpv4(ip: string | null | undefined): string | null {
@@ -415,9 +419,9 @@ function getInstanceRowClass(): string {
 </script>
 
 <template>
-  <div class="kawaii-page kawaii-dashboard-page space-y-6 animate-fade-in">
+  <div ref="revealRoot" class="kawaii-page kawaii-dashboard-page space-y-6 animate-fade-in">
     <!-- 欢迎区域 -->
-    <div class="kawaii-dashboard-hero kawaii-dashboard-command-center rounded-lg p-5 page-header flex-col gap-4 sm:flex-row sm:gap-0">
+    <div data-reveal class="kawaii-dashboard-hero kawaii-dashboard-command-center rounded-lg p-5 page-header flex-col gap-4 sm:flex-row sm:gap-0">
       <div class="kawaii-dashboard-hero-main flex w-full items-start justify-between gap-3 sm:w-auto sm:items-center sm:justify-start">
         <div class="min-w-0 flex-1 sm:flex-none">
           <h1 class="page-title text-lg sm:text-xl">{{ greetingText }}</h1>
@@ -483,8 +487,7 @@ function getInstanceRowClass(): string {
 
     <!-- 总览面板 -->
     <div class="grid gap-4">
-      <section class="kawaii-card dashboard-overview-card kawaii-dashboard-orbit-card relative overflow-hidden rounded-lg border p-5 shadow-sm sm:p-6" :class="overviewShellClass">
-        <div class="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-br from-sky-500/12 via-emerald-400/8 to-transparent"></div>
+      <section data-reveal class="kawaii-card dashboard-overview-card kawaii-dashboard-orbit-card relative overflow-hidden rounded-lg border p-5 shadow-sm sm:p-6" :class="overviewShellClass">
         <div class="relative flex flex-col gap-4">
           <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div class="min-w-0">
@@ -541,7 +544,7 @@ function getInstanceRowClass(): string {
         </div>
       </section>
 
-      <section class="kawaii-card dashboard-overview-card kawaii-dashboard-orbit-card relative overflow-hidden rounded-lg border p-5 shadow-sm sm:p-6" :class="overviewShellClass">
+      <section data-reveal class="kawaii-card dashboard-overview-card kawaii-dashboard-orbit-card relative overflow-hidden rounded-lg border p-5 shadow-sm sm:p-6" :class="overviewShellClass">
         <div class="relative flex h-full flex-col gap-5">
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
@@ -670,7 +673,7 @@ function getInstanceRowClass(): string {
     <PluginFrameSlot slot-name="user.dashboard.cards" surface="user" frame-class="min-h-[220px]" />
 
     <!-- 实例列表 -->
-    <div class="kawaii-card kawaii-dashboard-instance-panel card overflow-hidden rounded-lg">
+    <div data-reveal class="kawaii-card kawaii-dashboard-instance-panel card overflow-hidden rounded-lg">
       <div 
         class="px-4 py-4 border-b flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
         :class="themeStore.isDark ? 'border-gray-800' : 'border-gray-200'"

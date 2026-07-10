@@ -17,6 +17,10 @@ import {
 } from '@/utils/inboxHelper'
 import type { InboxMessage } from '@/types/api'
 import api from '@/api'
+import { useReveal } from '@/composables/useReveal'
+
+const revealRoot = ref<HTMLElement | null>(null)
+useReveal(revealRoot)
 
 const { t } = useI18n()
 const route = useRoute()
@@ -203,9 +207,9 @@ watch(() => route.path, () => {
 </script>
 
 <template>
-  <div class="kawaii-page animate-fade-in">
+  <div ref="revealRoot" class="kawaii-page animate-fade-in">
     <!-- Header -->
-    <div class="page-header">
+    <div data-reveal class="page-header">
       <div>
         <h1 class="page-title">{{ t('inbox.title') }}</h1>
         <p class="page-description">{{ t('inbox.description') }}</p>
@@ -229,7 +233,7 @@ watch(() => route.path, () => {
     </div>
 
     <!-- 筛选标签 -->
-    <div class="space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:items-center sm:gap-2 mb-4">
+    <div data-reveal class="space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:items-center sm:gap-2 mb-4">
       <!-- 已读/未读筛选 -->
       <div class="flex items-center gap-1 sm:mr-4">
         <button

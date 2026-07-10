@@ -1,8 +1,17 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useReveal } from '@/composables/useReveal'
+
+const revealRoot = ref<HTMLElement | null>(null)
+useReveal(revealRoot)
+</script>
+
 <template>
-  <div 
+  <div
+    ref="revealRoot"
     class="kawaii-public-shell kawaii-auth-shell min-h-screen flex items-center justify-center p-4"
   >
-    <div class="card w-full max-w-md p-8 text-center">
+    <div class="card w-full max-w-md p-8 text-center" data-reveal>
       <h1 
         class="text-8xl font-bold text-themed-faint"
       >

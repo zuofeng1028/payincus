@@ -1,38 +1,39 @@
 @layer base {
+  /* 纯黑白 · Apple 中性色板（浅色白黑 / 深色黑白，主色=墨色，状态色单独保留） */
   .light {
-    --kawaii-bg: #f7fbff;
+    --kawaii-bg: #f5f5f7;
     --kawaii-surface: #ffffff;
-    --kawaii-surface-soft: #eef7ff;
-    --kawaii-line: #dbeafe;
-    --kawaii-line-strong: #bfdbfe;
-    --kawaii-text: #172554;
-    --kawaii-muted: #64748b;
-    --kawaii-primary: #3b82f6;
-    --kawaii-primary-strong: #2563eb;
+    --kawaii-surface-soft: #f2f2f4;
+    --kawaii-line: #e6e6e9;
+    --kawaii-line-strong: #d7d7dc;
+    --kawaii-text: #111113;
+    --kawaii-muted: #6e6e73;
+    --kawaii-primary: #111113;
+    --kawaii-primary-strong: #000000;
     --kawaii-pink: var(--kawaii-primary);
-    --kawaii-mint: #34d399;
+    --kawaii-mint: #28a745;
     --kawaii-lavender: var(--kawaii-primary);
-    --kawaii-amber: #f59e0b;
-    --kawaii-faint: #94a3b8;
+    --kawaii-amber: #e08600;
+    --kawaii-faint: #8e8e93;
     --kawaii-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
   }
 
   .dark {
-    --kawaii-bg: #07111f;
-    --kawaii-surface: #0f1b2d;
-    --kawaii-surface-soft: #13243b;
-    --kawaii-line: #24405f;
-    --kawaii-line-strong: #38638f;
-    --kawaii-text: #eaf4ff;
-    --kawaii-muted: #9db5d4;
-    --kawaii-primary: #60a5fa;
-    --kawaii-primary-strong: #93c5fd;
+    --kawaii-bg: #000000;
+    --kawaii-surface: #0d0d0f;
+    --kawaii-surface-soft: #151518;
+    --kawaii-line: #262629;
+    --kawaii-line-strong: #37373b;
+    --kawaii-text: #f5f5f7;
+    --kawaii-muted: #98989d;
+    --kawaii-primary: #f5f5f7;
+    --kawaii-primary-strong: #ffffff;
     --kawaii-pink: var(--kawaii-primary);
-    --kawaii-mint: #6ee7b7;
+    --kawaii-mint: #30d158;
     --kawaii-lavender: var(--kawaii-primary);
-    --kawaii-amber: #fcd34d;
-    --kawaii-faint: #6f89aa;
-    --kawaii-shadow: 0 1px 3px rgb(0 0 0 / 0.4);
+    --kawaii-amber: #ff9f0a;
+    --kawaii-faint: #6e6e73;
+    --kawaii-shadow: 0 1px 3px rgb(0 0 0 / 0.5);
   }
 }
 
@@ -3171,4 +3172,94 @@
       transform: none;
     }
   }
+}
+
+/* ────────────────────────────────────────────────────────────
+   纯黑白 · 认证页收尾覆盖（放在 @layer base 之外 → 无层级，稳定胜出）
+   去掉遗留的蓝色网格背景 / 蓝色投影 / 主按钮绿色微光
+   影响：登录 / 注册 / 找回密码 / 管理端登录 / OAuth 授权 / 404
+   ──────────────────────────────────────────────────────────── */
+.kawaii-auth-shell::before,
+.dark .kawaii-auth-shell::before {
+  content: none !important;
+  background: none !important;
+}
+
+.kawaii-auth-shell img {
+  box-shadow: 0 12px 30px rgb(0 0 0 / 0.12) !important;
+}
+
+.kawaii-auth-shell :where(.btn-primary, .kawaii-primary-button):not(.btn-danger)::before {
+  background:
+    linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 0.28) 48%, rgb(255 255 255 / 0.14) 54%, transparent 68%) !important;
+}
+
+/* 收尾精修：与门面统一的圆角与链接强调 */
+.kawaii-auth-shell .card {
+  border-radius: 22px !important;
+}
+.kawaii-auth-shell .input {
+  border-radius: 12px !important;
+}
+.kawaii-auth-shell :where(.btn-primary, .btn-ghost, .btn-secondary) {
+  border-radius: 13px !important;
+}
+.kawaii-auth-shell a {
+  font-weight: 600 !important;
+}
+
+/* ────────────────────────────────────────────────────────────
+   纯黑白 · 全站背景与首页功能图标去色
+   原 shell 背景在四角有蓝/粉/紫光晕，图标有蓝底蓝字 → 全部归中性
+   影响：所有公开页 + 用户控制台 + 管理端（.kawaii-public-shell / .kawaii-app-shell）
+   ──────────────────────────────────────────────────────────── */
+.kawaii-public-shell,
+.kawaii-app-shell {
+  background:
+    linear-gradient(180deg, var(--kawaii-surface-soft), var(--kawaii-bg) 42%),
+    var(--kawaii-bg) !important;
+  animation: none !important;
+}
+.dark .kawaii-public-shell,
+.dark .kawaii-app-shell {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--kawaii-surface-soft) 70%, var(--kawaii-bg)), var(--kawaii-bg) 46%),
+    var(--kawaii-bg) !important;
+}
+
+.kawaii-hero-feature-icon,
+.dark .kawaii-hero-feature-icon {
+  border-color: var(--kawaii-line) !important;
+  background: var(--kawaii-surface-soft) !important;
+  color: var(--kawaii-text) !important;
+  box-shadow: none !important;
+}
+
+/* ────────────────────────────────────────────────────────────
+   清理全部二次元立绘 / 吉祥物 / 云宝装饰（paya-cloud-operator*、hero-cloud-map、mascot）
+   这些通过伪元素注入到：登录/注册/找回密码右下角、每个控制台路由的大水印、
+   仪表盘 hero、统计磁贴、实例云卡、以及浮动吉祥物。全部移除。
+   ──────────────────────────────────────────────────────────── */
+.kawaii-user-auth::before,
+.kawaii-user-auth::after,
+.kawaii-workspace::before,
+.kawaii-workspace::after,
+.kawaii-dashboard-hero::before,
+.kawaii-dashboard-hero::after,
+.kawaii-stat-tile::after,
+.kawaii-instance-cloud-card::after,
+.kawaii-mascot-stage::before,
+.kawaii-mascot-stage::after {
+  content: none !important;
+  background: none !important;
+}
+.kawaii-app-companion,
+.kawaii-mascot-stage,
+.kawaii-mascot-layer,
+.kawaii-mascot-image {
+  display: none !important;
+}
+/* 立绘移除后，实例云卡内容不再需要给右侧留白 */
+.kawaii-instance-cloud-card dl {
+  max-width: 100% !important;
 }

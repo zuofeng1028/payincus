@@ -590,7 +590,7 @@ const tabs = [
                 <!-- 步骤 1: 执行安装命令 -->
                 <div class="space-y-2">
                   <div class="flex items-center gap-2">
-                    <span class="flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium" :class="reinstallStatus === 'success' ? 'bg-green-500 text-white' : 'bg-blue-500 text-white'">1</span>
+                    <span class="flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium" :class="reinstallStatus === 'success' ? 'bg-green-500 text-white' : 'bg-accent text-white dark:text-black'">1</span>
                     <span class="text-sm font-medium text-themed">{{ t('admin.hosts.step1RunScript') }}</span>
                   </div>
                   <p class="text-xs text-themed-muted ml-8">{{ t('admin.hosts.runOnHost') }}</p>

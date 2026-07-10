@@ -142,7 +142,7 @@ defineExpose({
       <button
         class="accessory-btn"
         :class="[
-          ctrlActive ? 'bg-blue-600 text-white' : '',
+          ctrlActive ? 'bg-accent text-white dark:text-black' : '',
           { 'opacity-50': isDisabled }
         ]"
         :disabled="isDisabled"

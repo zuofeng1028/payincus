@@ -15,6 +15,7 @@ import {
   type PublicPackage
 } from '@/utils/publicCatalog'
 import { dashboardPath, loginPath, marketPath } from '@/utils/app-paths'
+import { useReveal } from '@/composables/useReveal'
 
 defineOptions({
   name: 'PortalView'
@@ -24,6 +25,10 @@ const router = useRouter()
 const { t, locale } = useI18n()
 const authStore = useAuthStore()
 const brand = useBrand()
+
+// 门面首页滚动揭示（GSAP + IntersectionObserver，渐进增强、内容默认可见）
+const portalRoot = ref<HTMLElement | null>(null)
+useReveal(portalRoot)
 
 const packages = ref<PublicPackage[]>([])
 const loading = ref(true)
@@ -230,7 +235,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="kawaii-page kawaii-home-page relative">
+  <div ref="portalRoot" class="kawaii-page kawaii-home-page relative">
     <ThemeTemplateSlot
       slot-name="public.home.hero"
       container-class="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8"
@@ -239,7 +244,7 @@ onMounted(() => {
     <section class="kawaii-hero-section relative overflow-hidden px-4 pb-10 pt-8 sm:px-6 lg:px-8">
       <div class="kawaii-hero-shell relative mx-auto max-w-7xl px-1 pb-2 pt-8 sm:px-3 sm:pt-10 lg:px-4">
         <div class="relative z-10">
-          <div class="kawaii-hero-copy relative z-20 max-w-2xl">
+          <div class="kawaii-hero-copy relative z-20 max-w-2xl" data-reveal>
             <div
               class="inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium"
               :class="ui.badge"
@@ -281,7 +286,7 @@ onMounted(() => {
           </div>
         </div>
 
-        <div class="kawaii-hero-feature-strip relative z-10 mt-8 grid gap-3 lg:!mt-8 lg:grid-cols-4">
+        <div class="kawaii-hero-feature-strip relative z-10 mt-8 grid gap-3 lg:!mt-8 lg:grid-cols-4" data-reveal>
           <div
             v-for="feature in heroFeatureCards"
             :key="feature.title"
@@ -500,3 +505,89 @@ onMounted(() => {
     </section>
   </div>
 </template>
+
+<style scoped>
+/* ── 首页门面：清掉遗留斜线/透视网格装饰，纯黑白 Apple ── */
+.kawaii-page::before,
+.kawaii-hero-shell::before,
+.kawaii-hero-section::before,
+.kawaii-hero-section::after,
+.kawaii-product-section::before,
+.kawaii-product-showcase::before,
+.kawaii-product-stage::after {
+  content: none !important;
+  background: none !important;
+}
+
+/* 产品区外层面板：去掉斜向色渐变，改为干净描边卡 */
+.kawaii-product-showcase {
+  background: var(--kawaii-surface) !important;
+  border-color: var(--kawaii-line) !important;
+  box-shadow: var(--kawaii-shadow) !important;
+}
+
+/* ── 去掉绿色：所有 .market 变体中和为墨/灰 ── */
+.kawaii-source-chip.market {
+  background: var(--kawaii-primary) !important;
+  color: var(--kawaii-bg) !important;
+}
+.kawaii-price-text.market {
+  color: var(--kawaii-text) !important;
+}
+.kawaii-source-dot.market {
+  background: var(--kawaii-text) !important;
+}
+
+/* ── 直营卡 = 墨黑实心（主推），内容整体反色 ── */
+.kawaii-product-choice-card.official,
+.kawaii-product-choice-card.official:hover,
+.kawaii-product-choice-card.official:focus-visible,
+.kawaii-product-choice-card.official.is-active {
+  background: var(--kawaii-primary) !important;
+  border-color: var(--kawaii-primary) !important;
+  color: var(--kawaii-bg) !important;
+}
+.kawaii-product-choice-card.official :where(h3, p, span, strong) {
+  color: var(--kawaii-bg) !important;
+}
+.kawaii-product-choice-card.official .kawaii-source-chip.official,
+.kawaii-product-choice-card.official .kawaii-product-line-badge {
+  background: color-mix(in srgb, var(--kawaii-bg) 16%, transparent) !important;
+  border-color: transparent !important;
+  color: var(--kawaii-bg) !important;
+}
+.kawaii-product-choice-card.official .kawaii-source-dot {
+  background: var(--kawaii-bg) !important;
+}
+.kawaii-product-choice-card.official .kawaii-product-choice-meta {
+  background: color-mix(in srgb, var(--kawaii-bg) 12%, transparent) !important;
+  border-color: transparent !important;
+}
+.kawaii-product-choice-card.official .kawaii-product-choice-action {
+  background: var(--kawaii-bg) !important;
+  color: var(--kawaii-primary) !important;
+  border-color: transparent !important;
+}
+
+/* ── 托管卡 = 白/描边（次级） ── */
+.kawaii-product-choice-card.market,
+.kawaii-product-choice-card.market.is-active {
+  background: var(--kawaii-surface) !important;
+  border-color: var(--kawaii-line) !important;
+}
+.kawaii-product-choice-card.market:hover,
+.kawaii-product-choice-card.market:focus-visible {
+  border-color: var(--kawaii-primary) !important;
+}
+.kawaii-product-choice-card.market .kawaii-product-choice-meta.market {
+  border-color: var(--kawaii-line) !important;
+}
+.kawaii-product-choice-card.market .kawaii-product-choice-meta.market strong {
+  color: var(--kawaii-text) !important;
+}
+.kawaii-product-choice-card.market .kawaii-product-choice-action.market {
+  background: var(--kawaii-primary) !important;
+  color: var(--kawaii-bg) !important;
+  border-color: transparent !important;
+}
+</style>

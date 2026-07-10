@@ -294,7 +294,7 @@ function textToIdList(value: unknown): number[] {
 }
 
 function tabClass(tab: TabKey): string {
-  return activeTab.value === tab ? 'border-blue-600 text-blue-600' : 'border-transparent text-themed-muted hover:text-themed'
+  return activeTab.value === tab ? 'border-accent text-accent' : 'border-transparent text-themed-muted hover:text-themed'
 }
 
 const isListTab = computed(() => activeTab.value !== 'config')

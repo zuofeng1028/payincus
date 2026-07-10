@@ -1,3 +1,34 @@
+// 纯黑白墨阶：用于把所有装饰性冷色/粉紫色系收敛为中性灰（仅保留 绿/琥珀/红 作状态色）
+const neutralRamp = {
+  50: '#fafafa',
+  100: '#f2f2f4',
+  200: '#e6e6e9',
+  300: '#d7d7dc',
+  400: '#a3a3a8',
+  500: '#737378',
+  600: '#52525a',
+  700: '#3a3a40',
+  800: '#262629',
+  900: '#151518',
+  950: '#0a0a0a'
+}
+
+// rose 在代码里被广泛用作「危险/严重/亏损」的红色语义（非装饰），
+// 因此保留为真红（与 error=#dc2626 对齐），避免被灰化后危险态静默失色。
+const dangerRamp = {
+  50: '#fef2f2',
+  100: '#fee2e2',
+  200: '#fecaca',
+  300: '#fca5a5',
+  400: '#f87171',
+  500: '#ef4444',
+  600: '#dc2626',
+  700: '#b91c1c',
+  800: '#991b1b',
+  900: '#7f1d1d',
+  950: '#450a0a'
+}
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -22,31 +53,31 @@ export default {
           900: '#171717',
           950: '#0a0a0a'
         },
-        // 主强调色 - 克制蓝（原樱花粉已收敛为专业蓝，保留 sakura 名以兼容既有 class）
+        // 主强调色 - 已收敛为中性墨阶（纯黑白，保留 sakura 名以兼容既有 class）
         sakura: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a'
+          50: '#fafafa',
+          100: '#f2f2f4',
+          200: '#e6e6e9',
+          300: '#d7d7dc',
+          400: '#a3a3a8',
+          500: '#737378',
+          600: '#52525a',
+          700: '#3a3a40',
+          800: '#262629',
+          900: '#151518'
         },
-        // 天空蓝 - 次强调色
+        // 次强调色 - 同样收敛为中性墨阶
         sky2: {
-          50: '#eefaff',
-          100: '#d9f2ff',
-          200: '#b0e6ff',
-          300: '#7dd6ff',
-          400: '#4cc4ff',
-          500: '#2ab0f5',
-          600: '#1690d6',
-          700: '#1272ab',
-          800: '#125a86',
-          900: '#134a6c'
+          50: '#fafafa',
+          100: '#f2f2f4',
+          200: '#e6e6e9',
+          300: '#d7d7dc',
+          400: '#a3a3a8',
+          500: '#737378',
+          600: '#52525a',
+          700: '#3a3a40',
+          800: '#262629',
+          900: '#151518'
         },
         // 点缀色 - 已收敛为中性 slate（去掉紫色装饰感）
         lavender: {
@@ -87,33 +118,47 @@ export default {
           800: '#0c6448',
           900: '#0d523c'
         },
-        // 强调色别名 - 克制蓝主色
+        // 强调色别名 - 墨色（主题感知，浅色黑 / 深色白）
+        // primary/secondary 别名用于救活散落的 accent-primary/accent-secondary 死类
         accent: {
-          DEFAULT: '#2563eb',
-          hover: '#1d4ed8',
-          light: '#60a5fa'
+          DEFAULT: 'var(--accent)',
+          hover: 'var(--accent)',
+          light: 'var(--accent)',
+          primary: 'var(--accent)',
+          secondary: 'var(--accent)'
         },
-        // 状态色（语义色，克制去饱和）
+        // primary 色阶 - 代码里散落 bg-primary-*/text-primary-*/ring-primary-* 但从未定义，
+        // 会导致强调色/选中态/复选框静默失效；收敛为中性墨阶令其可见（纯黑白）
+        primary: neutralRamp,
+        // 状态色。保留 Tailwind 自带 blue/sky/teal 等语义色，
+        // 避免处理中、信息、选中和图表状态被全局灰化后失去区分。
         success: '#16a34a',
         warning: '#d97706',
-        error: '#dc2626'
+        error: '#dc2626',
+        // rose 保留真红：代码里当「危险/严重/亏损」语义用（详见 dangerRamp 注释）
+        rose: dangerRamp
       },
       fontFamily: {
-        // 专业中性无衬线字体栈（英文 Inter，中文 Noto Sans SC / 系统字体）
+        // Apple SF 系统字体栈（中文 苹方 / Noto Sans SC；Inter 作为非苹果平台回退）
         sans: [
-          'Inter',
           '-apple-system',
           'BlinkMacSystemFont',
-          '"Segoe UI"',
-          '"Noto Sans SC"',
+          '"SF Pro Text"',
+          '"SF Pro Display"',
+          '"Helvetica Neue"',
+          'Inter',
           '"PingFang SC"',
+          '"Noto Sans SC"',
           '"Microsoft YaHei"',
           'sans-serif'
         ],
         display: [
-          'Inter',
           '-apple-system',
-          '"Segoe UI"',
+          'BlinkMacSystemFont',
+          '"SF Pro Display"',
+          '"Helvetica Neue"',
+          'Inter',
+          '"PingFang SC"',
           '"Noto Sans SC"',
           'sans-serif'
         ],

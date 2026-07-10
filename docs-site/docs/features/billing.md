@@ -32,6 +32,16 @@
 | 礼品卡 | 在 `/admin/gift-cards` 单张或批量生成礼品卡，查看统计和脱敏列表，并启用、禁用或删除未使用礼品卡。 |
 | 兑换码 | 创建、禁用、使用记录和库存管理。 |
 
+## Antom 托管收银台
+
+1. 在 Antom 开发者后台准备 Client ID、Antom 平台公钥和对应的商户 RSA 私钥。
+2. 在 `/admin/payment-providers` 新建 `Antom 托管收银台`，先选择沙箱环境和商户所属的官方区域网关。
+3. 填写支付币种、每 1 CNY 对应的币种金额和币种小数位。例如 `1 CNY = 0.14 USD` 时填写 `USD`、`0.14`、`2`。
+4. 确保 `PAYMENT_CALLBACK_BASE_URL` 是用户端公网 HTTPS 域名。系统会生成 `/api/recharge/callback/<渠道ID>` 通知地址并随订单发送给 Antom。
+5. 在沙箱完成下单跳转、成功通知、重复通知、错误签名/金额拒绝和主动查询后，再切换生产环境。
+
+PayIncus 使用 Antom Hosted Checkout 的 `createPaymentSession` 创建支付会话，并通过 `inquiryPayment` 主动核验订单。API 响应和异步通知均验证 RSA-SHA256 签名；入账前还会核对本地订单号、支付币种、最小单位金额和幂等记录。当前内置 Antom 渠道不提供自动原路退款，退款继续走订单退款审批或人工调账。
+
 ## 回调边界
 
 - 支付回调地址应使用客户面板公网域名，例如 `https://panel.example.com/api/...`。

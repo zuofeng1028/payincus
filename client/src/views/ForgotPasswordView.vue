@@ -11,12 +11,16 @@ import { translateError } from '@/utils/errorHandler'
 import api from '@/api'
 import { useBrand } from '@/composables/useBrand'
 import { loginPath } from '@/utils/app-paths'
+import { useReveal } from '@/composables/useReveal'
 
 const router = useRouter()
 const { t } = useI18n()
 const themeStore = useThemeStore()
 const toast = useToast()
 const brand = useBrand()
+
+const revealRoot = ref<HTMLElement | null>(null)
+useReveal(revealRoot)
 
 const email = ref<string>('')
 const code = ref<string>('')
@@ -182,7 +186,7 @@ function backToEmail() {
 </script>
 
 <template>
-  <div class="kawaii-public-shell kawaii-auth-shell kawaii-user-auth min-h-screen flex items-center justify-center p-4">
+  <div ref="revealRoot" class="kawaii-public-shell kawaii-auth-shell kawaii-user-auth min-h-screen flex items-center justify-center p-4">
     <div class="w-full max-w-sm">
       <ThemeTemplateSlot
         slot-name="public.auth.aside"
@@ -190,7 +194,7 @@ function backToEmail() {
       />
 
       <!-- Logo -->
-      <div class="text-center mb-8">
+      <div class="text-center mb-8" data-reveal>
         <img
           :src="brand.brandLogoUrl"
           :alt="brand.brandName"
@@ -211,7 +215,7 @@ function backToEmail() {
       </div>
 
       <!-- 表单 -->
-      <div class="card p-6">
+      <div class="card p-6" data-reveal>
         <!-- 步骤1：输入邮箱 -->
         <form v-if="step === 'email'" class="space-y-4" @submit.prevent="sendVerificationCode">
           <div>

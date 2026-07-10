@@ -1260,7 +1260,7 @@ onMounted(async () => {
 	                <span class="rounded bg-gray-100 px-2 py-0.5 text-gray-700">匿名交易</span>
               </div>
             </div>
-            <div class="text-xl font-semibold text-orange-500">{{ money(listing.price) }}</div>
+            <div class="text-xl font-semibold text-themed">{{ money(listing.price) }}</div>
           </div>
 
           <dl class="grid grid-cols-[88px_minmax(0,1fr)] gap-y-2 text-sm">
@@ -1439,7 +1439,7 @@ onMounted(async () => {
               <div class="font-semibold text-themed">{{ listing.publicCode }}</div>
               <div class="text-sm text-themed-muted">{{ snapshotOf(listing).name }} · {{ statusLabel(listing.status) }}</div>
             </div>
-            <div class="text-lg font-semibold text-orange-500">{{ money(listing.price) }}</div>
+            <div class="text-lg font-semibold text-themed">{{ money(listing.price) }}</div>
           </div>
           <div class="text-sm text-themed-muted">卖家预计到账 {{ money(listing.sellerReceivesAmount) }}，手续费 {{ money(listing.feeAmount) }}</div>
           <div class="flex justify-end gap-2">
@@ -1487,7 +1487,7 @@ onMounted(async () => {
               </div>
             </div>
             <div class="text-right">
-              <div class="text-lg font-semibold text-orange-500">{{ money(order.price) }}</div>
+              <div class="text-lg font-semibold text-themed">{{ money(order.price) }}</div>
               <div class="mt-2 flex flex-wrap justify-end gap-2">
                 <button
                   class="btn btn-secondary"
@@ -1749,7 +1749,7 @@ onMounted(async () => {
             <span class="rounded bg-emerald-100 px-2 py-1 text-emerald-700">暂停锁定后交割</span>
             <span class="rounded bg-blue-100 px-2 py-1 text-blue-700">成交强制重装</span>
             <span class="rounded bg-gray-100 px-2 py-1 text-gray-700">匿名交易</span>
-            <span class="rounded bg-orange-100 px-2 py-1 text-orange-700">平台资金托管</span>
+            <span class="rounded bg-themed-secondary px-2 py-1 text-themed">平台资金托管</span>
           </div>
 
           <dl class="mt-5 grid gap-3 text-sm md:grid-cols-[120px_minmax(0,1fr)_120px_minmax(0,1fr)]">
@@ -1774,7 +1774,7 @@ onMounted(async () => {
             <dt class="font-medium text-themed">剩余有效期</dt>
             <dd class="text-themed-muted">{{ remainingDays(snapshotOf(selectedListing).expiresAt) }}，到期 {{ formatDateOnly(snapshotOf(selectedListing).expiresAt) }}</dd>
             <dt class="font-medium text-themed">售价</dt>
-            <dd class="text-orange-500">{{ money(selectedListing.price) }}</dd>
+            <dd class="text-themed">{{ money(selectedListing.price) }}</dd>
 	            <dt class="font-medium text-themed">手续费</dt>
 	            <dd class="text-themed-muted">平台手续费 {{ money(selectedListing.feeAmount) }}</dd>
 	            <dt class="font-medium text-themed">交易状态</dt>
@@ -1860,7 +1860,7 @@ onMounted(async () => {
           成交后实例会被锁定并强制重装交割，原系统和数据不会交付给买家，也不可恢复。挂牌期间实例保持暂停/交易锁定，只允许改价、改说明、下架或查看交易状态。
         </div>
         <div class="mt-4 grid gap-2 text-sm text-themed-muted">
-          <div>售价：<span class="text-orange-500">{{ money(Number(listingForm.price)) }}</span></div>
+          <div>售价：<span class="text-themed">{{ money(Number(listingForm.price)) }}</span></div>
           <div>自动下架：{{ listingForm.autoDelistAt || '未设置' }}</div>
           <div>说明：{{ listingForm.description || '未填写' }}</div>
         </div>

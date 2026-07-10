@@ -413,8 +413,8 @@ function goToNextPage() {
         :class="[
           'flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-colors',
           themeStore.isDark
-            ? 'bg-blue-600 text-white hover:bg-blue-500'
-            : 'bg-blue-600 text-white hover:bg-blue-700'
+            ? 'bg-accent text-white dark:text-black hover:opacity-90'
+            : 'bg-accent text-white dark:text-black hover:opacity-90'
         ]"
         @click="openCreateModal"
       >
@@ -755,8 +755,8 @@ function goToNextPage() {
                   'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
                   creating ? 'opacity-50 cursor-not-allowed' : '',
                   themeStore.isDark
-                    ? 'bg-blue-600 text-white hover:bg-blue-500'
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                    ? 'bg-accent text-white dark:text-black hover:opacity-90'
+                    : 'bg-accent text-white dark:text-black hover:opacity-90'
                 ]"
                 @click="handleCreate"
               >
@@ -808,7 +808,7 @@ function goToNextPage() {
                   'flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors',
                   copiedBatch
                     ? (themeStore.isDark ? 'bg-green-600 text-white' : 'bg-green-600 text-white')
-                    : (themeStore.isDark ? 'bg-blue-600 text-white hover:bg-blue-500' : 'bg-blue-600 text-white hover:bg-blue-700')
+                    : (themeStore.isDark ? 'bg-accent text-white dark:text-black hover:opacity-90' : 'bg-accent text-white dark:text-black hover:opacity-90')
                 ]"
                 @click="copyBatchCodes"
               >

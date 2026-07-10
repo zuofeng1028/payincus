@@ -430,7 +430,7 @@ function getBillingCycleSuffix(cycle: string | null | undefined) {
         <!-- Step 1: 选择服务地区 -->
         <div class="card p-5">
           <div class="flex items-center gap-2.5 mb-4">
-            <span class="w-6 h-6 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center">1</span>
+            <span class="w-6 h-6 rounded-full bg-accent text-white dark:text-black text-xs font-bold flex items-center justify-center">1</span>
             <h3 class="text-sm font-semibold text-themed">{{ t('mail.selectRegion') }}</h3>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -494,7 +494,7 @@ function getBillingCycleSuffix(cycle: string | null | undefined) {
         <!-- Step 2: 方案配置详情 -->
         <div v-if="selectedSource && !hasSubscriptionInSelectedRegion" class="card p-5">
           <div class="flex items-center gap-2.5 mb-4">
-            <span class="w-6 h-6 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center">2</span>
+            <span class="w-6 h-6 rounded-full bg-accent text-white dark:text-black text-xs font-bold flex items-center justify-center">2</span>
             <h3 class="text-sm font-semibold text-themed">{{ t('mail.planDetails') }}</h3>
           </div>
           
@@ -576,7 +576,7 @@ function getBillingCycleSuffix(cycle: string | null | undefined) {
         <!-- Step 3: 其他选项 (优惠码) -->
         <div v-if="selectedPlan && !hasSubscriptionInSelectedRegion" class="card p-5">
           <div class="flex items-center gap-2.5 mb-4">
-            <span class="w-6 h-6 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center">3</span>
+            <span class="w-6 h-6 rounded-full bg-accent text-white dark:text-black text-xs font-bold flex items-center justify-center">3</span>
             <h3 class="text-sm font-semibold text-themed">{{ t('mail.otherOptions') }}</h3>
           </div>
           

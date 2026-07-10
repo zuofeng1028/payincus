@@ -16,6 +16,7 @@ import TicketImageUploader from '@/components/tickets/TicketImageUploader.vue'
 import TicketInstanceOwnerCard from '@/components/tickets/TicketInstanceOwnerCard.vue'
 import { ticketsPath } from '@/utils/app-paths'
 import { buildApiUrl } from '@/utils/api-url'
+import { useReveal } from '@/composables/useReveal'
 import type {
   Ticket,
   TicketMessage,
@@ -36,6 +37,9 @@ const authStore = useAuthStore()
 const configStore = useConfigStore()
 const route = useRoute()
 const router = useRouter()
+
+const revealRoot = ref<HTMLElement | null>(null)
+useReveal(revealRoot)
 
 // Tab state
 type TabType = 'my' | 'host'
@@ -909,10 +913,10 @@ function formatDateShort(dateString: string) {
 </script>
 
 <template>
-  <div class="kawaii-page min-h-screen animate-fade-in">
+  <div ref="revealRoot" class="kawaii-page min-h-screen animate-fade-in">
     <div class="space-y-6 py-6">
       <!-- Header -->
-      <div class="kawaii-dashboard-hero page-header rounded-2xl p-5 flex-col gap-4 sm:flex-row sm:gap-0">
+      <div data-reveal class="kawaii-dashboard-hero page-header rounded-2xl p-5 flex-col gap-4 sm:flex-row sm:gap-0">
         <div class="flex items-center gap-3">
           <button v-if="viewMode !== 'list'" class="kawaii-action-button p-2 transition-colors" @click="backToList">
             <svg class="w-5 h-5 text-themed-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -941,7 +945,7 @@ function formatDateShort(dateString: string) {
       <!-- List View -->
       <template v-if="viewMode === 'list'">
         <!-- Tabs -->
-        <div class="kawaii-panel mb-6 flex w-full gap-1 overflow-x-auto rounded-2xl p-1 sm:w-fit">
+        <div data-reveal class="kawaii-panel mb-6 flex w-full gap-1 overflow-x-auto rounded-2xl p-1 sm:w-fit">
           <!-- 普通用户显示"我的工单"标签，管理员不显示 -->
           <button v-if="!authStore.isAdmin" :class="['kawaii-market-pill whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-all', activeTab === 'my' ? 'active' : '']" @click="switchTab('my')">
             {{ t('tickets.myTickets') }}
@@ -958,7 +962,7 @@ function formatDateShort(dateString: string) {
         </div>
         
         <!-- Filters & Search Row -->
-        <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+        <div data-reveal class="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
           <!-- Status Filter - 分段按钮组 -->
           <div class="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 flex-shrink-0">
             <div class="inline-flex items-center gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">

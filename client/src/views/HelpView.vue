@@ -306,12 +306,7 @@ function formatDate(dateStr: string | null | undefined): string {
         <!-- Category Filter -->
         <div v-if="categories.length > 0" class="flex flex-wrap gap-2">
           <button
-            :class="[
-              'px-3 py-1.5 text-sm rounded-lg transition-colors',
-              !selectedCategory 
-                ? 'bg-accent text-white' 
-                : 'bg-themed-secondary text-themed-secondary hover:text-themed'
-            ]"
+            :class="['help-chip', !selectedCategory ? 'active' : '']"
             @click="filterByCategory('')"
           >
             {{ $t('help.all') }}
@@ -319,16 +314,11 @@ function formatDate(dateStr: string | null | undefined): string {
           <button
             v-for="cat in categories"
             :key="cat.category"
-            :class="[
-              'px-3 py-1.5 text-sm rounded-lg transition-colors',
-              selectedCategory === cat.category 
-                ? 'bg-accent text-white' 
-                : 'bg-themed-secondary text-themed-secondary hover:text-themed'
-            ]"
+            :class="['help-chip', selectedCategory === cat.category ? 'active' : '']"
             @click="filterByCategory(cat.category)"
           >
             {{ getCategoryLabel(cat.category) }}
-            <span class="ml-1 opacity-60">({{ cat.count }})</span>
+            <span class="help-chip-count">{{ cat.count }}</span>
           </button>
         </div>
 
@@ -359,7 +349,7 @@ function formatDate(dateStr: string | null | undefined): string {
             v-for="article in articles" 
             :key="article.id"
             :to="{ name: 'help-article', params: { slug: article.slug } }"
-            class="card block p-4 hover:border-accent/50 transition-colors"
+            class="help-article-card card block p-4"
           >
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
@@ -813,5 +803,45 @@ function formatDate(dateStr: string | null | undefined): string {
 .light .markdown-body .hljs-variable,
 .light .markdown-body .hljs-template-variable {
   color: #953800;
+}
+</style>
+
+<style scoped>
+/* 帮助中心列表：与门面统一的分类 chip 与文章卡（纯黑白 Apple） */
+.help-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  font-weight: 600;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+.help-chip:hover {
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+/* 选中态用 accent 反色文字，深浅色都可读（修复暗色白底白字） */
+.help-chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg-primary);
+}
+.help-chip-count {
+  opacity: 0.6;
+  font-size: 12px;
+}
+
+.help-article-card {
+  transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+.help-article-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
 }
 </style>

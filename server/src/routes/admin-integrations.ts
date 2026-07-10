@@ -51,7 +51,7 @@ interface IntegrationHealthSummary {
 const telegramApiTimeoutMs = 15_000
 const integrationProbeTimeoutMs = 15_000
 const healthHistoryWindowDays = 7
-const supportedRechargeProviderTypes = new Set(['yipay', 'heleket', 'manual', 'plugin_gateway'])
+const supportedRechargeProviderTypes = new Set(['yipay', 'heleket', 'antom', 'manual', 'plugin_gateway'])
 const hostAgentOfflineThresholdMs = 2 * 60 * 1000
 
 function nowIso(): string {

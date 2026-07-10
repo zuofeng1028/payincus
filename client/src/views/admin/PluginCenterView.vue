@@ -1763,7 +1763,8 @@ watch(() => route.query.tab, tab => {
               v-for="tab in tabs"
               :key="tab.key"
               class="rounded border px-3 py-2 text-sm font-medium transition"
-              :class="activeTab === tab.key ? 'border-accent bg-accent text-white' : 'border-themed text-themed-muted hover:bg-themed-hover hover:text-themed'"
+              :class="activeTab === tab.key ? 'border-accent bg-accent' : 'border-themed text-themed-muted hover:bg-themed-hover hover:text-themed'"
+              :style="activeTab === tab.key ? { color: 'var(--bg-primary)' } : {}"
               @click="setActiveTab(tab.key)"
             >
               {{ tab.label }}

@@ -14,7 +14,9 @@
  * 
  * 注意：账户余额已移至独立的 WalletView 页面
  */
+import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useReveal } from '@/composables/useReveal'
 import AccountSection from '@/components/profile/AccountSection.vue'
 import PasswordSection from '@/components/profile/PasswordSection.vue'
 import TwoFactorSection from '@/components/profile/TwoFactorSection.vue'
@@ -29,21 +31,24 @@ import ThemeTemplateSlot from '@/components/theme/ThemeTemplateSlot.vue'
 defineOptions({ name: 'ProfileView' })
 
 const authStore = useAuthStore()
+
+const revealRoot = ref<HTMLElement | null>(null)
+useReveal(revealRoot)
 </script>
 
 <template>
-  <div class="kawaii-page space-y-6 animate-fade-in">
-    <div class="page-header">
+  <div ref="revealRoot" class="kawaii-page space-y-6 animate-fade-in">
+    <div data-reveal class="page-header">
       <h1 class="page-title">{{ $t('nav.settings') }}</h1>
     </div>
 
     <ThemeTemplateSlot slot-name="user.profile.banner" container-class="overflow-hidden rounded-lg border border-themed bg-themed-surface" />
 
     <!-- 账户信息和配额 -->
-    <AccountSection />
+    <AccountSection data-reveal />
 
     <!-- 修改密码 -->
-    <PasswordSection />
+    <PasswordSection data-reveal />
 
     <!-- 双因素认证 -->
     <TwoFactorSection />

@@ -135,7 +135,7 @@ onMounted(loadData)
                 </p>
               </div>
               <div class="text-right">
-                <div class="text-xl font-semibold text-orange-500">{{ formatMoneyCents(item.flashPrice) }}</div>
+                <div class="text-xl font-semibold text-themed">{{ formatMoneyCents(item.flashPrice) }}</div>
                 <div class="text-xs text-themed-muted line-through">{{ formatMoneyCents(item.originalPriceSnapshot) }}</div>
               </div>
             </div>
@@ -146,7 +146,7 @@ onMounted(loadData)
                 <span>已售 {{ stockPercent(item) }}%</span>
               </div>
               <div class="h-2 overflow-hidden rounded-full bg-themed-muted">
-                <div class="h-full rounded-full bg-orange-500" :style="{ width: `${stockPercent(item)}%` }" />
+                <div class="h-full rounded-full bg-accent" :style="{ width: `${stockPercent(item)}%` }" />
               </div>
             </div>
 
@@ -189,7 +189,7 @@ onMounted(loadData)
                 </div>
               </div>
               <div class="shrink-0 text-right">
-                <div class="font-semibold text-orange-500">¥{{ record.amount.toFixed(2) }}</div>
+                <div class="font-semibold text-themed">¥{{ record.amount.toFixed(2) }}</div>
                 <div class="mt-1 text-xs text-themed-muted">{{ record.status }}</div>
               </div>
             </div>
@@ -217,7 +217,7 @@ onMounted(loadData)
                 <td class="px-5 py-3 text-themed-muted">
                   <div class="truncate" :title="`${record.packageName} / ${record.planName}`">{{ record.packageName }} / {{ record.planName }}</div>
                 </td>
-                <td class="px-5 py-3 text-orange-500 whitespace-nowrap">¥{{ record.amount.toFixed(2) }}</td>
+                <td class="px-5 py-3 text-themed whitespace-nowrap">¥{{ record.amount.toFixed(2) }}</td>
                 <td class="px-5 py-3 text-themed-muted">
                   <div class="truncate" :title="record.status">{{ record.status }}</div>
                 </td>

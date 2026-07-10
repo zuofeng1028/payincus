@@ -9,6 +9,10 @@ import ThemeTemplateSlot from '@/components/theme/ThemeTemplateSlot.vue'
 import TermsOfServiceModal from '@/components/TermsOfServiceModal.vue'
 import { freeSiteCopy } from '@/utils/freeSiteFun'
 import { instanceDetailPath, walletPath } from '@/utils/app-paths'
+import { useReveal } from '@/composables/useReveal'
+
+const revealRoot = ref<HTMLElement | null>(null)
+useReveal(revealRoot)
 
 const { t } = useI18n()
 const toast = useToast()
@@ -967,8 +971,8 @@ function formatAmount() {
 </script>
 
 <template>
-  <div class="kawaii-page kawaii-wallet-page space-y-5 animate-fade-in">
-    <div class="kawaii-dashboard-hero page-header rounded-2xl p-5 flex-col gap-4 sm:flex-row sm:gap-0">
+  <div ref="revealRoot" class="kawaii-page kawaii-wallet-page space-y-5 animate-fade-in">
+    <div data-reveal class="kawaii-dashboard-hero page-header rounded-2xl p-5 flex-col gap-4 sm:flex-row sm:gap-0">
       <div>
         <h1 class="page-title text-lg sm:text-xl">{{ configStore.freeSiteMode ? freeSiteCopy.walletBalanceTab : $t('wallet.title') }}</h1>
         <p class="page-description">
@@ -986,7 +990,7 @@ function formatAmount() {
     <ThemeTemplateSlot slot-name="user.wallet.banner" container-class="mb-5 overflow-hidden rounded-lg border border-themed bg-themed-surface" />
 
     <!-- 顶部胶囊 Tabs -->
-    <div class="mb-4 flex justify-center overflow-x-auto pb-1 sm:mb-5">
+    <div data-reveal class="mb-4 flex justify-center overflow-x-auto pb-1 sm:mb-5">
       <div
         class="kawaii-browse-wrap inline-flex max-w-full min-w-max rounded-full p-1"
         role="tablist"
@@ -1009,7 +1013,7 @@ function formatAmount() {
 
     <!-- 账户余额 TAB -->
     <div v-show="activeTab === 'balance'" class="space-y-6">
-      <div class="card rounded-[28px] border border-zinc-200/80 bg-white/95 p-6 shadow-[0_24px_80px_-56px_rgba(15,23,42,0.32)] dark:border-white/10 dark:bg-zinc-950/60 sm:p-8">
+      <div data-reveal class="card rounded-[28px] border border-zinc-200/80 bg-white/95 p-6 shadow-[0_24px_80px_-56px_rgba(15,23,42,0.32)] dark:border-white/10 dark:bg-zinc-950/60 sm:p-8">
         <div v-if="loading" class="animate-pulse space-y-6">
           <div class="h-3 w-24 rounded bg-themed-secondary"></div>
           <div class="h-16 w-64 rounded bg-themed-secondary"></div>

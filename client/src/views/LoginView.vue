@@ -13,6 +13,7 @@ import { useBrand } from '@/composables/useBrand'
 import { buildApiUrl } from '@/utils/api-url'
 import { forgotPasswordPath, registerPath } from '@/utils/app-paths'
 import { getDemoLoginAccount } from '@/utils/demo-login'
+import { useReveal } from '@/composables/useReveal'
 
 const router = useRouter()
 const route = useRoute()
@@ -20,6 +21,9 @@ const { t } = useI18n()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
 const brand = useBrand()
+
+const revealRoot = ref<HTMLElement | null>(null)
+useReveal(revealRoot)
 
 const username = ref<string>('')
 const password = ref<string>('')
@@ -207,7 +211,7 @@ function getProviderInfo(provider: string): ProviderInfo {
 </script>
 
 <template>
-  <div class="kawaii-public-shell kawaii-auth-shell kawaii-user-auth min-h-screen flex items-center justify-center p-4">
+  <div ref="revealRoot" class="kawaii-public-shell kawaii-auth-shell kawaii-user-auth min-h-screen flex items-center justify-center p-4">
     <div class="w-full max-w-md">
       <ThemeTemplateSlot
         slot-name="public.auth.aside"
@@ -215,7 +219,7 @@ function getProviderInfo(provider: string): ProviderInfo {
       />
 
       <!-- Logo -->
-      <div class="text-center mb-8">
+      <div class="text-center mb-8" data-reveal>
         <img
           :src="brand.brandLogoUrl"
           :alt="brand.brandName"
@@ -236,7 +240,7 @@ function getProviderInfo(provider: string): ProviderInfo {
       </div>
 
       <!-- 登录表单 -->
-      <div class="card p-6">
+      <div class="card p-6" data-reveal>
         <form class="space-y-4" @submit.prevent="handleLogin">
           <div>
             <label 

@@ -1,5 +1,7 @@
 import type { HeleketConfig, HeleketPayment } from './heleket.js'
 import { extractHeleketPaymentDetails, getHeleketInvoiceAmount } from './heleket.js'
+import type { AntomConfig, AntomPaymentInquiryResponse, AntomPaymentNotification } from './antom.js'
+import { calculateAntomMinorAmount } from './antom.js'
 
 export interface RechargePaymentDetails {
   kind?: string
@@ -32,6 +34,16 @@ export interface RechargePaymentDetails {
     merchantAmount?: string | null
     address?: string | null
     from?: string | null
+  }
+  antom?: {
+    paymentRequestId?: string | null
+    paymentId?: string | null
+    currency?: string | null
+    amountMinor?: string | null
+    currencyRate?: number | null
+    currencyExponent?: number | null
+    status?: string | null
+    statusDescription?: string | null
   }
 }
 
@@ -75,6 +87,24 @@ export function buildHeleketInvoicePaymentDetails(
       invoiceCurrency: config.currency || 'CNY',
       invoiceAmount: amount,
       lifetimeSeconds: config.lifetimeSeconds
+    }
+  }
+}
+
+export function buildAntomPaymentDetails(
+  orderNo: string,
+  amountCny: number,
+  config: AntomConfig
+): RechargePaymentDetails {
+  return {
+    kind: 'antom',
+    antom: {
+      paymentRequestId: orderNo,
+      currency: config.currency,
+      amountMinor: calculateAntomMinorAmount(amountCny, config),
+      currencyRate: config.currencyRate,
+      currencyExponent: config.currencyExponent,
+      status: 'PENDING'
     }
   }
 }
@@ -160,18 +190,51 @@ export function mergeHeleketPaymentDetails(
   }
 }
 
+export function mergeAntomPaymentDetails(
+  existingValue: unknown,
+  payment: AntomPaymentNotification | AntomPaymentInquiryResponse,
+  config: AntomConfig,
+  fallback: { orderNo: string; amountCny: number }
+): RechargePaymentDetails {
+  const existing = readRechargePaymentDetails(existingValue)
+  const amount = payment.actualPaymentAmount || payment.paymentAmount
+  const status = 'paymentStatus' in payment
+    ? payment.paymentStatus || null
+    : payment.result?.resultStatus || null
+  const statusDescription = 'paymentResultMessage' in payment
+    ? payment.paymentResultMessage || payment.result?.resultMessage || null
+    : payment.result?.resultMessage || null
+
+  return {
+    ...existing,
+    kind: 'antom',
+    antom: {
+      ...existing.antom,
+      paymentRequestId: payment.paymentRequestId || existing.antom?.paymentRequestId || fallback.orderNo,
+      paymentId: payment.paymentId || existing.antom?.paymentId || null,
+      currency: amount?.currency || existing.antom?.currency || config.currency,
+      amountMinor: amount?.value || existing.antom?.amountMinor || calculateAntomMinorAmount(fallback.amountCny, config),
+      currencyRate: existing.antom?.currencyRate ?? config.currencyRate,
+      currencyExponent: existing.antom?.currencyExponent ?? config.currencyExponent,
+      status,
+      statusDescription
+    }
+  }
+}
+
 export function extractRechargePaymentDisplayInfo(value: unknown): RechargePaymentDisplayInfo {
   const details = readRechargePaymentDetails(value)
   const heleket = details.heleket
+  const antom = details.antom
 
   return {
-    invoiceCurrency: heleket?.invoiceCurrency || null,
-    paymentCurrency: heleket?.payerCurrency || null,
+    invoiceCurrency: heleket?.invoiceCurrency || antom?.currency || null,
+    paymentCurrency: heleket?.payerCurrency || antom?.currency || null,
     paymentNetwork: heleket?.network || null,
     actualPaymentMethod: heleket?.paymentMethodCode || null,
-    paymentUuid: heleket?.uuid || null,
+    paymentUuid: heleket?.uuid || antom?.paymentId || null,
     paymentTxid: heleket?.txid || null,
-    gatewayStatus: heleket?.status || null,
-    gatewayStatusDescription: heleket?.statusDescription || null
+    gatewayStatus: heleket?.status || antom?.status || null,
+    gatewayStatusDescription: heleket?.statusDescription || antom?.statusDescription || null
   }
 }

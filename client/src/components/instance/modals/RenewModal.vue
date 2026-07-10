@@ -362,7 +362,7 @@ function handleClose() {
             </button>
             <button
               :disabled="loading || renewing || insufficientBalance || !selectedRenewOption || !canHostedInstanceRenew"
-              class="px-4 py-2 text-sm font-medium rounded-lg transition-colors bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-4 py-2 text-sm font-medium rounded-lg transition-colors bg-accent text-white dark:text-black hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
               @click="handleRenew"
             >
               {{ renewing ? t('billing.renewing') : t('billing.renew') }}

@@ -7,6 +7,7 @@ import type { RechargeStatus } from '@prisma/client'
 import * as db from '../db/index.js'
 import * as crypto from 'crypto'
 import { isIP } from 'net'
+import { Readable } from 'stream'
 import { createEpayClient, type EpayConfig, type EpayConfigV1, type EpayConfigV2, type CallbackData, type EpayVersion, type VerifyResult } from '../lib/epay.js'
 import {
   buildHeleketConfig,
@@ -18,13 +19,24 @@ import {
 } from '../lib/heleket.js'
 import {
   buildManualRechargePaymentDetails,
+  buildAntomPaymentDetails,
   buildHeleketInvoicePaymentDetails,
   extractRechargePaymentDisplayInfo,
   getRechargePayableAmount,
   mergeHeleketPaymentDetails,
+  mergeAntomPaymentDetails,
   mergeRechargeAmountDetails,
   readRechargePaymentDetails
 } from '../lib/recharge-payment-details.js'
+import {
+  AntomClient,
+  antomMinorAmountToCny,
+  antomNotificationResponse,
+  buildAntomConfig,
+  calculateAntomMinorAmount,
+  verifyAntomWebhook,
+  type AntomPaymentNotification
+} from '../lib/antom.js'
 import {
   buildRechargeProviderConfigSnapshot,
   resolveRechargeProviderConfigSnapshot
@@ -48,7 +60,7 @@ import type { PluginGatewayExtensionHook } from '../lib/plugin-manifest.js'
 const AMOUNT_TOLERANCE_CENTS = 1
 const PLUGIN_GATEWAY_PROVIDER_TYPE = 'plugin_gateway'
 const MANUAL_PROVIDER_TYPE = 'manual'
-const SUPPORTED_RECHARGE_PROVIDER_TYPES = new Set(['yipay', 'heleket', PLUGIN_GATEWAY_PROVIDER_TYPE, MANUAL_PROVIDER_TYPE])
+const SUPPORTED_RECHARGE_PROVIDER_TYPES = new Set(['yipay', 'heleket', 'antom', PLUGIN_GATEWAY_PROVIDER_TYPE, MANUAL_PROVIDER_TYPE])
 const HELEKET_CALLBACK_IPS = ['31.133.220.8']
 const POSITIVE_ID_PATTERN = /^[1-9]\d*$/
 const RECHARGE_STATUSES = new Set(['pending', 'paid', 'completed', 'failed', 'cancelled', 'refunded'])
@@ -146,6 +158,24 @@ function normalizePaymentCallbackPayload(value: unknown): Record<string, unknown
   }
 
   return value as Record<string, unknown>
+}
+
+async function capturePaymentCallbackRawBody(request: any, _reply: any, payload: NodeJS.ReadableStream): Promise<Readable> {
+  const chunks: Buffer[] = []
+  let size = 0
+  for await (const chunk of payload) {
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)
+    size += buffer.length
+    if (size > 256 * 1024) {
+      const error = new Error('支付回调报文过大') as Error & { statusCode: number }
+      error.statusCode = 413
+      throw error
+    }
+    chunks.push(buffer)
+  }
+  const rawBody = Buffer.concat(chunks)
+  request.rawPaymentCallbackBody = rawBody.toString('utf8')
+  return Readable.from(rawBody)
 }
 
 function isRechargeProviderTypeSupported(type: string): boolean {
@@ -482,6 +512,11 @@ function getRechargeOrderExpiryAt(providerType: string, config: Record<string, u
     return new Date(Date.now() + heleketConfig.lifetimeSeconds * 1000)
   }
 
+  if (providerType === 'antom') {
+    const { config: antomConfig } = buildAntomConfig(config)
+    return new Date(Date.now() + antomConfig.sessionExpiryMinutes * 60_000)
+  }
+
   return new Date(Date.now() + 30 * 60 * 1000)
 }
 
@@ -565,6 +600,8 @@ function extractRechargeOrderNoFromCallback(
       return typeof callbackData.out_trade_no === 'string' ? callbackData.out_trade_no : undefined
     case 'heleket':
       return typeof callbackData.order_id === 'string' ? callbackData.order_id : undefined
+    case 'antom':
+      return typeof callbackData.paymentRequestId === 'string' ? callbackData.paymentRequestId : undefined
     case 'stripe': {
       const data = callbackData.data as { object?: { metadata?: { orderNo?: string } } } | undefined
       return data?.object?.metadata?.orderNo
@@ -919,6 +956,27 @@ async function createRechargePayUrl(
     return typeof invoice.url === 'string' && invoice.url.trim() ? invoice.url : null
   }
 
+  if (provider.type === 'antom') {
+    const { config: antomConfig, valid, error } = buildAntomConfig(config)
+    if (!valid) throw new Error(error || 'Antom 支付渠道配置不完整')
+    const antom = new AntomClient(antomConfig)
+    const session = await antom.createPaymentSession({
+      orderNo,
+      amountCny: amount,
+      notifyUrl: urls.notifyUrl,
+      redirectUrl: urls.successUrl
+    })
+    if (session.result?.resultStatus !== 'S' || session.result.resultCode !== 'SUCCESS') {
+      throw new Error(session.result?.resultMessage || 'Antom 创建支付会话失败')
+    }
+    if (typeof session.normalUrl !== 'string' || !session.normalUrl.trim()) {
+      throw new Error('Antom 未返回 Hosted Checkout 地址')
+    }
+    const normalUrl = await assertSafeHttpUrl(session.normalUrl, 'Antom Hosted Checkout URL')
+    if (normalUrl.protocol !== 'https:') throw new Error('Antom Hosted Checkout 地址必须使用 HTTPS')
+    return normalUrl.toString()
+  }
+
   if (provider.type === PLUGIN_GATEWAY_PROVIDER_TYPE) {
     return createPluginGatewayRechargePayUrl({
       provider,
@@ -948,6 +1006,11 @@ function validateActiveRechargeProvider(
 
   if (provider.type === 'heleket') {
     const { valid, error } = buildHeleketConfig(provider.config)
+    return { valid, error }
+  }
+
+  if (provider.type === 'antom') {
+    const { valid, error } = buildAntomConfig(provider.config)
     return { valid, error }
   }
 
@@ -1028,6 +1091,28 @@ async function validatePaymentProviderAdminInput(
     if (!valid) {
       return { valid: false, error, config: normalizedConfig }
     }
+  }
+
+  if (providerType === 'antom') {
+    const { valid, error, config: antomConfig } = buildAntomConfig(normalizedConfig)
+    if (!valid) return { valid: false, error, config: normalizedConfig }
+    Object.assign(normalizedConfig, {
+      environment: antomConfig.environment,
+      apiurl: antomConfig.apiurl,
+      clientId: antomConfig.clientId,
+      antom_public_key: antomConfig.antomPublicKey,
+      merchant_private_key: antomConfig.merchantPrivateKey,
+      keyVersion: antomConfig.keyVersion,
+      currency: antomConfig.currency,
+      currencyRate: antomConfig.currencyRate,
+      currencyExponent: antomConfig.currencyExponent,
+      merchantRegion: antomConfig.merchantRegion || '',
+      settlementCurrency: antomConfig.settlementCurrency || '',
+      merchantAccountId: antomConfig.merchantAccountId || '',
+      locale: antomConfig.locale || '',
+      orderDescription: antomConfig.orderDescription,
+      sessionExpiryMinutes: antomConfig.sessionExpiryMinutes
+    })
   }
 
   if (providerType === PLUGIN_GATEWAY_PROVIDER_TYPE) {
@@ -1281,6 +1366,8 @@ export default async function rechargeRoutes(app: FastifyInstance): Promise<void
       const providerConfigSnapshot = buildRechargeProviderConfigSnapshot(provider.type, providerConfig)
       const providerPaymentDetails = provider.type === 'heleket'
         ? buildHeleketInvoicePaymentDetails(orderNo, payableAmount, buildHeleketConfig(providerConfig).heleketConfig)
+        : provider.type === 'antom'
+          ? buildAntomPaymentDetails(orderNo, payableAmount, buildAntomConfig(providerConfig).config)
         : provider.type === PLUGIN_GATEWAY_PROVIDER_TYPE
           ? buildPluginGatewayPaymentDetails(providerConfig)
           : provider.type === MANUAL_PROVIDER_TYPE
@@ -1613,6 +1700,12 @@ export default async function rechargeRoutes(app: FastifyInstance): Promise<void
               payableAmount,
               buildHeleketConfig(effectiveProviderConfig).heleketConfig
             )
+          : provider.type === 'antom'
+            ? buildAntomPaymentDetails(
+                record.orderNo,
+                payableAmount,
+                buildAntomConfig(effectiveProviderConfig).config
+              )
           : provider.type === PLUGIN_GATEWAY_PROVIDER_TYPE
             ? buildPluginGatewayPaymentDetails(effectiveProviderConfig)
             : provider.type === MANUAL_PROVIDER_TYPE
@@ -2014,7 +2107,7 @@ export default async function rechargeRoutes(app: FastifyInstance): Promise<void
         }
 
         actualAmount = creditedAmount
-      } else if (provider.type !== 'yipay' && provider.type !== 'heleket') {
+      } else if (provider.type !== 'yipay' && provider.type !== 'heleket' && provider.type !== 'antom') {
         return {
           success: true,
           verified: false,
@@ -2350,6 +2443,153 @@ export default async function rechargeRoutes(app: FastifyInstance): Promise<void
           }
         }
 
+        actualAmount = creditedAmount
+      } else if (provider.type === 'antom') {
+        const { config: antomConfig, valid, error: configError } = buildAntomConfig(effectiveConfig)
+        if (!valid) {
+          request.log.warn({ orderNo, error: configError }, 'Antom 支付渠道配置不完整')
+          return {
+            success: true,
+            verified: false,
+            status: record.status,
+            message: '订单待支付，请稍后重试',
+            order: { orderNo: record.orderNo, amount: rechargeAmount, status: record.status }
+          }
+        }
+
+        const queryResult = await new AntomClient(antomConfig).inquiryPayment(orderNo)
+        request.log.info(
+          { orderNo, paymentStatus: queryResult.paymentStatus, paymentId: queryResult.paymentId },
+          'Antom 订单查询结果'
+        )
+
+        if (queryResult.result?.resultStatus !== 'S') {
+          return {
+            success: true,
+            verified: false,
+            status: record.status,
+            message: queryResult.result?.resultMessage || '订单待支付，请稍后重试',
+            order: { orderNo: record.orderNo, amount: rechargeAmount, status: record.status }
+          }
+        }
+
+        if (!isRechargeGatewayOrderNoMatch(orderNo, queryResult.paymentRequestId)) {
+          request.log.warn({ orderNo, gatewayOrderNo: queryResult.paymentRequestId }, 'Antom 查询返回订单号不匹配')
+          return {
+            success: false,
+            verified: false,
+            status: record.status,
+            message: '支付订单号校验失败，请等待异步回调或联系客服',
+            order: { orderNo: record.orderNo, amount: rechargeAmount, status: record.status }
+          }
+        }
+
+        paymentDetails = mergeAntomPaymentDetails(
+          (record as any).paymentDetails,
+          queryResult,
+          antomConfig,
+          { orderNo, amountCny: orderAmount }
+        ) as Record<string, unknown>
+        callbackPayload = {
+          source: 'verify_api',
+          antomPaymentStatus: queryResult.paymentStatus,
+          antomPaymentId: queryResult.paymentId || null
+        }
+
+        if (!queryResult.paymentStatus || queryResult.paymentStatus === 'PROCESSING') {
+          await db.updateRechargeOrderMetadata(orderNo, {
+            tradeNo: queryResult.paymentId || null,
+            paymentDetails
+          })
+          return {
+            success: true,
+            verified: false,
+            status: 'pending',
+            message: queryResult.paymentResultMessage || '订单待支付',
+            order: buildRechargeRecordView({
+              id: record.id,
+              orderNo,
+              amount: record.amount,
+              actualAmount: record.actualAmount,
+              fee: record.fee,
+              status: record.status,
+              provider: record.provider,
+              paymentMethod: (record as any).paymentMethod || null,
+              paymentDetails,
+              tradeNo: queryResult.paymentId || null,
+              failReason: record.failReason,
+              createdAt: record.createdAt,
+              expiredAt: record.expiredAt,
+              completedAt: record.completedAt
+            })
+          }
+        }
+
+        if (queryResult.paymentStatus === 'FAIL' || queryResult.paymentStatus === 'CANCELLED') {
+          const message = queryResult.paymentResultMessage || `Antom payment ${queryResult.paymentStatus.toLowerCase()}`
+          const terminalRecord = queryResult.paymentStatus === 'CANCELLED'
+            ? await db.cancelRecharge(orderNo, callbackPayload, paymentDetails)
+            : await db.failRecharge(orderNo, message, callbackPayload, paymentDetails)
+          tradeNo = queryResult.paymentId || ''
+          tradeNoForIndex = getTradeNoForIndex(orderNo, tradeNo)
+          await markCallbackProcessed(provider.id, orderNo, tradeNoForIndex, request.ip)
+          return {
+            success: true,
+            verified: true,
+            status: queryResult.paymentStatus === 'CANCELLED' ? 'cancelled' : 'failed',
+            message,
+            order: buildRechargeRecordView({
+              id: terminalRecord.id,
+              orderNo,
+              amount: record.amount,
+              actualAmount: terminalRecord.actualAmount ?? record.actualAmount,
+              fee: terminalRecord.fee ?? record.fee,
+              status: queryResult.paymentStatus === 'CANCELLED' ? 'cancelled' : 'failed',
+              provider: record.provider,
+              paymentMethod: (record as any).paymentMethod || null,
+              paymentDetails,
+              tradeNo,
+              failReason: message,
+              createdAt: record.createdAt,
+              expiredAt: record.expiredAt,
+              completedAt: terminalRecord.completedAt
+            })
+          }
+        }
+
+        if (queryResult.paymentStatus !== 'SUCCESS') {
+          return {
+            success: true,
+            verified: false,
+            status: record.status,
+            message: '支付处理中，请稍后重试',
+            order: { orderNo, amount: rechargeAmount, status: record.status }
+          }
+        }
+
+        const paidAmount = queryResult.actualPaymentAmount || queryResult.paymentAmount
+        const expectedMinor = readRechargePaymentDetails((record as any).paymentDetails).antom?.amountMinor
+          || calculateAntomMinorAmount(orderAmount, antomConfig)
+        if (
+          !paidAmount ||
+          paidAmount.currency !== antomConfig.currency ||
+          paidAmount.value !== expectedMinor
+        ) {
+          request.log.warn(
+            { orderNo, expectedCurrency: antomConfig.currency, expectedMinor, actual: sanitizeObject(paidAmount) },
+            'Antom 支付金额或币种不匹配，拒绝处理'
+          )
+          return {
+            success: false,
+            verified: false,
+            status: 'pending',
+            message: '支付金额或币种不匹配，请联系客服',
+            order: { orderNo, amount: rechargeAmount, status: record.status }
+          }
+        }
+
+        tradeNo = queryResult.paymentId || orderNo
+        tradeNoForIndex = getTradeNoForIndex(orderNo, tradeNo)
         actualAmount = creditedAmount
       }
 
@@ -3193,6 +3433,8 @@ export default async function rechargeRoutes(app: FastifyInstance): Promise<void
     let verifyResult: VerifyResult | null = null
     let heleketPaymentStatus = ''
     let heleketPaymentState = 'pending'
+    let antomConfig: ReturnType<typeof buildAntomConfig>['config'] | null = null
+    let antomNotification: AntomPaymentNotification | null = null
     
     if (provider.type === 'yipay') {
       const { epayConfig, valid } = buildEpayConfig(config)
@@ -3230,6 +3472,33 @@ export default async function rechargeRoutes(app: FastifyInstance): Promise<void
 
       heleketPaymentStatus = extractHeleketStatus(callbackData)
       heleketPaymentState = getHeleketPaymentState(callbackData)
+    } else if (provider.type === 'antom') {
+      const built = buildAntomConfig(config)
+      if (!built.valid) {
+        request.log.warn({ providerId, error: built.error }, 'Antom 支付渠道配置不完整')
+        return reply.status(500).send(antomNotificationResponse(false))
+      }
+      antomConfig = built.config
+      antomNotification = callbackData as AntomPaymentNotification
+      const rawBody = typeof request.rawPaymentCallbackBody === 'string' ? request.rawPaymentCallbackBody : ''
+      const requestUri = String(request.raw?.url || request.url || '').split('?')[0]
+      const signatureValid = verifyAntomWebhook({
+        config: antomConfig,
+        method: request.method,
+        requestUri,
+        requestTime: String(request.headers['request-time'] || ''),
+        clientId: String(request.headers['client-id'] || ''),
+        signature: String(request.headers.signature || ''),
+        rawBody
+      })
+      if (!signatureValid) {
+        request.log.warn({ providerId, ip: clientIp }, 'Antom 支付回调签名验证失败')
+        return reply.status(400).send(antomNotificationResponse(false))
+      }
+      if (antomNotification.notifyType !== 'PAYMENT_RESULT') {
+        request.log.info({ providerId, notifyType: antomNotification.notifyType }, '忽略非 PAYMENT_RESULT 的 Antom 通知')
+        return antomNotificationResponse(true)
+      }
     } else {
       // 其他支付渠道使用原有验证
       const signature = (callbackData.sign || callbackData.signature || request.headers['x-signature'] || '') as string
@@ -3257,6 +3526,13 @@ export default async function rechargeRoutes(app: FastifyInstance): Promise<void
         (typeof callbackData.order_id === 'string' && callbackData.order_id.trim() ? callbackData.order_id : '')
       )
       actualAmount = heleketPaymentState === 'paid' ? getHeleketInvoiceAmount(callbackData) : undefined
+    } else if (provider.type === 'antom' && antomConfig && antomNotification) {
+      orderNo = antomNotification.paymentRequestId
+      tradeNo = antomNotification.paymentId
+      const antomAmount = antomNotification.actualPaymentAmount || antomNotification.paymentAmount
+      actualAmount = antomAmount?.currency === antomConfig.currency
+        ? antomMinorAmountToCny(antomAmount.value, antomConfig) ?? undefined
+        : undefined
     } else if (provider.type === 'alipay_direct') {
       orderNo = callbackData.out_trade_no as string
       tradeNo = callbackData.trade_no as string
@@ -3286,6 +3562,7 @@ export default async function rechargeRoutes(app: FastifyInstance): Promise<void
     if (await isCallbackProcessed(providerIdNum, orderNo, tradeNoForIndex)) {
       request.log.info({ orderNo }, '重复回调，忽略')
       // 返回成功，避免支付平台重试
+      if (provider.type === 'antom') return antomNotificationResponse(true)
       return provider.type === 'yipay' && epayVersion === 'v1' ? 'success' : { code: 'SUCCESS', message: 'OK' }
     }
 
@@ -3309,7 +3586,57 @@ export default async function rechargeRoutes(app: FastifyInstance): Promise<void
     if (record.status === 'completed') {
       await markCallbackProcessed(providerIdNum, orderNo, tradeNoForIndex, clientIp)
       request.log.info({ orderNo }, '订单已完成，幂等返回')
+      if (provider.type === 'antom') return antomNotificationResponse(true)
       return provider.type === 'yipay' && epayVersion === 'v1' ? 'success' : { code: 'SUCCESS', message: 'OK' }
+    }
+
+    if (provider.type === 'antom' && antomConfig && antomNotification) {
+      const orderAmount = getRechargePayableAmount({
+        amount: record.amount,
+        fee: record.fee,
+        paymentDetails: (record as any).paymentDetails
+      })
+      paymentDetails = mergeAntomPaymentDetails(
+        (record as any).paymentDetails,
+        antomNotification,
+        antomConfig,
+        { orderNo, amountCny: orderAmount }
+      ) as Record<string, unknown>
+
+      const resultStatus = antomNotification.result?.resultStatus
+      if (resultStatus === 'U') {
+        await db.updateRechargeOrderMetadata(orderNo, { tradeNo, callbackData, paymentDetails })
+        request.log.info({ orderNo }, 'Antom 处理中通知已记录')
+        return antomNotificationResponse(true)
+      }
+      if (resultStatus === 'F') {
+        if (record.status === 'pending' || record.status === 'paid') {
+          await db.failRecharge(
+            orderNo,
+            antomNotification.result?.resultMessage || 'Antom payment failed',
+            callbackData,
+            paymentDetails
+          )
+        }
+        await markCallbackProcessed(providerIdNum, orderNo, tradeNoForIndex, clientIp)
+        request.log.info({ orderNo }, 'Antom 失败通知已同步')
+        return antomNotificationResponse(true)
+      }
+      if (resultStatus !== 'S' || antomNotification.result?.resultCode !== 'SUCCESS') {
+        request.log.warn({ orderNo, result: sanitizeObject(antomNotification.result) }, 'Antom 通知结果状态不合法')
+        return reply.status(400).send(antomNotificationResponse(false))
+      }
+
+      const paidAmount = antomNotification.actualPaymentAmount || antomNotification.paymentAmount
+      const expectedMinor = readRechargePaymentDetails((record as any).paymentDetails).antom?.amountMinor
+        || calculateAntomMinorAmount(orderAmount, antomConfig)
+      if (!paidAmount || paidAmount.currency !== antomConfig.currency || paidAmount.value !== expectedMinor) {
+        request.log.warn(
+          { orderNo, expectedCurrency: antomConfig.currency, expectedMinor, actual: sanitizeObject(paidAmount) },
+          'Antom 回调支付金额或币种不匹配'
+        )
+        return reply.status(400).send(antomNotificationResponse(false))
+      }
     }
 
     const shouldValidatePaidAmount = !(provider.type === 'heleket' && heleketPaymentState !== 'paid')
@@ -3441,7 +3768,7 @@ export default async function rechargeRoutes(app: FastifyInstance): Promise<void
         )
         return reply.status(400).send({ error: '支付金额不足' })
       }
-    } else {
+    } else if (provider.type !== 'antom') {
       const diff = Math.abs(paidActualAmount - expectedAmount)
       if (diff > AMOUNT_TOLERANCE_CENTS / 100) {
         request.log.warn({
@@ -3564,6 +3891,8 @@ export default async function rechargeRoutes(app: FastifyInstance): Promise<void
         return 'success'
       } else if (provider.type === 'wechat_direct') {
         return { return_code: 'SUCCESS', return_msg: 'OK' }
+      } else if (provider.type === 'antom') {
+        return antomNotificationResponse(true)
       } else {
         return { code: 'SUCCESS', message: 'OK' }
       }
@@ -3572,6 +3901,7 @@ export default async function rechargeRoutes(app: FastifyInstance): Promise<void
       const currentRecord = await db.getRechargeRecordByOrderNo(orderNo)
       if (currentRecord && currentRecord.status === 'completed') {
         await markCallbackProcessed(providerIdNum, orderNo, tradeNoForIndex, clientIp)
+        if (provider.type === 'antom') return antomNotificationResponse(true)
         return provider.type === 'yipay' && epayVersion === 'v1' ? 'success' : { code: 'SUCCESS', message: 'OK' }
       }
       throw completeError
@@ -3580,6 +3910,8 @@ export default async function rechargeRoutes(app: FastifyInstance): Promise<void
 
   // POST 回调接口
   app.post('/api/recharge/callback/:providerId', {
+    preParsing: capturePaymentCallbackRawBody,
+    bodyLimit: 256 * 1024,
     config: {
       rateLimit: { max: 100, timeWindow: '1 minute' }
     }

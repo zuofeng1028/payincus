@@ -2,6 +2,10 @@
 import { computed, onMounted, ref } from 'vue'
 import api from '@/api'
 import ThemeTemplateSlot from '@/components/theme/ThemeTemplateSlot.vue'
+import { useReveal } from '@/composables/useReveal'
+
+const revealRoot = ref<HTMLElement | null>(null)
+useReveal(revealRoot)
 
 type OrderSourceType = 'recharge' | 'instance_billing'
 
@@ -166,8 +170,8 @@ onMounted(loadOrders)
 </script>
 
 <template>
-  <div class="kawaii-page space-y-5 animate-fade-in">
-    <header class="kawaii-dashboard-hero page-header rounded-2xl p-5 flex-col gap-4 sm:flex-row sm:gap-0">
+  <div ref="revealRoot" class="kawaii-page space-y-5 animate-fade-in">
+    <header data-reveal class="kawaii-dashboard-hero page-header rounded-2xl p-5 flex-col gap-4 sm:flex-row sm:gap-0">
       <div>
         <h1 class="page-title text-lg sm:text-xl">订单中心</h1>
         <p class="page-description">查看充值订单、实例新购、续费和退款账单。</p>
@@ -177,7 +181,7 @@ onMounted(loadOrders)
 
     <ThemeTemplateSlot slot-name="user.orders.banner" container-class="overflow-hidden rounded-lg border border-themed bg-themed-surface" />
 
-    <section class="kawaii-panel rounded-2xl p-4">
+    <section data-reveal class="kawaii-panel rounded-2xl p-4">
       <div class="grid gap-3 md:grid-cols-[180px_180px_auto]">
         <select v-model="type" class="input" @change="status = ''; applyFilters()">
           <option v-for="item in typeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
@@ -191,7 +195,7 @@ onMounted(loadOrders)
 
     <div v-if="error" class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{{ error }}</div>
 
-    <section class="kawaii-card overflow-hidden rounded-2xl">
+    <section data-reveal class="kawaii-card overflow-hidden rounded-2xl">
       <div v-if="loading" class="p-8 text-center text-sm text-themed-muted">正在加载订单...</div>
       <div v-else-if="orders.length === 0" class="p-8 text-center text-sm text-themed-muted">暂无订单记录</div>
       <div v-else class="space-y-3 p-4 lg:hidden">

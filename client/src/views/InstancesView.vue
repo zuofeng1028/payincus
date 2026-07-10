@@ -2394,7 +2394,7 @@ async function confirmBatchDestroy(): Promise<void> {
                 type="button"
                 class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors"
                 :class="selectedIds.has(instance.id)
-                  ? 'border-blue-500 bg-blue-500 text-white'
+                  ? 'border-accent bg-accent text-white dark:text-black'
                   : (themeStore.isDark ? 'border-gray-700 bg-gray-900 text-transparent hover:border-gray-600' : 'border-gray-300 bg-white text-transparent hover:border-gray-400')"
                 :aria-pressed="selectedIds.has(instance.id)"
                 @click.stop="toggleSelect(instance.id)"
@@ -2435,10 +2435,10 @@ async function confirmBatchDestroy(): Promise<void> {
               <dd class="min-w-0 truncate" :class="themeStore.isDark ? 'text-gray-400' : 'text-gray-600'">{{ getInstanceTrafficUsage(instance) }}</dd>
 
               <dt class="font-semibold" :class="themeStore.isDark ? 'text-gray-200' : 'text-gray-800'">{{ $t('instance.card.trafficReset') }}</dt>
-              <dd class="min-w-0 truncate text-orange-500">{{ getInstanceResetTrafficPrice(instance) }}</dd>
+              <dd class="min-w-0 truncate text-themed">{{ getInstanceResetTrafficPrice(instance) }}</dd>
 
               <dt class="font-semibold" :class="themeStore.isDark ? 'text-gray-200' : 'text-gray-800'">{{ $t('instance.card.price') }}</dt>
-              <dd class="min-w-0 truncate text-orange-500">{{ getInstanceMonthlyPrice(instance) }}</dd>
+              <dd class="min-w-0 truncate text-themed">{{ getInstanceMonthlyPrice(instance) }}</dd>
 
               <dt class="font-semibold" :class="themeStore.isDark ? 'text-gray-200' : 'text-gray-800'">{{ $t('instance.expireAt') }}</dt>
               <dd class="min-w-0 truncate" :class="themeStore.isDark ? 'text-gray-400' : 'text-gray-600'">
@@ -2518,7 +2518,7 @@ async function confirmBatchDestroy(): Promise<void> {
                 </button>
                 <button
                   type="button"
-                  class="inline-flex h-8 items-center justify-center rounded-md bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-500 disabled:cursor-not-allowed disabled:bg-gray-400"
+                  class="inline-flex h-8 items-center justify-center rounded-md bg-accent px-4 text-sm font-medium text-white dark:text-black transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:bg-gray-400"
                   :disabled="!canUseInstanceBillingAction(instance) || !!actionLoading[instance.id]"
                   @click.stop="openSingleRenewModal(instance)"
                 >
@@ -2596,7 +2596,7 @@ async function confirmBatchDestroy(): Promise<void> {
             </div>
             <div class="flex items-center justify-between gap-3">
               <span class="text-themed-muted">{{ $t('instance.card.trafficReset') }}</span>
-              <span class="text-orange-500">{{ getInstanceResetTrafficPrice(resetTrafficTarget) }}</span>
+              <span class="text-themed">{{ getInstanceResetTrafficPrice(resetTrafficTarget) }}</span>
             </div>
           </div>
 

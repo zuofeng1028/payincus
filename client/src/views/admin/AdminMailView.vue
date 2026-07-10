@@ -389,7 +389,7 @@ const regionOptions = [
       <button
         class="px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px"
         :class="activeTab === 'sources' 
-          ? 'border-blue-500 text-blue-500' 
+          ? 'border-accent text-accent'
           : 'border-transparent text-themed-muted hover:text-themed'"
         @click="switchTab('sources')"
       >
@@ -398,7 +398,7 @@ const regionOptions = [
       <button
         class="px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px"
         :class="activeTab === 'plans' 
-          ? 'border-blue-500 text-blue-500' 
+          ? 'border-accent text-accent'
           : 'border-transparent text-themed-muted hover:text-themed'"
         @click="switchTab('plans')"
       >
@@ -407,7 +407,7 @@ const regionOptions = [
       <button
         class="px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px"
         :class="activeTab === 'subscriptions' 
-          ? 'border-blue-500 text-blue-500' 
+          ? 'border-accent text-accent'
           : 'border-transparent text-themed-muted hover:text-themed'"
         @click="switchTab('subscriptions')"
       >
@@ -416,7 +416,7 @@ const regionOptions = [
       <button
         class="px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px"
         :class="activeTab === 'domains' 
-          ? 'border-blue-500 text-blue-500' 
+          ? 'border-accent text-accent'
           : 'border-transparent text-themed-muted hover:text-themed'"
         @click="switchTab('domains')"
       >
