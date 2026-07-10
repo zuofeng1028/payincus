@@ -1,6 +1,6 @@
 # PayIncus Handoff
 
-Last updated: 2026-07-10 14:50 CST
+Last updated: 2026-07-10 15:57 CST
 
 This file is a handoff note for a new Codex conversation. Do not include server passwords or other secrets in this file.
 
@@ -12,11 +12,33 @@ Give the next Codex session this file first. The active working directory is:
 C:\Users\Administrator\Desktop\payinces
 ```
 
-Production is currently on `v1.3.6`. This release contains the audited UI refinement and the new, disabled-by-default Antom Hosted Checkout integration completed after `v1.3.5`.
+Production is currently on `v1.3.7`. This release contains the second UI consistency pass completed after `v1.3.6`; Antom Hosted Checkout remains deployed but disabled by default.
 
 The Service Worker derives its cache name from the registered client version. Antom code and its database enum are deployed, but no Antom provider record exists in production; keep it disabled until merchant credentials and a sandbox payment have been verified.
 
-The release commit/tag and OTA evidence below are production proof for `v1.3.6`. Local UI audit screenshots and tool metadata are local-only evidence and are not tracked release content.
+The release commit/tag and OTA evidence below are production proof for `v1.3.7`. Local UI audit screenshots and tool metadata are local-only evidence and are not tracked release content.
+
+### Current v1.3.7 Production / OTA Status
+
+- `v1.3.7` release commit/tag: `fd5e722f0df2` (`Release v1.3.7 UI consistency refinement`).
+- GitHub Actions:
+  - CI run `29077829603` -> success.
+  - Build & Release run `29077829621` -> success.
+  - Docs Pages run `29077829595` -> success.
+- GitHub Release `v1.3.7` contains amd64/arm64 tarballs, both SHA256 files, versioned and generic OTA manifests, plugin assets, and `plugin-market-index.json`.
+- OTA manifest proof: version/tag `v1.3.7`, gitCommit `fd5e722f0df2`, buildTime `2026-07-10T07:52:46.913Z`, amd64 sha256 `16a0c061d182ddae2337cdbb436cd4910ac6b7a7cd299f4d327a9d97b8343c7d`, arm64 sha256 `b9cd965971fa866e5ab94647545473cb4b4d1af483e52850618a27eee96334be`.
+- Final OTA task `#146`: `v1.3.6 -> v1.3.7`, status `success`, log `/opt/incudal/update-logs/system-update-146.log`, backup `/opt/incudal/releases/v1.3.6-20260710064758`.
+  - Ran with the standing owner directive `RUN_DB_CHECKS=0`.
+  - Artifact SHA256, dependency install, Prisma migration status (188 migrations, no pending migration), atomic switch, backend health, split-host assets/API/WebSocket, Agent manifest, static production readiness, and log/header secret scan passed.
+  - Log contains `System update completed successfully` at `2026-07-10T07:56:23.308Z`.
+- Current production state:
+  - `/opt/incudal/current -> /opt/incudal/releases/v1.3.7-20260710075450`
+  - `version.json`: v1.3.7, commit `fd5e722f0df2`, buildTime `2026-07-10T07:52:06.143Z`, deployedAt `2026-07-10T07:55:18.249Z`.
+  - `incudal-backend` is enabled and active.
+  - local, public user, and public admin `/api/health` returned HTTP 200; split-host user/admin assets and WebSocket checks passed.
+  - UI release checks passed: client type-check, frontend i18n and route guards, ESLint with zero errors, user/admin production builds, frontend dist boundary guard, and server TypeScript build.
+  - Automated browser capture was unavailable for this second UI pass; static layout review and production compilation were used as the visual release gate.
+- Standing owner directive from 2026-07-10 remains active: all future PayIncus OTA runs should use `RUN_DB_CHECKS=0`; do not ask again for the DB/payment readiness waiver. Continue running artifact, migration, static config, split-host, Agent, service health, and log/header checks.
 
 ### Current v1.3.6 Production / OTA Status
 

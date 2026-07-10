@@ -6,16 +6,41 @@
 
 ## 最新发布状态 / Latest Release State
 
-- 最新发布提交 / Latest Release Commit: `1f4008cc2`
+- 最新发布提交 / Latest Release Commit: `fd5e722f0`
 - 提交日期 / Commit date: 2026-07-10
-- 提交说明 / Commit subject: Release v1.3.6 Antom payments and UI refinement
-- 最新 tag / Latest tag: `v1.3.6`
+- 提交说明 / Commit subject: Release v1.3.7 UI consistency refinement
+- 最新 tag / Latest tag: `v1.3.7`
 
 ## 未发布变更 / Unreleased Changes
 
 - 该 tag 与相邻 tag 指向同一提交，未产生额外 Git commit。
 
 ## 历史版本 / Historical Versions
+
+## v1.3.7
+
+- 发布提交 / Release commit: `fd5e722f0`
+- 提交日期 / Commit date: 2026-07-10
+- 提交说明 / Commit subject: Release v1.3.7 UI consistency refinement
+
+
+### 界面一致性
+
+- 继续统一用户端与管理端的中性色视觉语言，收敛实例、套餐、消息、账务、运营和系统设置页面中过多的装饰性颜色。
+- 保留失败、危险、成功、警告和处理中等关键业务状态的语义色，并补齐对应的暗色模式样式。
+- 优化表格、筛选区、状态标签、操作按钮和管理端表单的间距、边框与信息层级，降低高密度页面的视觉干扰。
+
+### 布局与可读性
+
+- Antom 支付配置弹窗扩大到双列表单宽度，减少密钥、币种和商户字段的拥挤。
+- 实例与套餐页面的网络模式、来源和类型标签改为稳定的中性标签；IPv6 地址不再截断，便于核对完整地址。
+- 调整账务提醒、批量操作及多项管理表单的网格布局，并改善窄屏下的换行和内容容纳。
+
+### 验证
+
+- 前端 TypeScript、国际化键和路由守卫通过。
+- ESLint 零错误；存量 Vue 缩进提示不阻断发布。
+- 用户端与管理端生产构建、前后台产物边界守卫和后端 TypeScript 编译通过。
 
 ## v1.3.6
 
