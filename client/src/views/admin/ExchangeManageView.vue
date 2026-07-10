@@ -219,21 +219,21 @@ const activeDisputeStatuses = ['open', 'processing', 'redelivering']
 function instanceTradeState(item: any): { label: string; className: string } {
   const status = item.instance?.status || item.snapshot?.status || item.eligibilitySnapshot?.instance?.status
   if (item.status === 'active' && status === 'stopped') {
-    return { label: '已暂停，可交易', className: 'bg-emerald-50 text-emerald-700 border-emerald-200' }
+    return { label: '已暂停，可交易', className: 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700' }
   }
   if (item.status === 'active' && status && status !== 'stopped') {
-    return { label: '非暂停，需处理', className: 'bg-red-50 text-red-700 border-red-200' }
+    return { label: '非暂停，需处理', className: 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-300 dark:border-rose-500/20' }
   }
   if (item.status === 'locked') {
-    return { label: '已挂牌，暂停锁定中', className: 'bg-amber-50 text-amber-700 border-amber-200' }
+    return { label: '已挂牌，暂停锁定中', className: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/20' }
   }
   if (item.status === 'delivery_failed') {
-    return { label: '交割异常', className: 'bg-red-50 text-red-700 border-red-200' }
+    return { label: '交割异常', className: 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-300 dark:border-rose-500/20' }
   }
   if (item.status === 'sold') {
-    return { label: '交割完成/等待结算', className: 'bg-blue-50 text-blue-700 border-blue-200' }
+    return { label: '交割完成/等待结算', className: 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700' }
   }
-  return { label: status ? `实例状态 ${status}` : '状态未知', className: 'bg-gray-50 text-gray-700 border-gray-200' }
+  return { label: status ? `实例状态 ${status}` : '状态未知', className: 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700' }
 }
 
 function listingLockLabel(item: any): string {
@@ -807,7 +807,7 @@ onMounted(loadActive)
       <button class="btn btn-secondary" type="button" @click="loadActive">刷新</button>
     </div>
 
-    <div class="grid gap-4 md:grid-cols-4 xl:grid-cols-7">
+    <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
       <div class="card p-4"><div class="text-xs text-themed-muted">挂牌中</div><div class="mt-2 text-2xl font-semibold text-themed">{{ overview.activeListings }}</div></div>
       <div class="card p-4"><div class="text-xs text-themed-muted">交易锁定</div><div class="mt-2 text-2xl font-semibold text-themed">{{ overview.lockedListings }}</div></div>
       <div class="card p-4"><div class="text-xs text-themed-muted">交割订单</div><div class="mt-2 text-2xl font-semibold text-themed">{{ overview.deliveringOrders }}</div></div>
@@ -926,9 +926,10 @@ onMounted(loadActive)
             <td class="p-3">
               <div>{{ statusLabel(item.status) }}</div>
               <div class="mt-1 text-xs text-themed-muted">任务：{{ item.deliveryTasks?.[0] ? statusLabel(item.deliveryTasks[0].status) : '等待创建' }} / {{ item.deliveryTasks?.[0] ? deliveryStepText(item.deliveryTasks[0]) : '-' }}</div>
-              <div v-if="item.failureReason" class="mt-1 max-w-xs text-xs text-red-600">{{ item.failureReason }}</div>
+              <div v-if="item.failureReason" class="mt-1 max-w-xs text-xs text-rose-600 dark:text-rose-400">{{ item.failureReason }}</div>
             </td>
-            <td class="p-3 text-right space-x-2">
+            <td class="p-3 text-right">
+              <div class="flex flex-wrap justify-end gap-2">
               <button
                 v-if="!['completed', 'refunded', 'cancelled', 'manual_review'].includes(item.status)"
                 class="btn btn-secondary btn-sm"
@@ -961,6 +962,7 @@ onMounted(loadActive)
               >
                 退款
               </button>
+              </div>
             </td>
           </tr>
           <tr v-if="orders.length === 0"><td class="p-6 text-center text-themed-muted" colspan="7">暂无订单。</td></tr>
@@ -987,7 +989,7 @@ onMounted(loadActive)
               <div>{{ statusLabel(item.status) }}</div>
               <div class="mt-1 text-xs text-themed-muted">订单资金：{{ item.order ? orderEscrowText(item.order) : '-' }}</div>
               <div v-if="item.order" class="mt-1 text-xs text-themed-muted">订单金额：{{ money(item.order.price) }} / 手续费 {{ money(item.order.feeAmount) }}</div>
-              <div v-if="item.error" class="mt-1 max-w-xs text-xs text-red-600">{{ item.error }}</div>
+              <div v-if="item.error" class="mt-1 max-w-xs text-xs text-rose-600 dark:text-rose-400">{{ item.error }}</div>
             </td>
             <td class="p-3 text-right">
               <div class="flex justify-end gap-2">
@@ -1018,13 +1020,15 @@ onMounted(loadActive)
         <tbody class="divide-y divide-themed">
           <tr v-for="item in wallets" :key="item.id">
             <td class="p-3">{{ item.user?.username || '-' }} / #{{ item.userId }}</td>
-            <td class="p-3 text-emerald-600">{{ money(item.availableAmount) }}</td>
-            <td class="p-3 text-orange-500">{{ money(item.frozenAmount) }}</td>
+            <td class="p-3 text-themed font-medium">{{ money(item.availableAmount) }}</td>
+            <td class="p-3 text-themed-muted">{{ money(item.frozenAmount) }}</td>
             <td class="p-3">{{ formatDate(item.updatedAt) }}</td>
-            <td class="p-3 text-right space-x-2">
+            <td class="p-3 text-right">
+              <div class="flex flex-wrap justify-end gap-2">
               <button class="btn btn-secondary btn-sm" type="button" @click="freezeWallet(item)">冻结</button>
               <button class="btn btn-secondary btn-sm" type="button" @click="unfreezeWallet(item)">解冻</button>
               <button class="btn btn-danger btn-sm" type="button" @click="adjustWallet(item)">人工调整</button>
+              </div>
             </td>
           </tr>
           <tr v-if="wallets.length === 0"><td class="p-6 text-center text-themed-muted" colspan="5">暂无交易所余额。</td></tr>
@@ -1044,11 +1048,13 @@ onMounted(loadActive)
             <td class="p-3">{{ money(item.amount) }}</td>
             <td class="p-3">{{ item.method || '-' }}</td>
             <td class="p-3">{{ statusLabel(item.status) }}</td>
-            <td class="p-3 text-right space-x-2">
+            <td class="p-3 text-right">
+              <div class="flex flex-wrap items-center justify-end gap-2">
               <button v-if="item.status === 'pending'" class="btn btn-secondary btn-sm" type="button" @click="approveWithdrawal(item)">通过</button>
               <button v-if="['approved', 'paying'].includes(item.status)" class="btn btn-secondary btn-sm" type="button" @click="completeWithdrawal(item)">完成</button>
               <button v-if="['pending', 'approved'].includes(item.status)" class="btn btn-danger btn-sm" type="button" @click="rejectWithdrawal(item)">拒绝</button>
               <span v-if="!['pending', 'approved', 'paying'].includes(item.status)" class="text-xs text-themed-muted">无可用操作</span>
+              </div>
             </td>
           </tr>
           <tr v-if="withdrawals.length === 0"><td class="p-6 text-center text-themed-muted" colspan="6">暂无提现。</td></tr>
@@ -1069,10 +1075,12 @@ onMounted(loadActive)
             <td class="p-3">{{ item.reason }}</td>
             <td class="p-3">{{ statusLabel(item.status) }}</td>
             <td class="p-3">{{ formatDate(item.createdAt) }}</td>
-            <td class="p-3 text-right space-x-2">
+            <td class="p-3 text-right">
+              <div class="flex flex-wrap justify-end gap-2">
               <button v-if="activeDisputeStatuses.includes(item.status)" class="btn btn-secondary btn-sm" type="button" @click="runDisputeAction(item, 'reject')">拒绝</button>
               <button v-if="activeDisputeStatuses.includes(item.status)" class="btn btn-danger btn-sm" type="button" @click="runDisputeAction(item, 'refund')">退款</button>
               <button v-if="activeDisputeStatuses.includes(item.status)" class="btn btn-secondary btn-sm" type="button" @click="runDisputeAction(item, 'release')">放款结案</button>
+              </div>
             </td>
           </tr>
           <tr v-if="disputes.length === 0"><td class="p-6 text-center text-themed-muted" colspan="7">暂无争议。</td></tr>

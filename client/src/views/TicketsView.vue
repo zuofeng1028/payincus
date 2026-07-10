@@ -154,18 +154,18 @@ const statusColors: Record<TicketStatus, string> = {
 }
 
 const priorityColors: Record<TicketPriority, string> = {
-  low: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
-  normal: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  high: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-  urgent: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+  low: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
+  normal: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+  high: 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
+  urgent: 'bg-gray-800 text-white dark:bg-gray-200 dark:text-gray-900'
 }
 
 const slaStatusColors = {
-  waiting_first_response: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-  waiting_user: 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300',
-  waiting_internal: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
-  due_soon: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
-  overdue: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+  waiting_first_response: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+  waiting_user: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+  waiting_internal: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+  due_soon: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+  overdue: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300',
   met: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
   closed: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
 }
@@ -955,14 +955,14 @@ function formatDateShort(dateString: string) {
           </button>
           <button v-if="isHostOwner" :class="['kawaii-market-pill whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-all', activeTab === 'host' ? 'active' : '']" @click="switchTab('host')">
             {{ t('tickets.hostTickets') }}
-            <span v-if="pendingCount.hostTickets > 0" class="ml-2 px-2 py-0.5 text-xs bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-full">
+            <span v-if="pendingCount.hostTickets > 0" class="ml-2 px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full">
               {{ pendingCount.hostTickets }}
             </span>
           </button>
         </div>
         
         <!-- Filters & Search Row -->
-        <div data-reveal class="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+        <div data-reveal class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-4 mb-4">
           <!-- Status Filter - 分段按钮组 -->
           <div class="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 flex-shrink-0">
             <div class="inline-flex items-center gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
@@ -1264,7 +1264,7 @@ function formatDateShort(dateString: string) {
             
             <!-- Owner Actions -->
             <div v-if="isOwner && selectedTicket.status !== 'closed'" class="flex flex-wrap gap-2 mt-4">
-              <button v-if="selectedTicket.status === 'open'" class="px-3 py-1.5 text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors" @click="updateStatus('in_progress')">
+              <button v-if="selectedTicket.status === 'open'" class="px-3 py-1.5 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" @click="updateStatus('in_progress')">
                 {{ t('tickets.markInProgress') }}
               </button>
               <button v-if="selectedTicket.status !== 'resolved'" class="px-3 py-1.5 text-sm bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors" @click="updateStatus('resolved')">
@@ -1357,10 +1357,10 @@ function formatDateShort(dateString: string) {
                 <div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
                   <h3 class="font-semibold text-gray-900 dark:text-white mb-3">{{ t('tickets.support.quickActions') }}</h3>
                   <div class="grid grid-cols-2 gap-2">
-                    <button class="px-3 py-2 text-sm rounded-lg border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 disabled:opacity-50 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300 dark:hover:bg-blue-500/20" :disabled="aiDraftLoading || aiReplyLoading || !selectedTicket" @click="generateAiDraft">
+                    <button class="px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50" :disabled="aiDraftLoading || aiReplyLoading || !selectedTicket" @click="generateAiDraft">
                       {{ aiDraftLoading ? t('tickets.support.aiDraftGenerating') : t('tickets.support.generateAiDraft') }}
                     </button>
-                    <button class="px-3 py-2 text-sm rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 disabled:opacity-50 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20" :disabled="aiDraftLoading || aiReplyLoading || !selectedTicket" @click="sendAiReply">
+                    <button class="px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50" :disabled="aiDraftLoading || aiReplyLoading || !selectedTicket" @click="sendAiReply">
                       {{ aiReplyLoading ? t('tickets.support.aiReplySending') : t('tickets.support.sendAiReply') }}
                     </button>
                     <button class="px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700" @click="openAdminPath(supportContext.quickActions.balanceAdjustmentPath)">
@@ -1495,7 +1495,7 @@ function formatDateShort(dateString: string) {
                       </svg>
                     </button>
                   </div>
-                  <div :class="['inline-block max-w-full p-3 rounded-lg text-sm', message.senderId === authStore.user?.id ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100' : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white']">
+                  <div :class="['inline-block max-w-full p-3 rounded-lg text-sm', message.senderId === authStore.user?.id ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white']">
                     <p v-if="message.content" class="whitespace-pre-wrap text-left">{{ message.content }}</p>
                     <div v-if="message.attachments.length > 0" :class="['grid gap-2', message.content ? 'mt-3' : '', message.attachments.length === 1 ? 'grid-cols-1 max-w-xs' : 'grid-cols-2']">
                       <button
@@ -1609,17 +1609,17 @@ function formatDateShort(dateString: string) {
             <TicketImageUploader v-model="createAttachments" :disabled="creating" />
             
             <!-- 托管实例提示 -->
-            <div class="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800/50">
-              <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-blue-100 dark:bg-blue-900/50">
-                <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex items-start gap-3 p-4 rounded-xl bg-themed-secondary border border-themed">
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-gray-100 dark:bg-gray-700">
+                <svg class="w-4 h-4 text-themed-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-blue-800 dark:text-blue-300">
+                <p class="text-sm font-medium text-themed">
                   {{ t('tickets.hostedInstanceHintTitle') }}
                 </p>
-                <p class="text-xs mt-0.5 text-blue-700/80 dark:text-blue-400/80">
+                <p class="text-xs mt-0.5 text-themed-muted">
                   {{ t('tickets.hostedInstanceHint') }}
                 </p>
               </div>

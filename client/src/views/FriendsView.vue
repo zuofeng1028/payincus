@@ -523,7 +523,7 @@ onActivated(async () => {
         {{ t('friends.pendingRequests') }}
         <span
           v-if="pendingCount > 0"
-          class="ml-1.5 text-xs bg-red-500 text-white px-1.5 py-0.5 rounded-full min-w-[20px] text-center"
+          class="ml-1.5 text-xs bg-accent text-white dark:text-black px-1.5 py-0.5 rounded-full min-w-[20px] text-center"
         >{{ pendingCount }}</span>
       </button>
       <button
@@ -603,7 +603,7 @@ onActivated(async () => {
                     class="card p-3 cursor-pointer transition-all"
                     :class="[
                       selectedFriend?.id === friend.id
-                        ? (themeStore.isDark ? 'border-blue-500 bg-blue-900/20' : 'border-blue-500 bg-blue-50')
+                        ? 'border-accent bg-themed-secondary'
                         : (themeStore.isDark ? 'hover:border-gray-700' : 'hover:border-gray-300')
                     ]"
                     @click="selectFriend(friend)"
@@ -630,7 +630,7 @@ onActivated(async () => {
                       </div>
                       <svg
                         v-if="selectedFriend?.id === friend.id"
-                        class="w-5 h-5 text-blue-500 flex-shrink-0"
+                        class="w-5 h-5 text-accent flex-shrink-0"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -1050,7 +1050,7 @@ onActivated(async () => {
                     class="text-xs px-2 py-1 rounded-full whitespace-nowrap"
                     :class="record.status === 'accepted'
                       ? (themeStore.isDark ? 'bg-green-900/50 text-green-400' : 'bg-green-100 text-green-700')
-                      : (themeStore.isDark ? 'bg-red-900/50 text-red-400' : 'bg-red-100 text-red-700')
+                      : (themeStore.isDark ? 'bg-gray-800 text-gray-400' : 'bg-gray-100 text-gray-600')
                     "
                   >
                     {{ record.status === 'accepted' ? t('friends.statusAccepted') : t('friends.statusRejected') }}

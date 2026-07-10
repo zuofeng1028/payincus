@@ -627,7 +627,7 @@ async function handleSubmit(): Promise<void> {
             </svg>
           </div>
           <div v-else-if="usernameValid === false" class="absolute right-3 top-1/2 -translate-y-1/2">
-            <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
@@ -635,7 +635,7 @@ async function handleSubmit(): Promise<void> {
         <p v-if="usernameValid === true && targetUser" class="text-xs text-green-500 mt-2">
           {{ $t('admin.instanceCreate.userFound', { id: targetUser.id }) }}
         </p>
-        <p v-else-if="usernameValid === false" class="text-xs text-red-500 mt-2">
+        <p v-else-if="usernameValid === false" class="text-xs text-rose-600 dark:text-rose-400 mt-2">
           {{ $t('admin.instanceCreate.userNotFound') }}
         </p>
         <p class="text-xs text-themed-muted mt-2">
@@ -683,11 +683,11 @@ async function handleSubmit(): Promise<void> {
         <h3 class="font-medium text-themed mb-4">{{ $t('admin.instanceCreate.instanceType') }}</h3>
         <div class="flex gap-4">
           <label class="flex items-center gap-2 cursor-pointer">
-            <input v-model="instanceType" type="radio" value="free" class="w-4 h-4 accent-blue-500" />
+            <input v-model="instanceType" type="radio" value="free" class="w-4 h-4 accent-accent" />
             <span class="text-themed">{{ $t('admin.instanceCreate.freeInstance') }}</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer" :class="{ 'opacity-50': plans.length === 0 }">
-            <input v-model="instanceType" type="radio" value="paid" class="w-4 h-4 accent-blue-500" :disabled="plans.length === 0" />
+            <input v-model="instanceType" type="radio" value="paid" class="w-4 h-4 accent-accent" :disabled="plans.length === 0" />
             <span class="text-themed">{{ $t('admin.instanceCreate.paidInstance') }}</span>
           </label>
         </div>
@@ -713,10 +713,10 @@ async function handleSubmit(): Promise<void> {
             :class="[
               plan.isSoldOut ? 'cursor-not-allowed opacity-60' : '',
               selectedPlanId === plan.id && !plan.isSoldOut
-                ? 'border-blue-500 bg-blue-500/10'
+                ? 'border-accent bg-themed-secondary'
                 : plan.isSoldOut
                   ? (themeStore.isDark ? 'border-gray-700 bg-gray-800/40' : 'border-gray-200 bg-gray-50')
-                  : 'border-themed hover:border-blue-300'
+                  : 'border-themed hover:border-accent'
             ]"
             @click="!plan.isSoldOut && (selectedPlanId = plan.id)"
           >
@@ -727,7 +727,7 @@ async function handleSubmit(): Promise<void> {
                   <span
                     v-if="plan.isSoldOut"
                     class="text-xs px-2 py-0.5 rounded-full"
-                    :class="themeStore.isDark ? 'bg-red-500/15 text-red-300' : 'bg-red-50 text-red-700'"
+                    :class="themeStore.isDark ? 'bg-rose-500/15 text-rose-300' : 'bg-rose-50 text-rose-700'"
                   >
                     {{ $t('instance.selector.planSoldOut') }}
                   </span>
@@ -737,7 +737,7 @@ async function handleSubmit(): Promise<void> {
                 </div>
               </div>
               <div class="text-right">
-                <div class="font-semibold text-blue-500">¥{{ (plan.price / 100).toFixed(2) }}/{{ plan.billingCycle }}月</div>
+                <div class="font-semibold text-themed">¥{{ (plan.price / 100).toFixed(2) }}/{{ plan.billingCycle }}月</div>
               </div>
             </div>
           </div>
@@ -745,7 +745,7 @@ async function handleSubmit(): Promise<void> {
           <!-- 扣除首月费用选项 -->
           <div class="mt-4 pt-4 border-t border-themed">
             <label class="flex items-center gap-2 cursor-pointer">
-              <input v-model="chargeFirstMonth" type="checkbox" class="w-4 h-4 accent-blue-500" />
+              <input v-model="chargeFirstMonth" type="checkbox" class="w-4 h-4 accent-accent" />
               <span class="text-sm text-themed">{{ $t('admin.instanceCreate.chargeFirstMonth') }}</span>
             </label>
             <p class="text-xs text-themed-muted mt-2 ml-6">
@@ -762,13 +762,13 @@ async function handleSubmit(): Promise<void> {
               </div>
               <div class="flex justify-between font-medium pt-2 border-t border-themed">
                 <span class="text-themed">{{ chargeFirstMonth ? $t('admin.instanceCreate.totalCharge') : $t('admin.instanceCreate.freeFirstMonth') }}</span>
-                <span :class="chargeFirstMonth ? 'text-blue-500' : 'text-green-500'">
+                <span :class="chargeFirstMonth ? 'text-themed' : 'text-green-500'">
                   {{ chargeFirstMonth ? `¥${billingInfo.totalPrice.toFixed(2)}` : '¥0.00' }}
                 </span>
               </div>
               <div class="flex justify-between text-xs">
                 <span class="text-themed-muted">{{ $t('admin.instanceCreate.userBalance') }}</span>
-                <span :class="isBalanceSufficient ? 'text-green-500' : 'text-red-500'">
+                <span :class="isBalanceSufficient ? 'text-green-500' : 'text-rose-600 dark:text-rose-400'">
                   ¥{{ (targetUser.balance ?? 0).toFixed(2) }}
                   <span v-if="!isBalanceSufficient">(余额不足)</span>
                 </span>
@@ -819,7 +819,7 @@ async function handleSubmit(): Promise<void> {
             <input v-model="form.name" type="text" class="input" :placeholder="$t('instance.createPage.instanceNamePlaceholder')" required />
           </div>
 
-          <div v-if="error" class="p-3 rounded-lg border text-sm" :class="themeStore.isDark ? 'bg-red-900/20 border-red-500/30 text-red-400' : 'bg-red-50 border-red-200 text-red-700'">
+          <div v-if="error" class="p-3 rounded-lg border text-sm" :class="themeStore.isDark ? 'bg-rose-500/15 border-rose-500/30 text-rose-300' : 'bg-rose-50 border-rose-200 text-rose-700'">
             {{ error }}
           </div>
 

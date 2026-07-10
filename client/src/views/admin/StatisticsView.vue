@@ -381,13 +381,13 @@ function getPercent(value: number, total: number): number {
 function cardToneClass(tone: Tone): string {
   switch (tone) {
     case 'emerald':
-      return 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20'
+      return 'text-themed bg-themed-secondary border-themed'
     case 'amber':
-      return 'text-amber-500 bg-amber-500/10 border-amber-500/20'
+      return 'text-themed bg-themed-secondary border-themed'
     case 'rose':
-      return 'text-rose-500 bg-rose-500/10 border-rose-500/20'
+      return 'text-themed bg-themed-secondary border-themed'
     default:
-      return 'text-blue-500 bg-blue-500/10 border-blue-500/20'
+      return 'text-themed bg-themed-secondary border-themed'
   }
 }
 
@@ -407,7 +407,7 @@ function barToneClass(tone: Tone): string {
 function riskToneClass(severity: string): string {
   if (severity === 'critical') return 'text-rose-600 bg-rose-500/10 border-rose-500/25'
   if (severity === 'warning') return 'text-amber-600 bg-amber-500/10 border-amber-500/25'
-  return 'text-blue-600 bg-blue-500/10 border-blue-500/25'
+  return 'text-themed-muted bg-themed-secondary border-themed'
 }
 </script>
 

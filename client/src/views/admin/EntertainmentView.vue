@@ -760,47 +760,47 @@ function getSeriesTitle(seriesId: string): string {
     </div>
 
     <!-- TAB 切换 -->
-    <div class="flex border-b border-themed mb-6">
+    <div class="flex border-b border-themed mb-6 overflow-x-auto">
       <button
-        class="px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px"
+        class="px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px shrink-0 whitespace-nowrap"
         :class="activeTab === 'lotteries' 
-          ? 'border-blue-500 text-blue-500' 
+          ? 'border-accent text-accent'
           : 'border-transparent text-themed-muted hover:text-themed'"
         @click="switchTab('lotteries')"
       >
         {{ $t('entertainment.admin.tabs.lotteries') }}
       </button>
       <button
-        class="px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px"
+        class="px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px shrink-0 whitespace-nowrap"
         :class="activeTab === 'records' 
-          ? 'border-blue-500 text-blue-500' 
+          ? 'border-accent text-accent'
           : 'border-transparent text-themed-muted hover:text-themed'"
         @click="switchTab('records')"
       >
         {{ $t('entertainment.admin.tabs.records') }}
       </button>
       <button
-        class="px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px"
+        class="px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px shrink-0 whitespace-nowrap"
         :class="activeTab === 'users' 
-          ? 'border-blue-500 text-blue-500' 
+          ? 'border-accent text-accent'
           : 'border-transparent text-themed-muted hover:text-themed'"
         @click="switchTab('users')"
       >
         {{ $t('entertainment.admin.tabs.users') }}
       </button>
       <button
-        class="px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px"
+        class="px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px shrink-0 whitespace-nowrap"
         :class="activeTab === 'badges'
-          ? 'border-blue-500 text-blue-500'
+          ? 'border-accent text-accent'
           : 'border-transparent text-themed-muted hover:text-themed'"
         @click="switchTab('badges')"
       >
         {{ $t('entertainment.admin.tabs.badges') }}
       </button>
       <button
-        class="px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px"
+        class="px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px shrink-0 whitespace-nowrap"
         :class="activeTab === 'checkin'
-          ? 'border-blue-500 text-blue-500'
+          ? 'border-accent text-accent'
           : 'border-transparent text-themed-muted hover:text-themed'"
         @click="switchTab('checkin')"
       >
@@ -1665,13 +1665,13 @@ function getSeriesTitle(seriesId: string): string {
                     </select>
                   </div>
                 </div>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div v-if="prize.type !== 'nothing' && prize.type !== 'badge'">
                     <label class="block text-xs text-themed-muted mb-1">
                       {{ prize.type === 'balance' ? $t('entertainment.admin.balanceValue') : $t('entertainment.admin.prizeValue') }}
-                      <span v-if="prize.type === 'cpu'" class="text-orange-500">(%)</span>
-                      <span v-else-if="prize.type === 'memory' || prize.type === 'disk'" class="text-orange-500">(MB)</span>
-                      <span v-else-if="prize.type === 'traffic'" class="text-orange-500">(GB)</span>
+                      <span v-if="prize.type === 'cpu'" class="text-themed-muted">(%)</span>
+                      <span v-else-if="prize.type === 'memory' || prize.type === 'disk'" class="text-themed-muted">(MB)</span>
+                      <span v-else-if="prize.type === 'traffic'" class="text-themed-muted">(GB)</span>
                     </label>
                     <input 
                       v-model.number="prize.value" 
@@ -1703,7 +1703,7 @@ function getSeriesTitle(seriesId: string): string {
                   <div v-if="prize.id && prize.type !== 'points' && prize.type !== 'nothing' && prize.totalQuantity">
                     <label class="block text-xs text-themed-muted mb-1">
                       {{ $t('entertainment.admin.replenish') }}
-                      <span class="text-orange-500">({{ $t('entertainment.admin.remaining') }}: {{ prize.remainQuantity ?? 0 }})</span>
+                      <span class="text-themed-muted">({{ $t('entertainment.admin.remaining') }}: {{ prize.remainQuantity ?? 0 }})</span>
                     </label>
                     <input 
                       v-model.number="prize.replenishAmount" 
@@ -1765,7 +1765,7 @@ function getSeriesTitle(seriesId: string): string {
                 <label class="text-sm font-medium text-themed">{{ $t('entertainment.admin.notification.enabled') }}</label>
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input v-model="notificationForm.enabled" type="checkbox" class="sr-only peer">
-                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent"></div>
                 </label>
               </div>
               

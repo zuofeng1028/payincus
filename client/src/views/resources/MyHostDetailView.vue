@@ -540,7 +540,7 @@ const tabs = [
                 </button>
               </div>
               <div class="modal-body space-y-4">
-                <div class="p-3 rounded-lg" :class="themeStore.isDark ? 'bg-red-500/10' : 'bg-red-50'">
+                <div class="p-3 rounded-lg" :class="themeStore.isDark ? 'bg-rose-500/10' : 'bg-rose-50'">
                   <p class="text-sm text-error">{{ t('admin.hosts.deleteWarning') }}</p>
                 </div>
                 <p class="text-sm text-themed-secondary">
@@ -634,7 +634,7 @@ const tabs = [
                   </div>
                 
                   <!-- 错误提示 -->
-                  <div v-if="reinstallStatus === 'error' && reinstallError" class="ml-8 p-3 rounded-lg bg-red-500/10 text-red-500 text-sm">
+                  <div v-if="reinstallStatus === 'error' && reinstallError" class="ml-8 p-3 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 text-sm">
                     {{ reinstallError }}
                   </div>
                 </div>

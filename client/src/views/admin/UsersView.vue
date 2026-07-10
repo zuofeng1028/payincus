@@ -1171,7 +1171,7 @@ function _getQuotaPercent(used, limit) {
                 <div>{{ t('admin.users.points') }}</div>
                 <button
                   class="mt-1 text-left text-sm font-medium hover:text-primary"
-                  :class="user.points > 0 ? 'text-amber-500' : 'text-themed-muted'"
+                  :class="user.points > 0 ? 'text-themed' : 'text-themed-muted'"
                   :title="t('admin.users.adjustPoints')"
                   @click="openPointsModal(user)"
                 >
@@ -1249,7 +1249,7 @@ function _getQuotaPercent(used, limit) {
               <button
                 v-if="user.id !== authStore.user?.id"
                 class="btn-ghost btn-sm"
-                :class="user.role === 'admin' ? 'text-warning' : 'text-info'"
+                :class="user.role === 'admin' ? 'text-warning' : 'text-themed-muted'"
                 :title="user.role === 'admin' ? t('admin.users.demoteAdmin') : t('admin.users.promoteAdmin')"
                 @click="toggleUserRole(user)"
               >
@@ -1273,7 +1273,7 @@ function _getQuotaPercent(used, limit) {
               </button>
               <button
                 v-if="user.hasGithubBinding"
-                class="btn-ghost btn-sm text-info"
+                class="btn-ghost btn-sm"
                 :title="t('admin.users.unbindGitHub')"
                 @click="openUnbindGitHubModal(user)"
               >
@@ -1299,8 +1299,8 @@ function _getQuotaPercent(used, limit) {
           </div>
         </div>
 
-        <div class="card hidden overflow-hidden lg:block">
-          <table class="w-full table-fixed">
+        <div class="card hidden overflow-x-auto lg:block">
+          <table class="w-full min-w-[1100px]">
             <thead class="bg-themed-tertiary border-b border-themed">
               <tr>
                 <th class="text-left text-xs font-medium text-themed-muted uppercase tracking-wider px-4 py-3 whitespace-nowrap">ID</th>
@@ -1374,7 +1374,7 @@ function _getQuotaPercent(used, limit) {
                   <div class="flex flex-col gap-0.5">
                     <button 
                       class="text-sm font-medium hover:text-primary transition-colors text-left"
-                      :class="user.points > 0 ? 'text-amber-500' : 'text-themed-muted'"
+                      :class="user.points > 0 ? 'text-themed' : 'text-themed-muted'"
                       :title="t('admin.users.adjustPoints')"
                       @click="openPointsModal(user)"
                     >
@@ -1441,7 +1441,7 @@ function _getQuotaPercent(used, limit) {
                       <span class="text-themed-muted">·</span>
                       <span>{{ formatDate(user.lastLogin.createdAt) }}</span>
                     </div>
-                    <div class="text-xs text-themed-muted truncate max-w-[120px]" :title="user.lastLogin.ip">
+                    <div class="text-xs text-themed-muted truncate max-w-[200px]" :title="user.lastLogin.ip">
                       {{ user.lastLogin.ip }}
                     </div>
                   </button>
@@ -1468,7 +1468,7 @@ function _getQuotaPercent(used, limit) {
                     <!-- 发送站内信 -->
                     <button 
                       v-if="user.id !== authStore.user?.id"
-                      class="btn-ghost btn-sm" 
+                      class="btn-ghost btn-sm"
                       :title="t('admin.users.sendMessage')" 
                       @click="openSendMessageModal(user)"
                     >
@@ -1486,7 +1486,7 @@ function _getQuotaPercent(used, limit) {
                     <button
                       v-if="user.id !== authStore.user?.id"
                       class="btn-ghost btn-sm"
-                      :class="user.role === 'admin' ? 'text-warning' : 'text-info'"
+                      :class="user.role === 'admin' ? 'text-warning' : 'text-themed-muted'"
                       :title="user.role === 'admin' ? t('admin.users.demoteAdmin') : t('admin.users.promoteAdmin')"
                       @click="toggleUserRole(user)"
                     >
@@ -1512,7 +1512,7 @@ function _getQuotaPercent(used, limit) {
                     <!-- 解绑GitHub -->
                     <button 
                       v-if="user.hasGithubBinding"
-                      class="btn-ghost btn-sm text-info" 
+                      class="btn-ghost btn-sm"
                       :title="t('admin.users.unbindGitHub')" 
                       @click="openUnbindGitHubModal(user)"
                     >
@@ -2521,7 +2521,7 @@ function _getQuotaPercent(used, limit) {
                     <div class="text-xs text-themed-muted mt-1">{{ t('admin.users.currentBalance') }}</div>
                   </div>
                   <div class="bg-themed-tertiary rounded-lg p-4 text-center">
-                    <div class="text-2xl font-semibold text-info">
+                    <div class="text-2xl font-semibold text-themed">
                       ¥{{ balanceInfo.totalRecharge.toFixed(2) }}
                     </div>
                     <div class="text-xs text-themed-muted mt-1">{{ t('admin.users.totalRecharge') }}</div>
@@ -2758,7 +2758,7 @@ function _getQuotaPercent(used, limit) {
               <!-- 当前积分 -->
               <div class="flex items-center justify-between py-2 px-3 bg-themed-tertiary rounded-lg">
                 <span class="text-sm text-themed-muted">{{ t('admin.users.currentPoints') }}</span>
-                <span class="text-lg font-semibold text-amber-500">{{ pointsUser?.points || 0 }}</span>
+                <span class="text-lg font-semibold text-themed">{{ pointsUser?.points || 0 }}</span>
               </div>
               <!-- 调整数量 -->
               <div>

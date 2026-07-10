@@ -1254,10 +1254,10 @@ onMounted(async () => {
             <div>
 	              <div class="text-lg font-semibold text-themed">{{ listing.publicCode }}</div>
 	              <div class="mt-1 flex flex-wrap gap-1.5 text-xs">
-	                <span class="rounded bg-amber-100 px-2 py-0.5 text-amber-700">{{ statusLabel(listing.status) }}</span>
-	                <span class="rounded bg-emerald-100 px-2 py-0.5 text-emerald-700">暂停交割</span>
-	                <span class="rounded bg-blue-100 px-2 py-0.5 text-blue-700">强制重装</span>
-	                <span class="rounded bg-gray-100 px-2 py-0.5 text-gray-700">匿名交易</span>
+	                <span class="rounded bg-gray-100 px-2 py-0.5 text-gray-700 dark:bg-gray-800 dark:text-gray-300">{{ statusLabel(listing.status) }}</span>
+	                <span class="rounded bg-gray-100 px-2 py-0.5 text-gray-700 dark:bg-gray-800 dark:text-gray-300">暂停交割</span>
+	                <span class="rounded bg-gray-100 px-2 py-0.5 text-gray-700 dark:bg-gray-800 dark:text-gray-300">强制重装</span>
+	                <span class="rounded bg-gray-100 px-2 py-0.5 text-gray-700 dark:bg-gray-800 dark:text-gray-300">匿名交易</span>
               </div>
             </div>
             <div class="text-xl font-semibold text-themed">{{ money(listing.price) }}</div>
@@ -1364,7 +1364,7 @@ onMounted(async () => {
                     v-for="check in admissionEligibilityChecks(eligibilityMap[instance.id])"
                     :key="check.key"
                     class="rounded border px-3 py-2 text-xs"
-                    :class="check.passed ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-red-200 bg-red-50 text-red-700'"
+                    :class="check.passed ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-950/30 dark:text-rose-200'"
                   >
                     <span class="font-medium">{{ check.label }}</span>：{{ check.message }}
                   </div>
@@ -1377,7 +1377,7 @@ onMounted(async () => {
                     v-for="check in deliveryPolicyEligibilityChecks(eligibilityMap[instance.id])"
                     :key="check.key"
                     class="rounded border px-3 py-2 text-xs"
-                    :class="check.passed ? 'border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-800 dark:bg-sky-950/30 dark:text-sky-200' : 'border-red-200 bg-red-50 text-red-700'"
+                    :class="check.passed ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-950/30 dark:text-rose-200'"
                   >
                     <span class="font-medium">{{ check.label }}</span>：{{ check.message }}
                   </div>
@@ -1481,9 +1481,9 @@ onMounted(async () => {
                 重装镜像：{{ order.deliveryTask.imageAlias || '使用原实例镜像' }} · SSH Key：{{ order.deliveryTask.sshKeyId ? `#${order.deliveryTask.sshKeyId}` : '未指定' }}
               </div>
               <div class="mt-2 flex flex-wrap gap-1.5 text-[11px]">
-                <span class="rounded bg-emerald-100 px-2 py-0.5 text-emerald-700">匿名交易</span>
-                <span class="rounded bg-blue-100 px-2 py-0.5 text-blue-700">强制重装交割</span>
-                <span class="rounded bg-amber-100 px-2 py-0.5 text-amber-700">资金托管</span>
+                <span class="rounded bg-gray-100 px-2 py-0.5 text-gray-700 dark:bg-gray-800 dark:text-gray-300">匿名交易</span>
+                <span class="rounded bg-gray-100 px-2 py-0.5 text-gray-700 dark:bg-gray-800 dark:text-gray-300">强制重装交割</span>
+                <span class="rounded bg-gray-100 px-2 py-0.5 text-gray-700 dark:bg-gray-800 dark:text-gray-300">资金托管</span>
               </div>
             </div>
             <div class="text-right">
@@ -1501,7 +1501,7 @@ onMounted(async () => {
               </div>
             </div>
           </div>
-          <div class="mt-3 grid gap-2 text-xs md:grid-cols-4 xl:grid-cols-7">
+          <div class="mt-3 grid gap-2 text-xs grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
             <div
               v-for="step in deliveryProgressSteps(order)"
               :key="`${order.id}:${step}`"
@@ -1746,9 +1746,9 @@ onMounted(async () => {
         <div v-if="listingDetailLoading" class="mt-6 rounded bg-themed-secondary p-6 text-center text-themed-muted">加载详情中...</div>
         <template v-else>
           <div class="mt-5 flex flex-wrap gap-2 text-xs">
-            <span class="rounded bg-emerald-100 px-2 py-1 text-emerald-700">暂停锁定后交割</span>
-            <span class="rounded bg-blue-100 px-2 py-1 text-blue-700">成交强制重装</span>
-            <span class="rounded bg-gray-100 px-2 py-1 text-gray-700">匿名交易</span>
+            <span class="rounded bg-gray-100 px-2 py-1 text-gray-700 dark:bg-gray-800 dark:text-gray-300">暂停锁定后交割</span>
+            <span class="rounded bg-gray-100 px-2 py-1 text-gray-700 dark:bg-gray-800 dark:text-gray-300">成交强制重装</span>
+            <span class="rounded bg-gray-100 px-2 py-1 text-gray-700 dark:bg-gray-800 dark:text-gray-300">匿名交易</span>
             <span class="rounded bg-themed-secondary px-2 py-1 text-themed">平台资金托管</span>
           </div>
 
@@ -1796,7 +1796,7 @@ onMounted(async () => {
                 <h3 class="font-semibold text-themed">交割设置</h3>
                 <p class="mt-1 text-sm text-themed-muted">成交后平台会强制重装。镜像选择受后台交易所策略和节点镜像白名单限制。</p>
               </div>
-              <span class="rounded bg-blue-100 px-2 py-1 text-xs text-blue-700">重装后交割</span>
+              <span class="rounded bg-gray-100 px-2 py-1 text-xs text-gray-700 dark:bg-gray-800 dark:text-gray-300">重装后交割</span>
             </div>
             <div v-if="purchaseOptionsLoading" class="mt-4 rounded bg-themed-secondary p-4 text-sm text-themed-muted">加载交割设置中...</div>
             <div v-else class="mt-4 grid gap-3 md:grid-cols-2">

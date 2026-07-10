@@ -1241,7 +1241,7 @@ const exchangeStatusBadge = computed<{ label: string; hint: string; className: s
     return {
       label: '交易所挂牌中',
       hint: `实例已暂停并锁定，挂牌价 ¥${Number(listing.price || 0).toFixed(2)}`,
-      className: themeStore.isDark ? 'bg-blue-900/50 text-blue-300' : 'bg-blue-100 text-blue-700'
+      className: themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'
     }
   }
   if (listing?.status === 'paused') {
@@ -2741,7 +2741,7 @@ function formatShortDate(dateStr: string | null | undefined): string {
             v-if="isStopped && canClone"
             :disabled="isOperationDisabled"
             class="btn-sm sm:btn inline-flex rounded-lg"
-            :class="themeStore.isDark ? 'bg-purple-600 hover:bg-purple-700 text-white' : 'bg-purple-500 hover:bg-purple-600 text-white'"
+            :class="themeStore.isDark ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-800 hover:bg-gray-900 text-white'"
             :title="actionLoading === 'clone' ? '' : $t('instance.actions.clone')"
             @click="handleAction('clone')"
           >
@@ -2759,7 +2759,7 @@ function formatShortDate(dateStr: string | null | undefined): string {
             v-if="isRunning && canClone"
             disabled
             class="btn-sm sm:btn inline-flex rounded-lg opacity-50 cursor-not-allowed"
-            :class="themeStore.isDark ? 'bg-purple-600/50 text-white' : 'bg-purple-500/50 text-white'"
+            :class="themeStore.isDark ? 'bg-gray-700/50 text-white' : 'bg-gray-800/50 text-white'"
             :title="$t('instance.detail.actions.stopRequiredHint')"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3660,7 +3660,6 @@ function formatShortDate(dateStr: string | null | undefined): string {
               <button
                 :disabled="cloneLoading"
                 class="btn-primary"
-                :class="themeStore.isDark ? 'bg-purple-600 hover:bg-purple-700' : 'bg-purple-500 hover:bg-purple-600'"
                 @click="doClone"
               >
                 {{ cloneLoading ? $t('instance.detail.actions.cloning') : $t('common.confirm') }}

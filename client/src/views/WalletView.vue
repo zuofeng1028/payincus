@@ -593,8 +593,8 @@ function getTagClass(tone: MetricTone): string {
     emerald: 'border-emerald-200/80 bg-emerald-50/70 text-emerald-700 dark:border-emerald-500/15 dark:bg-emerald-500/[0.08] dark:text-emerald-200',
     rose: 'border-rose-200/80 bg-rose-50/70 text-rose-700 dark:border-rose-500/15 dark:bg-rose-500/[0.08] dark:text-rose-200',
     amber: 'border-amber-200/80 bg-amber-50/70 text-amber-700 dark:border-amber-500/15 dark:bg-amber-500/[0.08] dark:text-amber-200',
-    blue: 'border-blue-200/80 bg-blue-50/70 text-blue-700 dark:border-blue-500/15 dark:bg-blue-500/[0.08] dark:text-blue-200',
-    violet: 'border-violet-200/80 bg-violet-50/70 text-violet-700 dark:border-violet-500/15 dark:bg-violet-500/[0.08] dark:text-violet-200'
+    blue: 'border-zinc-200/80 bg-white text-zinc-700 shadow-sm dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-300',
+    violet: 'border-zinc-200/80 bg-white text-zinc-700 shadow-sm dark:border-white/10 dark:bg-white/[0.04] dark:text-zinc-300'
   }
 
   return map[tone]
@@ -606,8 +606,8 @@ function getMetricDotClass(tone: MetricTone): string {
     emerald: 'bg-emerald-500/70 dark:bg-emerald-400/80',
     rose: 'bg-rose-500/70 dark:bg-rose-400/80',
     amber: 'bg-amber-500/70 dark:bg-amber-400/80',
-    blue: 'bg-blue-500/70 dark:bg-blue-400/80',
-    violet: 'bg-violet-500/70 dark:bg-violet-400/80'
+    blue: 'bg-zinc-400 dark:bg-zinc-500',
+    violet: 'bg-zinc-400 dark:bg-zinc-500'
   }
 
   return map[tone]
@@ -627,8 +627,8 @@ function getLogTypeTagClass(type: string): string {
     gift: 'violet',
     transfer_refund: 'blue',
     consume: 'rose',
-    transfer_fee: 'amber',
-    hosting_withdraw: 'amber',
+    transfer_fee: 'slate',
+    hosting_withdraw: 'slate',
     hosting_deduction: 'rose',
     invite_generate: 'violet'
   }

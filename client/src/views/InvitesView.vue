@@ -180,11 +180,11 @@ function nextPage(): void {
         </div>
         <div class="card p-5">
           <p class="text-sm text-themed-muted">已使用</p>
-          <p class="mt-2 text-3xl font-bold text-emerald-500">{{ summary?.stats.used || 0 }}</p>
+          <p class="mt-2 text-3xl font-bold text-themed">{{ summary?.stats.used || 0 }}</p>
         </div>
         <div class="card p-5">
           <p class="text-sm text-themed-muted">使用率</p>
-          <p class="mt-2 text-3xl font-bold text-sky-500">{{ summary?.stats.usageRate || 0 }}%</p>
+          <p class="mt-2 text-3xl font-bold text-themed">{{ summary?.stats.usageRate || 0 }}%</p>
         </div>
       </div>
 
@@ -320,12 +320,12 @@ function nextPage(): void {
           <table class="w-full table-fixed divide-y divide-themed">
             <thead>
               <tr>
-                <th class="w-[20%] px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-themed-muted">邀请码</th>
-                <th class="w-[10%] px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-themed-muted">状态</th>
-                <th class="w-[24%] px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-themed-muted">使用人</th>
-                <th class="w-[14%] px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-themed-muted">生成成本</th>
-                <th class="w-[20%] px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-themed-muted">时间</th>
-                <th class="w-[12%] px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-themed-muted">操作</th>
+                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-themed-muted">邀请码</th>
+                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-themed-muted">状态</th>
+                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-themed-muted">使用人</th>
+                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-themed-muted">生成成本</th>
+                <th class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-themed-muted">时间</th>
+                <th class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-themed-muted">操作</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-themed">
@@ -360,8 +360,8 @@ function nextPage(): void {
                   <div v-if="invite.usedAt">使用 {{ formatDate(invite.usedAt) }}</div>
                   <div v-else-if="invite.expiresAt">过期 {{ formatDate(invite.expiresAt) }}</div>
                 </td>
-                <td class="px-4 py-3 text-right">
-                  <div class="inline-flex flex-wrap justify-end gap-2">
+                <td class="px-4 py-3 text-right whitespace-nowrap">
+                  <div class="inline-flex justify-end gap-2">
                     <button class="btn-ghost btn-sm" @click="copyText(invite.code, '邀请码已复制')">复制码</button>
                     <button class="btn-secondary btn-sm" @click="copyText(getInviteLink(invite), '邀请链接已复制')">复制链接</button>
                   </div>

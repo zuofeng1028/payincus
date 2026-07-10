@@ -453,7 +453,7 @@ function getPlanStatusLabel(plan: PackagePlan): string {
 function getPlanStatusBadgeClass(plan: PackagePlan): string {
   const status = getPlanStatus(plan)
   if (status === 'soldOut') {
-    return themeStore.isDark ? 'bg-red-500/15 text-red-300' : 'bg-red-50 text-red-700'
+    return themeStore.isDark ? 'bg-amber-500/15 text-amber-300' : 'bg-amber-50 text-amber-700'
   }
   if (status === 'inactive') {
     return themeStore.isDark ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'
@@ -815,7 +815,7 @@ function getBillingCycleLabel(months: number): string {
                   <span class="truncate text-sm font-medium" :class="themeStore.isDark ? 'text-gray-200' : 'text-gray-900'">{{ pkg.name }}</span>
                   <span
                     v-if="isPackagePublic(pkg)"
-                    class="inline-flex shrink-0 items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:ring-blue-500/30"
+                    class="inline-flex shrink-0 items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700"
                   >
                     {{ t('resources.packages.publicBadge') }}
                   </span>
@@ -865,7 +865,7 @@ function getBillingCycleLabel(months: number): string {
                 v-if="!isAdminEntry"
                 type="button"
                 class="p-1.5 transition-colors rounded"
-                :class="themeStore.isDark ? 'text-gray-500 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-400 hover:text-blue-600 hover:bg-gray-100'"
+                :class="themeStore.isDark ? 'text-gray-500 hover:text-gray-300 hover:bg-gray-800' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'"
                 :title="t('resources.packages.copyShareLink')"
                 @click="copyShareLink(pkg)"
               >
@@ -875,7 +875,7 @@ function getBillingCycleLabel(months: number): string {
               </button>
               <button
                 class="p-1.5 transition-colors rounded"
-                :class="themeStore.isDark ? 'text-gray-500 hover:text-indigo-400 hover:bg-gray-800' : 'text-gray-400 hover:text-indigo-600 hover:bg-gray-100'"
+                :class="themeStore.isDark ? 'text-gray-500 hover:text-gray-300 hover:bg-gray-800' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'"
                 :title="t('resources.plans.manage')"
                 @click="openPlansModal(pkg)"
               >
@@ -885,7 +885,7 @@ function getBillingCycleLabel(months: number): string {
               </button>
               <button
                 class="p-1.5 transition-colors rounded"
-                :class="themeStore.isDark ? 'text-gray-500 hover:text-teal-400 hover:bg-gray-800' : 'text-gray-400 hover:text-teal-600 hover:bg-gray-100'"
+                :class="themeStore.isDark ? 'text-gray-500 hover:text-gray-300 hover:bg-gray-800' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'"
                 :title="t('quotaRelease.title')"
                 @click="openQuotaReleaseModal(pkg)"
               >
@@ -933,15 +933,15 @@ function getBillingCycleLabel(months: number): string {
           <table class="w-full table-fixed text-sm">
             <thead>
               <tr :class="themeStore.isDark ? 'bg-gray-800/50 border-b border-gray-700' : 'bg-gray-50 border-b border-gray-200'">
-                <th class="w-[18%] text-left px-4 py-3 font-medium text-themed-muted whitespace-nowrap">{{ t('admin.packages.name') }}</th>
-                <th v-if="isAdmin && scope === 'hosted'" class="w-[16%] text-left px-4 py-3 font-medium text-themed-muted whitespace-nowrap">{{ t('resources.packages.owner') }}</th>
-                <th class="w-[10%] text-left px-4 py-3 font-medium text-themed-muted whitespace-nowrap">{{ t('admin.packages.status') }}</th>
-                <th class="w-[12%] text-left px-4 py-3 font-medium text-themed-muted whitespace-nowrap">{{ t('resources.packages.networkModeColumn') }}</th>
-                <th class="w-[12%] text-left px-4 py-3 font-medium text-themed-muted whitespace-nowrap">{{ t('resources.packages.instanceTypeColumn') }}</th>
-                <th class="w-[12%] text-right px-4 py-3 font-medium text-themed-muted whitespace-nowrap">{{ t('resources.packages.trafficMultiplierColumn') }}</th>
-                <th class="w-[14%] text-left px-4 py-3 font-medium text-themed-muted whitespace-nowrap">{{ t('resources.packages.hostColumn') }}</th>
-                <th class="w-[8%] text-right px-4 py-3 font-medium text-themed-muted whitespace-nowrap">{{ t('resources.packages.instanceColumn') }}</th>
-                <th v-if="scope === 'mine'" class="w-[22%] text-right px-4 py-3 font-medium text-themed-muted whitespace-nowrap">{{ t('common.actions') }}</th>
+                <th class="w-[18%] text-left px-4 py-3 font-medium text-themed-muted">{{ t('admin.packages.name') }}</th>
+                <th v-if="isAdmin && scope === 'hosted'" class="w-[20%] text-left px-4 py-3 font-medium text-themed-muted">{{ t('resources.packages.owner') }}</th>
+                <th class="w-[9%] text-left px-4 py-3 font-medium text-themed-muted">{{ t('admin.packages.status') }}</th>
+                <th class="w-[11%] text-left px-4 py-3 font-medium text-themed-muted">{{ t('resources.packages.networkModeColumn') }}</th>
+                <th class="w-[11%] text-left px-4 py-3 font-medium text-themed-muted">{{ t('resources.packages.instanceTypeColumn') }}</th>
+                <th class="w-[10%] text-right px-4 py-3 font-medium text-themed-muted">{{ t('resources.packages.trafficMultiplierColumn') }}</th>
+                <th class="w-[13%] text-left px-4 py-3 font-medium text-themed-muted">{{ t('resources.packages.hostColumn') }}</th>
+                <th class="w-[8%] text-right px-4 py-3 font-medium text-themed-muted">{{ t('resources.packages.instanceColumn') }}</th>
+                <th v-if="scope === 'mine'" class="w-[20%] text-right px-4 py-3 font-medium text-themed-muted">{{ t('common.actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -960,7 +960,7 @@ function getBillingCycleLabel(months: number): string {
                     <span class="font-medium truncate" :class="themeStore.isDark ? 'text-gray-200' : 'text-gray-900'">{{ pkg.name }}</span>
                     <span
                       v-if="isPackagePublic(pkg)"
-                      class="shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 bg-blue-50 text-blue-700 ring-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:ring-blue-500/30"
+                      class="shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 bg-gray-100 text-gray-700 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700"
                     >
                       {{ t('resources.packages.publicBadge') }}
                     </span>
@@ -1008,14 +1008,14 @@ function getBillingCycleLabel(months: number): string {
                   {{ pkg.instance_count || 0 }}
                 </td>
                 <!-- 操作 -->
-                <td v-if="scope === 'mine'" class="px-4 py-3">
-                  <div class="flex flex-wrap items-center justify-end gap-1">
+                <td v-if="scope === 'mine'" class="px-4 py-3 whitespace-nowrap">
+                  <div class="flex items-center justify-end gap-1">
                     <!-- 分享链接 -->
                     <button
                       v-if="!isAdminEntry"
                       type="button"
                       class="p-1.5 transition-colors rounded"
-                      :class="themeStore.isDark ? 'text-gray-500 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-400 hover:text-blue-600 hover:bg-gray-100'"
+                      :class="themeStore.isDark ? 'text-gray-500 hover:text-gray-300 hover:bg-gray-800' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'"
                       :title="t('resources.packages.copyShareLink')"
                       @click="copyShareLink(pkg)"
                     >
@@ -1025,7 +1025,7 @@ function getBillingCycleLabel(months: number): string {
                     </button>
                     <button
                       class="p-1.5 transition-colors rounded"
-                      :class="themeStore.isDark ? 'text-gray-500 hover:text-indigo-400 hover:bg-gray-800' : 'text-gray-400 hover:text-indigo-600 hover:bg-gray-100'"
+                      :class="themeStore.isDark ? 'text-gray-500 hover:text-gray-300 hover:bg-gray-800' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'"
                       :title="t('resources.plans.manage')"
                       @click="openPlansModal(pkg)"
                     >
@@ -1035,7 +1035,7 @@ function getBillingCycleLabel(months: number): string {
                     </button>
                     <button
                       class="p-1.5 transition-colors rounded"
-                      :class="themeStore.isDark ? 'text-gray-500 hover:text-teal-400 hover:bg-gray-800' : 'text-gray-400 hover:text-teal-600 hover:bg-gray-100'"
+                      :class="themeStore.isDark ? 'text-gray-500 hover:text-gray-300 hover:bg-gray-800' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'"
                       :title="t('quotaRelease.title')"
                       @click="openQuotaReleaseModal(pkg)"
                     >
@@ -1134,7 +1134,7 @@ function getBillingCycleLabel(months: number): string {
                 <div>
                   <div class="flex items-center gap-2">
                     <h3 class="modal-title">{{ t('resources.plans.title') }}</h3>
-                    <span v-if="plans.length > 0" class="text-xs px-2 py-0.5 rounded-full" :class="themeStore.isDark ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-100 text-indigo-600'">
+                    <span v-if="plans.length > 0" class="text-xs px-2 py-0.5 rounded-full" :class="themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'">
                       {{ plans.length }}
                     </span>
                   </div>

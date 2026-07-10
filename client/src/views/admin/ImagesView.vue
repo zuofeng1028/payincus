@@ -85,19 +85,19 @@ function getArchitectureCount(architecture: 'all' | 'x86_64' | 'aarch64'): numbe
 
 function getArchitectureBadgeClass(architecture?: string): string {
   if (architecture === 'aarch64') {
-    return 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:ring-emerald-800/70'
+    return 'bg-gray-100 text-gray-700 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700'
   }
-  return 'bg-sky-100 text-sky-800 ring-1 ring-sky-200 dark:bg-sky-950/60 dark:text-sky-300 dark:ring-sky-800/70'
+  return 'bg-gray-100 text-gray-700 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700'
 }
 
 function getInstanceTypeBadgeClass(instanceType?: string): string {
   if (instanceType === 'container') {
-    return 'bg-cyan-100 text-cyan-800 ring-1 ring-cyan-200 dark:bg-cyan-950/60 dark:text-cyan-300 dark:ring-cyan-800/70'
+    return 'bg-gray-100 text-gray-700 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700'
   }
   if (instanceType === 'vm') {
-    return 'bg-violet-100 text-violet-800 ring-1 ring-violet-200 dark:bg-violet-950/60 dark:text-violet-300 dark:ring-violet-800/70'
+    return 'bg-gray-100 text-gray-700 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700'
   }
-  return 'bg-amber-100 text-amber-800 ring-1 ring-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:ring-amber-800/70'
+  return 'bg-gray-100 text-gray-700 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700'
 }
 
 // 加载镜像列表
@@ -344,7 +344,7 @@ onMounted(() => {
               </button>
               <button
                 class="p-1.5 rounded transition-colors"
-                :class="themeStore.isDark ? 'hover:bg-red-900/50' : 'hover:bg-red-50'"
+                :class="themeStore.isDark ? 'hover:bg-rose-900/50' : 'hover:bg-rose-50'"
                 :title="t('common.delete')"
                 @click="deleteImage(image)"
               >
@@ -440,7 +440,7 @@ onMounted(() => {
                   </button>
                   <button
                     class="p-1.5 rounded transition-colors"
-                    :class="themeStore.isDark ? 'hover:bg-red-900/50' : 'hover:bg-red-50'"
+                    :class="themeStore.isDark ? 'hover:bg-rose-900/50' : 'hover:bg-rose-50'"
                     :title="t('common.delete')"
                     @click="deleteImage(image)"
                   >

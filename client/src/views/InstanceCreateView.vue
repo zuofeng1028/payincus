@@ -1244,7 +1244,7 @@ async function createRiskReviewTicket(): Promise<void> {
           <div ref="rightPanelScrollRef" class="space-y-4">
             <div
               v-if="flashSaleItemId"
-              class="rounded-lg border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-700"
+              class="rounded-lg border px-4 py-3 text-sm border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-900/20 dark:text-amber-300"
             >
               当前通过秒杀活动开通。提交时会校验活动时间、库存、账号限购、人机验证和实时节点资源。
             </div>
@@ -1318,8 +1318,8 @@ async function createRiskReviewTicket(): Promise<void> {
             <!-- 订单概览 -->
             <div v-if="isPaidPackage && form.planId && selectedPlan" class="card p-5">
               <div class="flex items-center gap-3 mb-5">
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" :class="themeStore.isDark ? 'bg-blue-500/20' : 'bg-blue-100'">
-                  <svg class="w-5 h-5" :class="themeStore.isDark ? 'text-blue-400' : 'text-blue-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" :class="themeStore.isDark ? 'bg-gray-800' : 'bg-gray-100'">
+                  <svg class="w-5 h-5" :class="themeStore.isDark ? 'text-gray-300' : 'text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                   </svg>
                 </div>
@@ -1329,15 +1329,15 @@ async function createRiskReviewTicket(): Promise<void> {
                 </div>
               </div>
               <div class="space-y-4">
-                <div class="p-4 rounded-xl border-2" :class="themeStore.isDark ? 'border-blue-500/30 bg-blue-500/5' : 'border-blue-200 bg-blue-50/50'">
+                <div class="p-4 rounded-xl border-2" :class="themeStore.isDark ? 'border-gray-700 bg-gray-800/30' : 'border-gray-200 bg-gray-50'">
                   <div class="flex items-center justify-between mb-3">
-                    <span class="px-2.5 py-1 rounded-full text-xs font-medium" :class="themeStore.isDark ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-700'">{{ getBillingCycleLabel(selectedPlan.billingCycle) }}</span>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-medium" :class="themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'">{{ getBillingCycleLabel(selectedPlan.billingCycle) }}</span>
                     <span v-if="selectedPlan.slaGuarantee" class="flex items-center gap-1 text-xs text-green-500">
                       <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
                       SLA {{ selectedPlan.slaGuarantee }}%
                     </span>
                   </div>
-                  <div class="grid grid-cols-4 gap-3 text-center">
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                     <div><div class="text-lg font-bold" :class="themeStore.isDark ? 'text-white' : 'text-gray-900'">{{ selectedPlan.cpu }}%</div><div class="text-xs text-themed-muted">CPU</div></div>
                     <div>
                       <div class="text-lg font-bold" :class="themeStore.isDark ? 'text-white' : 'text-gray-900'">{{ formatMemory(selectedPlan.memory) }}</div>
@@ -1349,7 +1349,7 @@ async function createRiskReviewTicket(): Promise<void> {
                     <div><div class="text-lg font-bold" :class="themeStore.isDark ? 'text-white' : 'text-gray-900'">{{ formatDisk(selectedPlan.disk) }}</div><div class="text-xs text-themed-muted">{{ $t('instance.disk') }}</div></div>
                     <div><div class="text-lg font-bold" :class="themeStore.isDark ? 'text-white' : 'text-gray-900'">{{ formatTraffic(selectedPlan.trafficLimit) }}</div><div class="text-xs text-themed-muted">{{ $t('billing.traffic') }} <span class="opacity-60">({{ $t('billing.trafficBidirectional') }})</span></div></div>
                   </div>
-                  <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 mt-3 pt-3 border-t text-xs" :class="themeStore.isDark ? 'border-blue-500/20' : 'border-blue-200'">
+                  <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 mt-3 pt-3 border-t text-xs" :class="themeStore.isDark ? 'border-gray-700' : 'border-gray-200'">
                     <span class="text-themed-muted"><span class="opacity-75">{{ $t('instance.ports') }}:</span> {{ selectedPlan.portLimit }}</span>
                     <span class="text-themed-muted"><span class="opacity-75">{{ $t('instance.snapshots') }}:</span> {{ selectedPlan.snapshotLimit }}</span>
                   </div>
@@ -1367,7 +1367,7 @@ async function createRiskReviewTicket(): Promise<void> {
                     <p v-if="promoCodeValid === true" class="text-xs text-green-500 mt-1.5 flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>{{ configStore.freeSiteMode ? freeSiteCopy.createPromoValid.replace('{rate}', (promoCodeDiscount * 100).toFixed(0) + '%') : $t('aff.promoCodeValid', { rate: (promoCodeDiscount * 100).toFixed(0) + '%' }) }}</p>
                     <p v-else-if="promoCodeError" class="text-xs text-red-500 mt-1.5">{{ promoCodeError }}</p>
                   </div>
-                  <div v-if="promoCodeValid === true" class="p-3 rounded-lg text-sm" :class="themeStore.isDark ? 'bg-blue-900/20 border border-blue-800/30 text-blue-300' : 'bg-blue-50 border border-blue-200 text-blue-700'">
+                  <div v-if="promoCodeValid === true" class="p-3 rounded-lg text-sm" :class="themeStore.isDark ? 'bg-gray-800/40 border border-gray-700 text-gray-300' : 'bg-gray-50 border border-gray-200 text-gray-700'">
                     <div class="flex items-start gap-2">
                       <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>
                       <div>
@@ -1387,12 +1387,12 @@ async function createRiskReviewTicket(): Promise<void> {
                       <span class="text-green-600 dark:text-green-400 font-medium">-¥{{ planPriceInfo.discountAmount.toFixed(2) }}</span>
                     </div>
                   </div>
-                  <div class="rounded-xl overflow-hidden" :class="themeStore.isDark ? 'border border-blue-800/50' : 'border border-blue-200'">
-                    <div class="p-5 flex items-center justify-between" :class="themeStore.isDark ? 'bg-gradient-to-r from-blue-900/50 to-indigo-900/50' : 'bg-gradient-to-r from-blue-50 to-indigo-50'">
+                  <div class="rounded-xl overflow-hidden" :class="themeStore.isDark ? 'border border-gray-700' : 'border border-gray-200'">
+                    <div class="p-5 flex items-center justify-between" :class="themeStore.isDark ? 'bg-gray-800/40' : 'bg-gray-50'">
                       <div>
-                        <div class="text-sm font-medium" :class="themeStore.isDark ? 'text-blue-300' : 'text-blue-700'">{{ configStore.freeSiteMode ? freeSiteCopy.finalPrice : $t('aff.finalPrice') }}</div>
+                        <div class="text-sm font-medium" :class="themeStore.isDark ? 'text-gray-200' : 'text-gray-700'">{{ configStore.freeSiteMode ? freeSiteCopy.finalPrice : $t('aff.finalPrice') }}</div>
                         <div v-if="selectedPlan.billingCycle > 1" class="text-xs mt-1">
-                          <span :class="themeStore.isDark ? 'text-blue-400/70' : 'text-blue-600/70'">{{ configStore.freeSiteMode ? freeSiteCopy.createMonthlyEquivalent : `≈ ¥${(planPriceInfo.finalPrice / selectedPlan.billingCycle).toFixed(2)}/${$t('instance.createPage.month')}` }}</span>
+                          <span :class="themeStore.isDark ? 'text-gray-400' : 'text-gray-500'">{{ configStore.freeSiteMode ? freeSiteCopy.createMonthlyEquivalent : `≈ ¥${(planPriceInfo.finalPrice / selectedPlan.billingCycle).toFixed(2)}/${$t('instance.createPage.month')}` }}</span>
                         </div>
                       </div>
                       <div class="text-3xl font-bold" :class="themeStore.isDark ? 'text-white' : 'text-gray-900'">¥{{ planPriceInfo.finalPrice.toFixed(2) }}</div>
@@ -1459,7 +1459,7 @@ async function createRiskReviewTicket(): Promise<void> {
               ref="turnstileSectionRef"
               tabindex="-1"
               class="space-y-3 p-3 rounded-lg border text-sm"
-              :class="themeStore.isDark ? 'bg-blue-900/20 border-blue-500/30 text-blue-300' : 'bg-blue-50 border-blue-200 text-blue-700'"
+              :class="themeStore.isDark ? 'bg-gray-800/40 border-gray-700 text-gray-300' : 'bg-gray-50 border-gray-200 text-gray-700'"
             >
               <div>
                 <p class="font-medium">{{ $t('instance.createPage.turnstileRequiredTitle') }}</p>
@@ -1581,7 +1581,7 @@ async function createRiskReviewTicket(): Promise<void> {
                     </svg>
                     {{ $t('instance.detail.info.hostOwnerHostCount') }}
                   </span>
-                  <span class="text-sm font-semibold" :class="themeStore.isDark ? 'text-blue-400' : 'text-blue-600'">
+                  <span class="text-sm font-semibold text-themed">
                     {{ hostOwnerInfo.hostCount }}
                   </span>
                 </div>
@@ -1595,7 +1595,7 @@ async function createRiskReviewTicket(): Promise<void> {
                     </svg>
                     {{ $t('instance.detail.info.hostOwnerInstanceCount') }}
                   </span>
-                  <span class="text-sm font-semibold" :class="themeStore.isDark ? 'text-green-400' : 'text-green-600'">
+                  <span class="text-sm font-semibold text-themed">
                     {{ hostOwnerInfo.instanceCount }}
                   </span>
                 </div>
@@ -1609,7 +1609,7 @@ async function createRiskReviewTicket(): Promise<void> {
                     </svg>
                     {{ $t('instance.detail.info.hostOwnerRegisteredDays') }}
                   </span>
-                  <span class="text-sm font-semibold" :class="themeStore.isDark ? 'text-purple-400' : 'text-purple-600'">
+                  <span class="text-sm font-semibold text-themed">
                     {{ hostOwnerInfo.registeredDays }} {{ $t('common.days') }}
                   </span>
                 </div>

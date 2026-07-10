@@ -115,7 +115,7 @@ onMounted(loadData)
           <div>
             <div class="flex flex-wrap items-center gap-2">
               <h2 class="text-lg font-semibold text-themed">{{ campaign.name }}</h2>
-              <span class="rounded-full px-2 py-0.5 text-xs font-medium" :class="campaign.effectiveStatus === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'">
+              <span class="rounded-full px-2 py-0.5 text-xs font-medium" :class="campaign.effectiveStatus === 'active' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : campaign.effectiveStatus === 'scheduled' ? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'">
                 {{ campaign.effectiveStatus === 'active' ? '进行中' : campaign.effectiveStatus === 'scheduled' ? '即将开始' : '已暂停' }}
               </span>
             </div>
@@ -145,7 +145,7 @@ onMounted(loadData)
                 <span>库存 {{ item.remainingStock }} / {{ item.totalStock }}</span>
                 <span>已售 {{ stockPercent(item) }}%</span>
               </div>
-              <div class="h-2 overflow-hidden rounded-full bg-themed-muted">
+              <div class="h-2 overflow-hidden rounded-full bg-themed-secondary">
                 <div class="h-full rounded-full bg-accent" :style="{ width: `${stockPercent(item)}%` }" />
               </div>
             </div>

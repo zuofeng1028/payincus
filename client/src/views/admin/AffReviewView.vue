@@ -213,7 +213,7 @@ const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
                 {{ approveLoading === w.id ? $t('common.processing') : $t('aff.approve') }}
               </button>
               <button
-                class="btn btn-xs btn-ghost text-red-500 hover:bg-red-500/10"
+                class="btn btn-xs btn-ghost text-rose-600 dark:text-rose-400 hover:bg-rose-500/10"
                 @click="openRejectModal(w)"
               >
                 {{ $t('aff.reject') }}
@@ -262,7 +262,7 @@ const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
                         {{ approveLoading === w.id ? $t('common.processing') : $t('aff.approve') }}
                       </button>
                       <button
-                        class="btn btn-xs btn-ghost text-red-500 hover:bg-red-500/10"
+                        class="btn btn-xs btn-ghost text-rose-600 dark:text-rose-400 hover:bg-rose-500/10"
                         @click="openRejectModal(w)"
                       >
                         {{ $t('aff.reject') }}

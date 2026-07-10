@@ -303,8 +303,8 @@ function getBillingCycleSuffix(cycle: string | null | undefined) {
     <div class="flex border-b border-themed mb-6">
       <button
         class="px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px"
-        :class="activeTab === 'my' 
-          ? 'border-blue-500 text-blue-500' 
+        :class="activeTab === 'my'
+          ? 'border-gray-900 dark:border-gray-100 text-themed'
           : 'border-transparent text-themed-muted hover:text-themed'"
         @click="activeTab = 'my'"
       >
@@ -312,8 +312,8 @@ function getBillingCycleSuffix(cycle: string | null | undefined) {
       </button>
       <button
         class="px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px"
-        :class="activeTab === 'buy' 
-          ? 'border-blue-500 text-blue-500' 
+        :class="activeTab === 'buy'
+          ? 'border-gray-900 dark:border-gray-100 text-themed'
           : 'border-transparent text-themed-muted hover:text-themed'"
         @click="activeTab = 'buy'"
       >
@@ -353,7 +353,7 @@ function getBillingCycleSuffix(cycle: string | null | undefined) {
             </span>
           </div>
           
-          <div class="grid grid-cols-3 gap-4 mb-4">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
             <div class="bg-themed-secondary rounded-lg p-3">
               <div class="text-xs text-themed-muted mb-1">{{ t('mail.expiresAt') }}</div>
               <div class="text-sm font-medium text-themed">{{ formatDate(subscription.expiresAt) }}</div>
@@ -368,13 +368,13 @@ function getBillingCycleSuffix(cycle: string | null | undefined) {
             </div>
           </div>
           
-          <div class="flex items-center justify-between text-sm">
-            <span class="text-themed-muted">
-              {{ t('mail.plan') }}：{{ subscription.plan.name }} ({{ subscription.source.name }}) · 
-              {{ subscription.plan.domainLimit }} {{ t('mail.domains') }} / {{ subscription.plan.diskLimitGb }}GB · 
+          <div class="flex items-center justify-between gap-3 text-sm">
+            <span class="text-themed-muted min-w-0 truncate">
+              {{ t('mail.plan') }}：{{ subscription.plan.name }} ({{ subscription.source.name }}) ·
+              {{ subscription.plan.domainLimit }} {{ t('mail.domains') }} / {{ subscription.plan.diskLimitGb }}GB ·
               {{ formatPrice(subscription.plan.price) }}{{ getBillingCycleSuffix(subscription.plan.billingCycle) }}
             </span>
-            <button class="btn btn-sm btn-outline" @click="openRenewModal">
+            <button class="btn btn-sm btn-outline shrink-0" @click="openRenewModal">
               {{ t('mail.renew') }}
             </button>
           </div>
@@ -439,9 +439,9 @@ function getBillingCycleSuffix(cycle: string | null | undefined) {
               :key="source.id"
               :class="[
                 'relative p-4 rounded-xl border-2 transition-all cursor-pointer group',
-                selectedSourceId === source.id 
-                  ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/20' 
-                  : 'border-themed hover:border-blue-300 dark:hover:border-blue-800'
+                selectedSourceId === source.id
+                  ? 'border-accent bg-themed-secondary'
+                  : 'border-themed hover:border-gray-400 dark:hover:border-gray-500'
               ]"
               @click="selectSource(source.id)"
             >
@@ -458,12 +458,12 @@ function getBillingCycleSuffix(cycle: string | null | undefined) {
                 <div 
                   :class="[
                     'w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all',
-                    selectedSourceId === source.id 
-                      ? 'border-blue-500 bg-blue-500' 
-                      : 'border-gray-300 dark:border-gray-600 group-hover:border-blue-400'
+                    selectedSourceId === source.id
+                      ? 'border-accent bg-accent'
+                      : 'border-gray-300 dark:border-gray-600 group-hover:border-gray-400 dark:group-hover:border-gray-500'
                   ]"
                 >
-                  <svg v-if="selectedSourceId === source.id" class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <svg v-if="selectedSourceId === source.id" class="w-3 h-3 text-white dark:text-black" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
                 </div>
@@ -502,9 +502,9 @@ function getBillingCycleSuffix(cycle: string | null | undefined) {
             <div
               :class="[
                 'relative p-5 rounded-xl border-2 transition-all cursor-pointer',
-                selectedPlanId === plan.id 
-                  ? 'border-blue-500 bg-blue-50/30 dark:bg-blue-950/10' 
-                  : 'border-themed hover:border-blue-300 dark:hover:border-blue-800'
+                selectedPlanId === plan.id
+                  ? 'border-accent bg-themed-secondary'
+                  : 'border-themed hover:border-gray-400 dark:hover:border-gray-500'
               ]"
               @click="selectPlan(plan.id)"
             >
@@ -523,37 +523,37 @@ function getBillingCycleSuffix(cycle: string | null | undefined) {
               <!-- 配额信息 + 功能特性 -->
               <div class="grid grid-cols-2 gap-3 pt-4 border-t border-themed">
                 <div class="flex items-center gap-2.5 text-sm text-themed-muted">
-                  <svg class="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 text-themed-muted flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                   </svg>
                   <span>{{ t('mail.feature.domainStorage', { count: plan.domainLimit, storage: plan.diskLimitGb }) }}</span>
                 </div>
                 <div class="flex items-center gap-2.5 text-sm text-themed-muted">
-                  <svg class="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 text-themed-muted flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                   <span>{{ t('mail.feature.unlimitedAliases') }}</span>
                 </div>
                 <div class="flex items-center gap-2.5 text-sm text-themed-muted">
-                  <svg class="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 text-themed-muted flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
                   <span>{{ t('mail.feature.unlimitedMailboxes') }}</span>
                 </div>
                 <div class="flex items-center gap-2.5 text-sm text-themed-muted">
-                  <svg class="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 text-themed-muted flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                   <span>{{ t('mail.feature.emailLimit') }}</span>
                 </div>
                 <div class="flex items-center gap-2.5 text-sm text-themed-muted">
-                  <svg class="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 text-themed-muted flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
                   </svg>
                   <span>{{ t('mail.feature.emClientPro') }}</span>
                 </div>
                 <div class="flex items-center gap-2.5 text-sm text-themed-muted">
-                  <svg class="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 text-themed-muted flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                   </svg>
                   <span>{{ t('mail.feature.catchAll') }}</span>
@@ -563,9 +563,9 @@ function getBillingCycleSuffix(cycle: string | null | undefined) {
               <!-- 选中指示器 -->
               <div 
                 v-if="selectedPlanId === plan.id"
-                class="absolute bottom-4 right-4 w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center"
+                class="absolute bottom-4 right-4 w-6 h-6 rounded-full bg-accent flex items-center justify-center"
               >
-                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="w-4 h-4 text-white dark:text-black" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                 </svg>
               </div>
@@ -628,7 +628,7 @@ function getBillingCycleSuffix(cycle: string | null | undefined) {
             </div>
             <div class="flex justify-between">
               <span class="text-themed-muted">{{ configStore.freeSiteMode ? freeSiteCopy.mailBillingCycle : t('mail.billingCycle') }}</span>
-              <span class="text-blue-500 font-medium">{{ getBillingCycleLabel(selectedPlan.billingCycle) }}</span>
+              <span class="text-themed font-medium">{{ getBillingCycleLabel(selectedPlan.billingCycle) }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-themed-muted">{{ t('mail.checkout.serviceStatus') }}</span>
@@ -687,7 +687,7 @@ function getBillingCycleSuffix(cycle: string | null | undefined) {
               </div>
               <div class="flex justify-between">
                 <span class="text-themed-muted">{{ configStore.freeSiteMode ? freeSiteCopy.mailBillingCycle : t('mail.billingCycle') }}</span>
-                <span class="text-blue-500 font-medium">{{ getBillingCycleLabel(selectedPlan.billingCycle) }}</span>
+                <span class="text-themed font-medium">{{ getBillingCycleLabel(selectedPlan.billingCycle) }}</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-themed-muted">{{ t('mail.checkout.serviceStatus') }}</span>

@@ -301,7 +301,7 @@ function closeAndGoBack() {
         <!-- 表单卡片 -->
         <div class="card p-6">
           <!-- 节点部署说明 -->
-          <div class="mb-6 p-4 rounded-lg border" :class="themeStore.isDark ? 'bg-blue-900/20 border-blue-800' : 'bg-blue-50 border-blue-200'">
+          <div class="mb-6 p-4 rounded-lg border" :class="themeStore.isDark ? 'bg-blue-500/10 border-blue-500/20' : 'bg-blue-50 border-blue-200'">
             <div class="flex items-start gap-3">
               <svg class="w-5 h-5 flex-shrink-0 mt-0.5" :class="themeStore.isDark ? 'text-blue-400' : 'text-blue-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -501,7 +501,7 @@ function closeAndGoBack() {
 
             <div
               class="rounded-lg border px-4 py-3"
-              :class="themeStore.isDark ? 'border-blue-800 bg-blue-950/30 text-blue-100' : 'border-blue-200 bg-blue-50 text-blue-900'"
+              :class="themeStore.isDark ? 'border-blue-500/20 bg-blue-500/10 text-blue-300' : 'border-blue-200 bg-blue-50 text-blue-700'"
             >
               <div class="flex items-start gap-2">
                 <svg class="w-4 h-4 mt-0.5 shrink-0 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -195,11 +195,11 @@ function statusLabel(order: AdminOrderItem): string {
 }
 
 function statusClass(statusValue: string): string {
-  if (statusValue === 'completed') return 'bg-green-50 text-green-700 border-green-200'
-  if (statusValue === 'pending') return 'bg-yellow-50 text-yellow-700 border-yellow-200'
-  if (statusValue === 'refunded') return 'bg-blue-50 text-blue-700 border-blue-200'
-  if (statusValue === 'failed' || statusValue === 'cancelled') return 'bg-red-50 text-red-700 border-red-200'
-  return 'bg-gray-50 text-gray-700 border-gray-200'
+  if (statusValue === 'completed') return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800'
+  if (statusValue === 'pending') return 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800'
+  if (statusValue === 'refunded') return 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
+  if (statusValue === 'failed' || statusValue === 'cancelled') return 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-300 dark:border-rose-500/20'
+  return 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
 }
 
 function operationStatusLabel(statusValue: string | null | undefined): string {
@@ -213,11 +213,11 @@ function operationStatusLabel(statusValue: string | null | undefined): string {
 }
 
 function operationStatusClass(statusValue: string | null | undefined): string {
-  if (statusValue === 'pending_review') return 'bg-yellow-50 text-yellow-700 border-yellow-200'
-  if (statusValue === 'confirmed') return 'bg-blue-50 text-blue-700 border-blue-200'
-  if (statusValue === 'compensated') return 'bg-green-50 text-green-700 border-green-200'
-  if (statusValue === 'closed') return 'bg-gray-50 text-gray-700 border-gray-200'
-  return 'bg-gray-50 text-gray-700 border-gray-200'
+  if (statusValue === 'pending_review') return 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800'
+  if (statusValue === 'confirmed') return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-300 dark:border-blue-500/20'
+  if (statusValue === 'compensated') return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800'
+  if (statusValue === 'closed') return 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
+  return 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
 }
 
 function sourceLabel(sourceType: OrderSourceType): string {
@@ -238,10 +238,10 @@ function adjustmentStatusLabel(statusValue: string): string {
 }
 
 function adjustmentStatusClass(statusValue: string): string {
-  if (statusValue === 'approved') return 'bg-green-50 text-green-700 border-green-200'
-  if (statusValue === 'pending') return 'bg-yellow-50 text-yellow-700 border-yellow-200'
-  if (statusValue === 'rejected') return 'bg-red-50 text-red-700 border-red-200'
-  return 'bg-gray-50 text-gray-700 border-gray-200'
+  if (statusValue === 'approved') return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800'
+  if (statusValue === 'pending') return 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800'
+  if (statusValue === 'rejected') return 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-300 dark:border-rose-500/20'
+  return 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
 }
 
 const canCompleteRecharge = computed(() => {
@@ -582,22 +582,22 @@ onMounted(() => {
     </header>
 
     <section class="rounded-lg border border-themed bg-themed-secondary p-4">
-      <div class="grid gap-3 lg:grid-cols-[160px_160px_140px_minmax(220px,1fr)_150px_150px_auto]">
-        <select v-model="type" class="input" @change="status = ''; applyFilters()">
+      <div class="flex flex-wrap items-center gap-3">
+        <select v-model="type" class="input w-full sm:w-40" @change="status = ''; applyFilters()">
           <option v-for="item in typeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
         </select>
-        <select v-model="status" class="input" @change="applyFilters">
+        <select v-model="status" class="input w-full sm:w-40" @change="applyFilters">
           <option v-for="item in statusOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
         </select>
-        <input v-model="userId" class="input" placeholder="用户 ID" @keyup.enter="applyFilters" />
-        <input v-model="keyword" class="input" placeholder="订单号、交易号、用户名、实例名" @keyup.enter="applyFilters" />
-        <input v-model="createdFrom" class="input" type="date" title="开始日期" @change="applyFilters" />
-        <input v-model="createdTo" class="input" type="date" title="结束日期" @change="applyFilters" />
-        <button class="btn btn-outline justify-self-start" @click="clearFilters">重置</button>
+        <input v-model="userId" class="input w-full sm:w-36" placeholder="用户 ID" @keyup.enter="applyFilters" />
+        <input v-model="keyword" class="input w-full sm:min-w-[220px] sm:flex-1" placeholder="订单号、交易号、用户名、实例名" @keyup.enter="applyFilters" />
+        <input v-model="createdFrom" class="input w-full sm:w-40" type="date" title="开始日期" @change="applyFilters" />
+        <input v-model="createdTo" class="input w-full sm:w-40" type="date" title="结束日期" @change="applyFilters" />
+        <button class="btn btn-outline" @click="clearFilters">重置</button>
       </div>
     </section>
 
-    <div v-if="error" class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{{ error }}</div>
+    <div v-if="error" class="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300">{{ error }}</div>
 
     <section class="overflow-hidden rounded-lg border border-themed bg-themed-secondary">
       <div v-if="loading" class="p-8 text-center text-sm text-themed-muted">正在加载订单...</div>
@@ -645,8 +645,8 @@ onMounted(() => {
             </div>
           </button>
         </div>
-        <div class="hidden overflow-hidden lg:block">
-          <table class="w-full table-fixed divide-y divide-themed">
+        <div class="hidden overflow-x-auto lg:block">
+          <table class="w-full min-w-[900px] divide-y divide-themed">
           <thead class="bg-themed-tertiary">
             <tr class="text-left text-xs font-medium text-themed-muted">
               <th class="px-4 py-3">订单</th>
@@ -715,7 +715,7 @@ onMounted(() => {
         </div>
       </div>
 
-      <div v-if="requestError" class="m-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{{ requestError }}</div>
+      <div v-if="requestError" class="m-4 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300">{{ requestError }}</div>
       <div v-if="requestLoading" class="p-6 text-center text-sm text-themed-muted">正在加载审批任务...</div>
       <div v-else-if="adjustmentRequests.length === 0" class="p-6 text-center text-sm text-themed-muted">暂无调账审批任务</div>
       <template v-else>
@@ -738,7 +738,7 @@ onMounted(() => {
               </div>
               <div class="rounded-md bg-themed-secondary p-2">
                 <div class="text-themed-muted">金额</div>
-                <div class="mt-1 font-medium" :class="request.amount >= 0 ? 'text-green-700' : 'text-red-700'">
+                <div class="mt-1 font-medium" :class="request.amount >= 0 ? 'text-green-700 dark:text-green-300' : 'text-rose-700 dark:text-rose-300'">
                   {{ request.amount >= 0 ? '+' : '' }}{{ formatMoney(request.amount) }}
                 </div>
               </div>
@@ -754,15 +754,15 @@ onMounted(() => {
             </div>
             <div class="mt-3 flex flex-wrap justify-end gap-2">
               <template v-if="request.status === 'pending'">
-                <button class="btn btn-sm btn-outline text-red-600" :disabled="reviewLoadingId === request.id" @click="rejectAdjustmentRequest(request)">驳回</button>
+                <button class="btn btn-sm btn-outline text-rose-600 dark:text-rose-400" :disabled="reviewLoadingId === request.id" @click="rejectAdjustmentRequest(request)">驳回</button>
                 <button class="btn btn-sm btn-primary" :disabled="reviewLoadingId === request.id" @click="approveAdjustmentRequest(request)">通过并执行</button>
               </template>
               <span v-else class="text-xs text-themed-muted">{{ request.reviewedBy?.username || '-' }}</span>
             </div>
           </div>
         </div>
-        <div class="hidden overflow-hidden lg:block">
-          <table class="w-full table-fixed divide-y divide-themed">
+        <div class="hidden overflow-x-auto lg:block">
+          <table class="w-full min-w-[900px] divide-y divide-themed">
           <thead class="bg-themed-tertiary">
             <tr class="text-left text-xs font-medium text-themed-muted">
               <th class="px-4 py-3">申请</th>
@@ -784,7 +784,7 @@ onMounted(() => {
                 <div class="text-themed">{{ request.user.username }}</div>
                 <div class="text-xs text-themed-muted">申请人 {{ request.requestedBy.username }}</div>
               </td>
-              <td class="px-4 py-3 font-medium" :class="request.amount >= 0 ? 'text-green-700' : 'text-red-700'">
+              <td class="px-4 py-3 font-medium" :class="request.amount >= 0 ? 'text-green-700 dark:text-green-300' : 'text-rose-700 dark:text-rose-300'">
                 {{ request.amount >= 0 ? '+' : '' }}{{ formatMoney(request.amount) }}
               </td>
               <td class="px-4 py-3 text-themed-muted">
@@ -799,7 +799,7 @@ onMounted(() => {
               <td class="px-4 py-3 text-themed-muted">{{ formatTime(request.createdAt) }}</td>
               <td class="px-4 py-3 text-right">
                 <div v-if="request.status === 'pending'" class="flex justify-end gap-2">
-                  <button class="btn btn-sm btn-outline text-red-600" :disabled="reviewLoadingId === request.id" @click="rejectAdjustmentRequest(request)">驳回</button>
+                  <button class="btn btn-sm btn-outline text-rose-600 dark:text-rose-400" :disabled="reviewLoadingId === request.id" @click="rejectAdjustmentRequest(request)">驳回</button>
                   <button class="btn btn-sm btn-primary" :disabled="reviewLoadingId === request.id" @click="approveAdjustmentRequest(request)">通过并执行</button>
                 </div>
                 <span v-else class="text-xs text-themed-muted">{{ request.reviewedBy?.username || '-' }}</span>
@@ -858,7 +858,7 @@ onMounted(() => {
         </dl>
 
         <div v-if="actionMessage" class="mt-5 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700">{{ actionMessage }}</div>
-        <div v-if="actionError" class="mt-5 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{{ actionError }}</div>
+        <div v-if="actionError" class="mt-5 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300">{{ actionError }}</div>
 
         <section class="mt-6 border-t border-themed pt-5">
           <div class="flex items-center justify-between gap-3">
@@ -930,7 +930,7 @@ onMounted(() => {
               <span class="mb-1 block text-themed-muted">失败原因</span>
               <textarea v-model="failReason" class="input min-h-[84px]" placeholder="标记失败时必须填写原因" :disabled="!canFailRecharge || actionLoading" />
             </label>
-            <button class="btn btn-outline justify-self-start text-red-600" :disabled="!canFailRecharge || actionLoading" @click="failRecharge">标记失败</button>
+            <button class="btn btn-outline justify-self-start text-rose-600 dark:text-rose-400" :disabled="!canFailRecharge || actionLoading" @click="failRecharge">标记失败</button>
           </div>
         </section>
 

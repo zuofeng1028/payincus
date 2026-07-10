@@ -616,8 +616,8 @@ textarea {
   gap: 6px;
   padding: 3px 8px;
   border-radius: 999px;
-  background: #e8f7ef;
-  color: #0f7a3b;
+  background: #f2f2f4;
+  color: #3a3a40;
   font-size: 12px;
 }
 
@@ -648,8 +648,9 @@ textarea {
 }
 
 .code-form {
-  grid-template-columns: 90px 90px 110px 110px minmax(0, 1fr) auto;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   display: grid;
+  gap: 10px;
 }
 
 .offer-list,
@@ -671,9 +672,14 @@ textarea {
 
 .reminder-grid {
   display: grid;
-  grid-template-columns: minmax(220px, 0.4fr) minmax(360px, 1fr) minmax(220px, 0.5fr) auto;
+  grid-template-columns: minmax(220px, 0.6fr) minmax(220px, 1fr) auto;
   gap: 10px;
   align-items: start;
+}
+
+.reminder-grid textarea {
+  grid-column: 1 / -1;
+  min-height: 80px;
 }
 
 .empty {

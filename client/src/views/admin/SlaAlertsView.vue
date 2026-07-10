@@ -105,23 +105,23 @@ function moduleLabel(module: string): string {
 }
 
 function statusClass(status: SlaAlertStatus): string {
-  if (status === 'open') return 'border-amber-200 bg-amber-50 text-amber-700'
-  if (status === 'investigating') return 'border-blue-200 bg-blue-50 text-blue-700'
-  if (status === 'recovered') return 'border-emerald-200 bg-emerald-50 text-emerald-700'
+  if (status === 'open') return 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300'
+  if (status === 'investigating') return 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300'
+  if (status === 'recovered') return 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300'
   return 'border-themed bg-themed-secondary text-themed-muted'
 }
 
 function severityClass(severity: SlaAlertSeverity): string {
-  if (severity === 'critical') return 'border-red-200 bg-red-50 text-red-700'
-  if (severity === 'warning') return 'border-amber-200 bg-amber-50 text-amber-700'
-  return 'border-blue-200 bg-blue-50 text-blue-700'
+  if (severity === 'critical') return 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300'
+  if (severity === 'warning') return 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300'
+  return 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300'
 }
 
 function toneClass(tone: string): string {
-  if (tone === 'success') return 'border-emerald-200 bg-emerald-50 text-emerald-700'
-  if (tone === 'danger') return 'border-red-200 bg-red-50 text-red-700'
-  if (tone === 'warning') return 'border-amber-200 bg-amber-50 text-amber-700'
-  if (tone === 'info') return 'border-blue-200 bg-blue-50 text-blue-700'
+  if (tone === 'success') return 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300'
+  if (tone === 'danger') return 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300'
+  if (tone === 'warning') return 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300'
+  if (tone === 'info') return 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300'
   return 'border-themed bg-themed-secondary text-themed'
 }
 
@@ -324,7 +324,7 @@ onMounted(() => {
               :key="alert.id"
               type="button"
               class="w-full rounded-lg border border-themed bg-themed-surface p-4 text-left shadow-sm"
-              :class="selectedAlertId === alert.id ? 'ring-2 ring-blue-500' : ''"
+              :class="selectedAlertId === alert.id ? 'ring-2 ring-accent' : ''"
               @click="selectedAlertId = alert.id"
             >
               <div class="flex items-start justify-between gap-3">
@@ -358,8 +358,8 @@ onMounted(() => {
               </div>
             </button>
           </div>
-          <div class="hidden overflow-hidden lg:block">
-            <table class="w-full table-fixed divide-y divide-themed text-sm">
+          <div class="hidden overflow-x-auto lg:block">
+            <table class="w-full min-w-[900px] divide-y divide-themed text-sm">
               <thead>
                 <tr class="text-left text-xs text-themed-muted">
                   <th class="w-[10%] px-4 py-3 font-medium">等级</th>

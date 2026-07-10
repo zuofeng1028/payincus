@@ -255,7 +255,7 @@ watch(() => route.path, () => {
           {{ t('inbox.unread') }}
           <span
             v-if="inboxStore.unreadCount > 0"
-            class="px-1.5 py-0.5 text-xs rounded-full bg-red-500 text-white"
+            class="px-1.5 py-0.5 text-xs rounded-full bg-gray-500 text-white"
           >
             {{ inboxStore.unreadCount }}
           </span>
@@ -323,7 +323,7 @@ watch(() => route.path, () => {
           :key="message.id"
           class="px-4 py-2.5 flex items-start gap-3 transition-colors"
           :class="[
-            !message.isRead ? (themeStore.isDark ? 'bg-gray-800/30' : 'bg-blue-50/50') : '',
+            !message.isRead ? (themeStore.isDark ? 'bg-gray-800/30' : 'bg-gray-100/70') : '',
             themeStore.isDark ? 'hover:bg-gray-800/50' : 'hover:bg-gray-50',
             canNavigate(message) ? 'cursor-pointer' : ''
           ]"

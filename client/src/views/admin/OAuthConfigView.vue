@@ -414,7 +414,7 @@ function formatScopeAccess(access: PublicApiScopeMetadata['access']): string {
                 :class="[
                   'text-xs',
                   config.configured 
-                    ? (config.enabled ? 'text-green-400' : 'text-yellow-400')
+                    ? (config.enabled ? 'text-success' : 'text-warning')
                     : 'text-themed-muted'
                 ]"
               >
@@ -480,7 +480,7 @@ function formatScopeAccess(access: PublicApiScopeMetadata['access']): string {
         <p>{{ t('admin.oauth.step2') }}</p>
         <p>{{ t('admin.oauth.step3') }}</p>
         <p>{{ t('admin.oauth.step4') }}</p>
-        <p class="text-yellow-500">{{ t('admin.oauth.warning') }}</p>
+        <p class="text-warning">{{ t('admin.oauth.warning') }}</p>
       </div>
     </div>
 
@@ -495,7 +495,7 @@ function formatScopeAccess(access: PublicApiScopeMetadata['access']): string {
         </button>
       </div>
 
-      <div v-if="oauthAppSecret" class="mt-4 rounded-lg border border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-800">
+      <div v-if="oauthAppSecret" class="mt-4 rounded-lg border border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-800 dark:border-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300">
         <div class="font-medium">Client Secret 只显示一次</div>
         <code class="mt-2 block break-all rounded bg-white/70 p-2 font-mono text-xs">{{ oauthAppSecret }}</code>
       </div>
@@ -555,7 +555,7 @@ function formatScopeAccess(access: PublicApiScopeMetadata['access']): string {
               <div class="font-medium text-themed">{{ appItem.name }}</div>
               <div class="mt-1 break-all font-mono text-xs text-themed-muted">{{ appItem.clientId }}</div>
             </div>
-            <span class="shrink-0" :class="appItem.enabled ? 'text-green-500' : 'text-yellow-500'">{{ appItem.enabled ? '启用' : '停用' }}</span>
+            <span class="shrink-0" :class="appItem.enabled ? 'text-success' : 'text-warning'">{{ appItem.enabled ? '启用' : '停用' }}</span>
           </div>
           <div class="mt-3 space-y-2 text-xs text-themed-muted">
             <div>
@@ -578,8 +578,8 @@ function formatScopeAccess(access: PublicApiScopeMetadata['access']): string {
           </div>
         </div>
       </div>
-      <div class="mt-6 hidden overflow-hidden lg:block">
-        <table class="w-full table-fixed text-sm">
+      <div class="mt-6 hidden overflow-x-auto lg:block">
+        <table class="w-full min-w-[900px] text-sm">
           <thead class="border-b border-themed text-left text-themed-muted">
             <tr>
               <th class="py-3 pr-4">应用</th>
@@ -606,7 +606,7 @@ function formatScopeAccess(access: PublicApiScopeMetadata['access']): string {
                 </div>
               </td>
               <td class="py-3 pr-4">
-                <span :class="appItem.enabled ? 'text-green-500' : 'text-yellow-500'">{{ appItem.enabled ? '启用' : '停用' }}</span>
+                <span :class="appItem.enabled ? 'text-success' : 'text-warning'">{{ appItem.enabled ? '启用' : '停用' }}</span>
               </td>
               <td class="py-3 pr-4">
                 <div class="flex flex-wrap gap-2">
@@ -670,7 +670,7 @@ function formatScopeAccess(access: PublicApiScopeMetadata['access']): string {
               <div class="font-medium text-themed">{{ authorization.user.username }}</div>
               <div class="mt-1 break-all text-xs text-themed-muted">#{{ authorization.user.id }} · {{ authorization.user.email || '无邮箱' }}</div>
             </div>
-            <span class="shrink-0" :class="authorization.active ? 'text-green-500' : 'text-yellow-500'">
+            <span class="shrink-0" :class="authorization.active ? 'text-success' : 'text-warning'">
               {{ formatOAuthAuthorizationStatus(authorization) }}
             </span>
           </div>
@@ -708,8 +708,8 @@ function formatScopeAccess(access: PublicApiScopeMetadata['access']): string {
           </button>
         </div>
       </div>
-      <div class="mt-6 hidden overflow-hidden lg:block">
-        <table class="w-full table-fixed text-sm">
+      <div class="mt-6 hidden overflow-x-auto lg:block">
+        <table class="w-full min-w-[900px] text-sm">
           <thead class="border-b border-themed text-left text-themed-muted">
             <tr>
               <th class="py-3 pr-4">用户</th>
@@ -739,7 +739,7 @@ function formatScopeAccess(access: PublicApiScopeMetadata['access']): string {
                 </div>
               </td>
               <td class="py-3 pr-4">
-                <span :class="authorization.active ? 'text-green-500' : 'text-yellow-500'">
+                <span :class="authorization.active ? 'text-success' : 'text-warning'">
                   {{ formatOAuthAuthorizationStatus(authorization) }}
                 </span>
                 <div v-if="authorization.revokedAt" class="text-xs text-themed-muted">{{ new Date(authorization.revokedAt).toLocaleString() }}</div>

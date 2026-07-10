@@ -673,27 +673,28 @@ function getInstanceNetworkMode(instance: Instance): string {
 
 function getInstanceTypeBadgeClass(instance: Instance): string {
   if ((instance as any).instanceType === 'vm') {
-    return themeStore.isDark ? 'bg-purple-900/50 text-purple-400' : 'bg-purple-100 text-purple-600'
+    return themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'
   }
-  return themeStore.isDark ? 'bg-green-900/50 text-green-400' : 'bg-green-100 text-green-600'
+  return themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'
 }
 
 function getInstanceNetworkBadgeClass(instance: Instance): string {
+  const neutralChip = themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'
   switch (getInstanceNetworkMode(instance)) {
     case 'nat_ipv6':
-      return themeStore.isDark ? 'bg-blue-900/50 text-blue-400' : 'bg-blue-100 text-blue-600'
+      return neutralChip
     case 'nat_ipv6_nat':
-      return themeStore.isDark ? 'bg-cyan-900/50 text-cyan-400' : 'bg-cyan-100 text-cyan-600'
+      return neutralChip
     case 'ipv6_only':
-      return themeStore.isDark ? 'bg-purple-900/50 text-purple-400' : 'bg-purple-100 text-purple-600'
+      return neutralChip
     case 'ipv6_nat':
-      return themeStore.isDark ? 'bg-teal-900/50 text-teal-400' : 'bg-teal-100 text-teal-600'
+      return neutralChip
     case 'public_ipv4':
     case 'public_ipv4_ipv6':
-      return themeStore.isDark ? 'bg-emerald-900/40 text-emerald-400' : 'bg-emerald-100 text-emerald-700'
+      return neutralChip
     case 'nat':
     default:
-      return themeStore.isDark ? 'bg-yellow-900/30 text-yellow-400' : 'bg-yellow-50 text-yellow-700'
+      return neutralChip
   }
 }
 
@@ -755,7 +756,7 @@ function getInstanceExchangeState(instance: Instance): { label: string; hint: st
     return {
       label: '交易所挂牌中',
       hint: `暂停锁定 · 挂牌价 ${formatCurrency(listing.price)}`,
-      className: themeStore.isDark ? 'bg-blue-900/50 text-blue-300' : 'bg-blue-100 text-blue-700'
+      className: themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'
     }
   }
   if (listing?.status === 'paused') {
@@ -776,7 +777,7 @@ function getInstanceExchangeState(instance: Instance): { label: string; hint: st
     return {
       label: '交割异常',
       hint: '等待平台重试、退款或人工接管',
-      className: themeStore.isDark ? 'bg-red-900/50 text-red-300' : 'bg-red-100 text-red-700'
+      className: themeStore.isDark ? 'bg-rose-500/15 text-rose-300' : 'bg-rose-50 text-rose-700'
     }
   }
   return null
@@ -1943,11 +1944,11 @@ async function confirmBatchDestroy(): Promise<void> {
                       <div
                         v-for="(ipObj, idx) in getIps(instance)"
                         :key="idx"
-                        class="text-xs font-mono truncate"
+                        class="text-xs font-mono break-all"
                         :class="themeStore.isDark ? 'text-gray-300' : 'text-gray-600'"
                         :title="ipObj.ip"
                       >
-                        {{ ipObj.type === 'ipv6' ? (ipObj.ip.length > 18 ? ipObj.ip.substring(0, 18) + '...' : ipObj.ip) : ipObj.ip }}
+                        {{ ipObj.ip }}
                       </div>
                     </template>
                     <span v-else class="text-themed-muted text-xs">-</span>
@@ -1989,7 +1990,7 @@ async function confirmBatchDestroy(): Promise<void> {
               </td>
               <td class="px-3 py-3">
                 <div class="space-y-0.5">
-                  <div class="text-sm text-themed-muted whitespace-nowrap">
+                  <div class="text-sm text-themed-muted">
                     {{ getInstanceQuotaSummary(instance) }}
                   </div>
                   <div class="text-xs">
@@ -2163,8 +2164,8 @@ async function confirmBatchDestroy(): Promise<void> {
                 </div>
                 <div
                   v-if="(instance as any).packageName"
-                  class="text-xs px-2 py-1 rounded truncate max-w-[130px]"
-                  :class="themeStore.isDark ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-50 text-blue-600'"
+                  class="text-xs px-2 py-1 rounded truncate max-w-[180px]"
+                  :class="themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-600'"
                   :title="(instance as any).packageName"
                   @click="openInstanceDetail(instance.id)"
                 >
@@ -2180,11 +2181,11 @@ async function confirmBatchDestroy(): Promise<void> {
                       <span
                         v-for="(ipObj, idx) in getIps(instance)"
                         :key="idx"
-                        class="font-mono text-xs max-w-[200px] truncate"
+                        class="font-mono text-xs max-w-[220px] break-all text-right"
                         :class="[themeStore.isDark ? 'text-gray-300' : 'text-gray-700', ipObj.type === 'ipv6' ? 'opacity-75' : '']"
                         :title="ipObj.ip"
                       >
-                        {{ ipObj.type === 'ipv6' ? (ipObj.ip.length > 18 ? ipObj.ip.substring(0, 18) + '...' : ipObj.ip) : ipObj.ip }}
+                        {{ ipObj.ip }}
                       </span>
                     </template>
                     <span v-else class="text-themed-muted text-xs">-</span>

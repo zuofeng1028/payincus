@@ -54,16 +54,16 @@ function boolStatus(enabled: boolean, enabledLabel = '已启用', disabledLabel 
 }
 
 function badgeClass(tone: IntegrationTone): string {
-  if (tone === 'success') return 'bg-green-50 text-green-700 dark:bg-green-500/15 dark:text-green-300'
-  if (tone === 'warning') return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-300'
-  if (tone === 'danger') return 'bg-red-50 text-red-700 dark:bg-red-500/15 dark:text-red-300'
+  if (tone === 'success') return 'bg-success/10 text-success dark:bg-success/15'
+  if (tone === 'warning') return 'bg-warning/10 text-warning dark:bg-warning/15'
+  if (tone === 'danger') return 'bg-error/10 text-error dark:bg-error/15'
   return 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
 }
 
 function healthBadgeClass(status: IntegrationHealthStatus): string {
-  if (status === 'ok') return 'bg-green-50 text-green-700 dark:bg-green-500/15 dark:text-green-300'
-  if (status === 'warning') return 'bg-yellow-50 text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-300'
-  if (status === 'error') return 'bg-red-50 text-red-700 dark:bg-red-500/15 dark:text-red-300'
+  if (status === 'ok') return 'bg-success/10 text-success dark:bg-success/15'
+  if (status === 'warning') return 'bg-warning/10 text-warning dark:bg-warning/15'
+  if (status === 'error') return 'bg-error/10 text-error dark:bg-error/15'
   return 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
 }
 
@@ -334,15 +334,15 @@ onMounted(loadIntegrations)
       </div>
       <div class="card p-4">
         <div class="text-sm text-themed-muted">正常</div>
-        <div class="mt-2 text-2xl font-semibold text-green-600 dark:text-green-300">{{ summary.success }}</div>
+        <div class="mt-2 text-2xl font-semibold text-success">{{ summary.success }}</div>
       </div>
       <div class="card p-4">
         <div class="text-sm text-themed-muted">需复核</div>
-        <div class="mt-2 text-2xl font-semibold text-yellow-600 dark:text-yellow-300">{{ summary.warning }}</div>
+        <div class="mt-2 text-2xl font-semibold text-warning">{{ summary.warning }}</div>
       </div>
       <div class="card p-4">
         <div class="text-sm text-themed-muted">异常</div>
-        <div class="mt-2 text-2xl font-semibold text-red-600 dark:text-red-300">{{ summary.danger }}</div>
+        <div class="mt-2 text-2xl font-semibold text-error">{{ summary.danger }}</div>
       </div>
     </div>
 

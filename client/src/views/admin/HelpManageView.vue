@@ -625,7 +625,7 @@ function formatDate(dateStr: string | null | undefined): string {
                         class="sr-only peer"
                       />
                       <div 
-                        class="w-10 h-6 rounded-full transition-colors peer-checked:bg-green-500"
+                        class="w-10 h-6 rounded-full transition-colors peer-checked:bg-accent"
                         :class="themeStore.isDark ? 'bg-gray-700' : 'bg-gray-300'"
                       ></div>
                       <div 
@@ -646,7 +646,7 @@ function formatDate(dateStr: string | null | undefined): string {
                         class="sr-only peer"
                       />
                       <div 
-                        class="w-10 h-6 rounded-full transition-colors peer-checked:bg-blue-500"
+                        class="w-10 h-6 rounded-full transition-colors peer-checked:bg-accent"
                         :class="themeStore.isDark ? 'bg-gray-700' : 'bg-gray-300'"
                       ></div>
                       <div 

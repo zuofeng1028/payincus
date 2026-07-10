@@ -50,19 +50,20 @@ function isOwnPackage(pkg: Package): boolean {
 // 根据主题的网络模式样式
 function getNetworkModeClass(mode: string | undefined | null): string {
   const normalizedMode = String(mode || 'nat').toLowerCase()
+  const neutralChip = themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'
   switch (normalizedMode) {
     case 'nat':
-      return themeStore.isDark ? 'bg-red-900/30 text-red-400' : 'bg-red-50 text-red-600'
+      return neutralChip
     case 'nat_ipv6':
-      return themeStore.isDark ? 'bg-blue-900/50 text-blue-400' : 'bg-blue-100 text-blue-700'
+      return neutralChip
     case 'nat_ipv6_nat':
-      return themeStore.isDark ? 'bg-cyan-900/50 text-cyan-400' : 'bg-cyan-100 text-cyan-600'
+      return neutralChip
     case 'ipv6_only':
-      return themeStore.isDark ? 'bg-purple-900/50 text-purple-400' : 'bg-purple-100 text-purple-600'
+      return neutralChip
     case 'ipv6_nat':
-      return themeStore.isDark ? 'bg-teal-900/50 text-teal-400' : 'bg-teal-100 text-teal-600'
+      return neutralChip
     default:
-      return themeStore.isDark ? 'bg-red-900/30 text-red-400' : 'bg-red-50 text-red-600'
+      return neutralChip
   }
 }
 
@@ -78,9 +79,9 @@ function getNetworkModeLabel(mode: string | undefined | null): string {
 function getInstanceTypeClass(type: string | undefined | null): string {
   const normalizedType = String(type || 'container').toLowerCase()
   if (normalizedType === 'vm') {
-    return themeStore.isDark ? 'bg-amber-900/50 text-amber-400' : 'bg-amber-100 text-amber-700'
+    return themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'
   }
-  return themeStore.isDark ? 'bg-teal-900/50 text-teal-400' : 'bg-teal-100 text-teal-700'
+  return themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'
 }
 
 function getInstanceTypeLabel(type: string | undefined | null): string {
@@ -93,15 +94,15 @@ function getPackageBadgeClass(kind: 'soldOut' | 'own' | 'market' | 'friends' | '
     case 'soldOut':
       return themeStore.isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-500'
     case 'own':
-      return themeStore.isDark ? 'bg-amber-900/50 text-amber-400' : 'bg-amber-100 text-amber-700'
+      return themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'
     case 'market':
-      return themeStore.isDark ? 'bg-blue-900/50 text-blue-400 hover:bg-blue-900/70' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+      return themeStore.isDark ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
     case 'friends':
-      return themeStore.isDark ? 'bg-purple-900/50 text-purple-400' : 'bg-purple-100 text-purple-700'
+      return themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'
     case 'available':
-      return themeStore.isDark ? 'bg-green-900/50 text-green-400' : 'bg-green-100 text-green-700'
+      return themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'
     case 'shared':
-      return themeStore.isDark ? 'bg-green-900/50 text-green-400' : 'bg-green-100 text-green-700'
+      return themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'
   }
 }
 
@@ -317,14 +318,14 @@ onBeforeUnmount(() => {
               <span
                 v-if="pkg.nested === 1"
                 class="text-2xs px-1.5 py-0.5 rounded"
-                :class="themeStore.isDark ? 'bg-purple-900/50 text-purple-400' : 'bg-purple-100 text-purple-600'"
+                :class="themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'"
               >
                 {{ t('instance.selector.docker') }}
               </span>
               <span
                 v-if="pkg.privileged === 1"
                 class="text-2xs px-1.5 py-0.5 rounded"
-                :class="themeStore.isDark ? 'bg-orange-900/50 text-orange-400' : 'bg-orange-100 text-orange-600'"
+                :class="themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'"
               >
                 {{ t('instance.selector.privileged') }}
               </span>
@@ -391,14 +392,14 @@ onBeforeUnmount(() => {
               <span
                 v-if="detailPackage.nested === 1"
                 class="text-xs px-2 py-1 rounded"
-                :class="themeStore.isDark ? 'bg-purple-900/50 text-purple-400' : 'bg-purple-100 text-purple-600'"
+                :class="themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'"
               >
                 {{ t('instance.selector.docker') }}
               </span>
               <span
                 v-if="detailPackage.privileged === 1"
                 class="text-xs px-2 py-1 rounded"
-                :class="themeStore.isDark ? 'bg-orange-900/50 text-orange-400' : 'bg-orange-100 text-orange-600'"
+                :class="themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'"
               >
                 {{ t('instance.selector.privileged') }}
               </span>

@@ -396,8 +396,8 @@ const periodComparisonCards = computed<PeriodComparisonCard[]>(() => {
       revenueAmount: overview.value.thisMonthRevenue,
       rechargeAmount: overview.value.recharge.thisMonthAmount,
       rechargeCount: overview.value.recharge.thisMonthCount,
-      badgeClass: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
-      iconClass: 'text-emerald-600 dark:text-emerald-300'
+      badgeClass: 'bg-themed-tertiary text-themed',
+      iconClass: 'text-slate-600 dark:text-slate-300'
     },
     {
       key: 'today',
@@ -405,8 +405,8 @@ const periodComparisonCards = computed<PeriodComparisonCard[]>(() => {
       revenueAmount: overview.value.todayRevenue,
       rechargeAmount: overview.value.recharge.todayAmount,
       rechargeCount: overview.value.recharge.todayCount,
-      badgeClass: 'bg-cyan-500/10 text-cyan-700 dark:text-cyan-300',
-      iconClass: 'text-cyan-600 dark:text-cyan-300'
+      badgeClass: 'bg-themed-tertiary text-themed',
+      iconClass: 'text-slate-600 dark:text-slate-300'
     }
   ]
 })
@@ -492,8 +492,8 @@ const affCards = computed<MetricCard[]>(() => {
       value: overview.value.aff.totalCommission,
       format: 'money',
       icon: 'sparkles',
-      toneClass: 'text-sky-600 dark:text-sky-300',
-      surfaceClass: 'bg-sky-500/10 ring-1 ring-sky-500/20'
+      toneClass: 'text-slate-700 dark:text-slate-200',
+      surfaceClass: 'bg-slate-500/10 ring-1 ring-slate-500/20'
     },
     {
       key: 'aff-month',
@@ -501,8 +501,8 @@ const affCards = computed<MetricCard[]>(() => {
       value: overview.value.aff.thisMonthCommission,
       format: 'money',
       icon: 'sparkles',
-      toneClass: 'text-emerald-600 dark:text-emerald-300',
-      surfaceClass: 'bg-emerald-500/10 ring-1 ring-emerald-500/20'
+      toneClass: 'text-slate-700 dark:text-slate-200',
+      surfaceClass: 'bg-slate-500/10 ring-1 ring-slate-500/20'
     },
     {
       key: 'aff-converted',
@@ -1310,7 +1310,7 @@ function getBatchPriceItemStatusClass(status: BatchPriceUpdateItemStatus): strin
   const map: Record<BatchPriceUpdateItemStatus, string> = {
     ready: 'text-blue-600 dark:text-blue-400',
     unchanged: 'text-themed-muted',
-    failed: 'text-red-600 dark:text-red-400'
+    failed: 'text-rose-600 dark:text-rose-400'
   }
   return map[status]
 }
@@ -1482,18 +1482,18 @@ function copyToClipboard(text: string) {
                     {{ formatMoney(overview.netRevenue) }}
                   </p>
                 </div>
-                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-300">
+                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-themed-secondary text-themed-muted">
                   <BillingOverviewIcon name="wallet" class="h-5 w-5" />
                 </div>
               </div>
 
               <div class="mt-6 grid gap-4 sm:grid-cols-2">
-                <div class="min-w-0 border-l-2 border-sky-500/40 pl-3">
+                <div class="min-w-0 border-l-2 border-themed pl-3">
                   <p class="text-xs text-themed-muted">{{ $t('admin.billing.todayRevenue') }}</p>
                   <p class="mt-1 break-words text-xl font-semibold text-themed">{{ formatMoney(overview.todayRevenue) }}</p>
                   <p class="mt-1 text-xs text-themed-muted">{{ $t('admin.billing.todayRecharge') }} {{ formatMoney(overview.recharge.todayAmount) }}</p>
                 </div>
-                <div class="min-w-0 border-l-2 border-emerald-500/40 pl-3">
+                <div class="min-w-0 border-l-2 border-themed pl-3">
                   <p class="text-xs text-themed-muted">{{ $t('admin.billing.thisMonthRevenue') }}</p>
                   <p class="mt-1 break-words text-xl font-semibold text-themed">{{ formatMoney(overview.thisMonthRevenue) }}</p>
                   <p class="mt-1 text-xs" :class="monthlyRevenueChange !== null && monthlyRevenueChange < 0 ? 'text-rose-500 dark:text-rose-300' : 'text-emerald-600 dark:text-emerald-300'">
@@ -1509,7 +1509,7 @@ function copyToClipboard(text: string) {
                   <p class="text-sm text-themed-muted">{{ $t('admin.billing.totalRevenue') }}</p>
                   <p class="mt-2 break-words text-2xl font-semibold text-themed">{{ formatMoney(overview.totalRevenue) }}</p>
                 </div>
-                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-300">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-themed-secondary text-themed-muted">
                   <BillingOverviewIcon name="chart" class="h-5 w-5" />
                 </div>
               </div>
@@ -1522,7 +1522,7 @@ function copyToClipboard(text: string) {
                   <p class="text-sm text-themed-muted">{{ $t('admin.billing.totalRecharge') }}</p>
                   <p class="mt-2 break-words text-2xl font-semibold text-themed">{{ formatMoney(overview.recharge.totalAmount) }}</p>
                 </div>
-                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-300">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-themed-secondary text-themed-muted">
                   <BillingOverviewIcon name="wallet" class="h-5 w-5" />
                 </div>
               </div>
@@ -1535,7 +1535,7 @@ function copyToClipboard(text: string) {
                   <p class="text-sm text-themed-muted">{{ $t('admin.billing.hostedRevenueShare') }}</p>
                   <p class="mt-2 break-words text-2xl font-semibold text-themed">{{ formatPercent(hostedRevenueShare) }}</p>
                 </div>
-                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-300">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-themed-secondary text-themed-muted">
                   <BillingOverviewIcon name="cloud" class="h-5 w-5" />
                 </div>
               </div>
@@ -1548,7 +1548,7 @@ function copyToClipboard(text: string) {
                   <p class="text-sm text-themed-muted">{{ $t('admin.billing.totalRefunds') }}</p>
                   <p class="mt-2 break-words text-2xl font-semibold text-themed">{{ formatMoney(overview.totalRefunds) }}</p>
                 </div>
-                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-300">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-themed-secondary text-themed-muted">
                   <BillingOverviewIcon name="ban" class="h-5 w-5" />
                 </div>
               </div>
@@ -1606,7 +1606,7 @@ function copyToClipboard(text: string) {
                   <h2 class="text-base font-semibold text-themed">{{ $t('admin.billing.revenueBreakdownTitle') }}</h2>
                   <p class="mt-1 text-sm text-themed-muted">{{ $t('admin.billing.directRevenue') }} / {{ $t('admin.billing.hostedRevenue') }}</p>
                 </div>
-                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-300">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-themed-secondary text-themed-muted">
                   <BillingOverviewIcon name="chart" class="h-5 w-5" />
                 </div>
               </div>
@@ -1681,7 +1681,7 @@ function copyToClipboard(text: string) {
                   <h2 class="text-base font-semibold text-themed">{{ $t('admin.billing.instanceHealthTitle') }}</h2>
                   <p class="mt-1 text-sm text-themed-muted">{{ formatCount(overview.activePaidInstancesCount) }} / {{ formatCount(overview.paidInstancesCount) }}</p>
                 </div>
-                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-300">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-themed-secondary text-themed-muted">
                   <BillingOverviewIcon name="server" class="h-5 w-5" />
                 </div>
               </div>
@@ -1854,13 +1854,13 @@ function copyToClipboard(text: string) {
                 />
                 <div class="min-w-0">
                   <button
-                    class="truncate text-left text-sm font-semibold text-themed hover:text-blue-500"
+                    class="truncate text-left text-sm font-semibold text-themed hover:text-themed"
                     @click="router.push(instanceDetailPath(inst.id))"
                   >
                     {{ inst.name }}
                   </button>
                   <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-themed-muted">
-                    <button class="font-mono text-blue-500 hover:text-blue-600" @click="router.push(instanceDetailPath(inst.id))">
+                    <button class="font-mono text-themed hover:text-themed-secondary" @click="router.push(instanceDetailPath(inst.id))">
                       #{{ inst.id }}
                     </button>
                     <span v-if="inst.incusId" class="font-mono" :title="inst.incusId">{{ inst.incusId?.slice(0, 8) }}</span>
@@ -1877,14 +1877,14 @@ function copyToClipboard(text: string) {
               <span
                 class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
                 :class="inst.isHostedInstance
-                  ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300'
-                  : 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'"
+                  ? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                  : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'"
               >
                 {{ inst.isHostedInstance ? $t('admin.billing.hosted') : $t('admin.billing.direct') }}
               </span>
               <button
                 class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
-                :class="inst.instanceTypeLabel === 'PRIME' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'"
+                :class="inst.instanceTypeLabel === 'PRIME' ? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'"
                 @click="router.push(instanceDetailPath(inst.id))"
               >
                 {{ inst.instanceTypeLabel }}
@@ -1915,7 +1915,7 @@ function copyToClipboard(text: string) {
                 <div class="text-xs text-themed-muted">{{ $t('admin.billing.price') }}</div>
                 <button
                   v-if="inst.billingPrice"
-                  class="mt-1 font-medium text-blue-500 hover:text-blue-600 hover:underline"
+                  class="mt-1 font-medium text-themed hover:text-themed-secondary hover:underline"
                   @click="openPriceModal(inst)"
                 >
                   {{ formatMoney(inst.billingPrice) }}
@@ -1938,7 +1938,7 @@ function copyToClipboard(text: string) {
                     v-if="inst.remainingDays !== null"
                     :class="[
                       'font-medium',
-                      inst.remainingDays <= 0 ? 'text-red-500' :
+                      inst.remainingDays <= 0 ? 'text-rose-500' :
                       inst.remainingDays <= 7 ? 'text-yellow-500' : 'text-green-500'
                     ]"
                   >
@@ -1952,7 +1952,7 @@ function copyToClipboard(text: string) {
             <div class="mt-4 flex flex-wrap justify-end gap-1 border-t border-themed pt-3">
               <button
                 v-if="inst.status === 'suspended'"
-                class="btn btn-xs btn-ghost text-green-500"
+                class="btn btn-xs btn-ghost"
                 @click="openActionModal('unsuspend', inst)"
               >
                 {{ $t('admin.billing.unsuspend') }}
@@ -1962,26 +1962,26 @@ function copyToClipboard(text: string) {
               </button>
               <button
                 v-if="inst.remainingDays > 0"
-                class="btn btn-xs btn-ghost text-blue-500"
+                class="btn btn-xs btn-ghost text-themed"
                 @click="openUpgradeModal(inst)"
               >
                 {{ $t('admin.billing.upgradePlan') }}
               </button>
               <button
                 v-if="!inst.hasAffBinding"
-                class="btn btn-xs btn-ghost text-purple-500"
+                class="btn btn-xs btn-ghost"
                 @click="openActionModal('applyDiscount', inst)"
               >
                 {{ $t('admin.billing.applyDiscount') }}
               </button>
-              <button class="btn btn-xs btn-ghost text-red-500" @click="openActionModal('deleteRefund', inst)">
+              <button class="btn btn-xs btn-ghost text-rose-500" @click="openActionModal('deleteRefund', inst)">
                 {{ $t('admin.billing.deleteRefund') }}
               </button>
             </div>
           </div>
         </div>
 
-        <div class="hidden lg:block">
+        <div class="hidden overflow-hidden lg:block">
           <table class="w-full table-fixed text-sm">
             <thead class="bg-themed-secondary/80">
               <tr>
@@ -1996,21 +1996,21 @@ function copyToClipboard(text: string) {
                     @change="toggleSelectAllCurrentPage"
                   />
                 </th>
-                <th class="w-[7%] text-left p-3">{{ $t('admin.billing.hostingType') }}</th>
-                <th class="w-[7%] text-left p-3">{{ $t('admin.billing.instanceType') }}</th>
-                <th class="w-[7%] text-left p-3">ID</th>
-                <th class="w-[10%] text-left p-3">{{ $t('admin.billing.instanceName') }}</th>
-                <th class="w-[8%] text-left p-3">{{ $t('admin.billing.instanceStatus') }}</th>
-                <th class="w-[11%] text-left p-3">{{ $t('admin.billing.user') }}</th>
-                <th class="w-[8%] text-left p-3">{{ $t('admin.billing.package') }}</th>
-                <th class="w-[8%] text-left p-3">{{ $t('admin.billing.plan') }}</th>
-                <th class="w-[7%] text-left p-3">{{ $t('admin.billing.host') }}</th>
-                <th class="w-[7%] text-left p-3">{{ $t('admin.billing.price') }}</th>
-                <th class="w-[6%] text-left p-3">{{ $t('admin.billing.cycle') }}</th>
-                <th v-if="showDateColumns" class="w-[8%] text-left p-3">{{ $t('admin.billing.purchaseDate') }}</th>
-                <th v-if="showDateColumns" class="w-[8%] text-left p-3">{{ $t('admin.billing.expiresAt') }}</th>
-                <th class="w-[7%] text-left p-3">{{ $t('admin.billing.remainingDays') }}</th>
-                <th class="w-[13%] text-left p-3">{{ $t('common.actions') }}</th>
+                <th class="text-left p-3 whitespace-nowrap">{{ $t('admin.billing.hostingType') }}</th>
+                <th class="text-left p-3 whitespace-nowrap">{{ $t('admin.billing.instanceType') }}</th>
+                <th class="text-left p-3 whitespace-nowrap">ID</th>
+                <th class="text-left p-3 whitespace-nowrap">{{ $t('admin.billing.instanceName') }}</th>
+                <th class="text-left p-3 whitespace-nowrap">{{ $t('admin.billing.instanceStatus') }}</th>
+                <th class="text-left p-3 whitespace-nowrap">{{ $t('admin.billing.user') }}</th>
+                <th class="text-left p-3 whitespace-nowrap">{{ $t('admin.billing.package') }}</th>
+                <th class="text-left p-3 whitespace-nowrap">{{ $t('admin.billing.plan') }}</th>
+                <th class="text-left p-3 whitespace-nowrap">{{ $t('admin.billing.host') }}</th>
+                <th class="text-left p-3 whitespace-nowrap">{{ $t('admin.billing.price') }}</th>
+                <th class="text-left p-3 whitespace-nowrap">{{ $t('admin.billing.cycle') }}</th>
+                <th v-if="showDateColumns" class="text-left p-3 whitespace-nowrap">{{ $t('admin.billing.purchaseDate') }}</th>
+                <th v-if="showDateColumns" class="text-left p-3 whitespace-nowrap">{{ $t('admin.billing.expiresAt') }}</th>
+                <th class="text-left p-3 whitespace-nowrap">{{ $t('admin.billing.remainingDays') }}</th>
+                <th class="text-left p-3 whitespace-nowrap">{{ $t('common.actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -2030,8 +2030,8 @@ function copyToClipboard(text: string) {
                   <span 
                     class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
                     :class="inst.isHostedInstance 
-                      ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300' 
-                      : 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'"
+                      ? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                      : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'"
                   >
                     {{ inst.isHostedInstance ? $t('admin.billing.hosted') : $t('admin.billing.direct') }}
                   </span>
@@ -2040,7 +2040,7 @@ function copyToClipboard(text: string) {
                 <td class="p-3 whitespace-nowrap">
                   <span 
                     class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium cursor-pointer"
-                    :class="inst.instanceTypeLabel === 'PRIME' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'"
+                    :class="inst.instanceTypeLabel === 'PRIME' ? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'"
                     @click="router.push(instanceDetailPath(inst.id))"
                   >
                     <svg v-if="inst.instanceTypeLabel === 'PRIME'" class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -2056,7 +2056,7 @@ function copyToClipboard(text: string) {
                 <td class="p-3 whitespace-nowrap">
                   <div class="flex flex-col gap-0.5">
                     <span 
-                      class="text-blue-500 hover:text-blue-600 cursor-pointer font-mono text-xs"
+                      class="text-themed hover:text-themed-secondary cursor-pointer font-mono text-xs"
                       @click="router.push(instanceDetailPath(inst.id))"
                     >#{{ inst.id }}</span>
                     <span class="text-themed-muted font-mono text-xs" :title="inst.incusId">{{ inst.incusId?.slice(0, 8) }}</span>
@@ -2065,7 +2065,7 @@ function copyToClipboard(text: string) {
                 <!-- 实例名 -->
                 <td class="p-3">
                   <span 
-                    class="block truncate text-themed font-medium hover:text-blue-500 cursor-pointer"
+                    class="block truncate text-themed font-medium hover:text-themed cursor-pointer"
                     :title="inst.name"
                     @click="router.push(instanceDetailPath(inst.id))"
                   >{{ inst.name }}</span>
@@ -2098,7 +2098,7 @@ function copyToClipboard(text: string) {
                 <td class="p-3 whitespace-nowrap">
                   <button
                     v-if="inst.billingPrice"
-                    class="text-blue-500 hover:text-blue-600 hover:underline cursor-pointer font-medium"
+                    class="text-themed hover:text-themed-secondary hover:underline cursor-pointer font-medium"
                     @click="openPriceModal(inst)"
                   >
                     {{ formatMoney(inst.billingPrice) }}
@@ -2117,7 +2117,7 @@ function copyToClipboard(text: string) {
                     v-if="inst.remainingDays !== null"
                     :class="[
                       'font-medium',
-                      inst.remainingDays <= 0 ? 'text-red-500' : 
+                      inst.remainingDays <= 0 ? 'text-rose-500' :
                       inst.remainingDays <= 7 ? 'text-yellow-500' : 'text-green-500'
                     ]"
                   >
@@ -2130,7 +2130,7 @@ function copyToClipboard(text: string) {
                   <div class="flex flex-wrap items-center gap-1">
                     <button
                       v-if="inst.status === 'suspended'"
-                      class="btn btn-xs btn-ghost text-green-500"
+                      class="btn btn-xs btn-ghost"
                       @click="openActionModal('unsuspend', inst)"
                     >
                       {{ $t('admin.billing.unsuspend') }}
@@ -2140,19 +2140,19 @@ function copyToClipboard(text: string) {
                     </button>
                     <button 
                       v-if="inst.remainingDays > 0" 
-                      class="btn btn-xs btn-ghost text-blue-500" 
+                      class="btn btn-xs btn-ghost text-themed"
                       @click="openUpgradeModal(inst)"
                     >
                       {{ $t('admin.billing.upgradePlan') }}
                     </button>
                     <button
                       v-if="!inst.hasAffBinding"
-                      class="btn btn-xs btn-ghost text-purple-500"
+                      class="btn btn-xs btn-ghost"
                       @click="openActionModal('applyDiscount', inst)"
                     >
                       {{ $t('admin.billing.applyDiscount') }}
                     </button>
-                    <button class="btn btn-xs btn-ghost text-red-500" @click="openActionModal('deleteRefund', inst)">
+                    <button class="btn btn-xs btn-ghost text-rose-500" @click="openActionModal('deleteRefund', inst)">
                       {{ $t('admin.billing.deleteRefund') }}
                     </button>
                   </div>
@@ -2164,7 +2164,7 @@ function copyToClipboard(text: string) {
       </div>
 
       <div v-else class="card p-10 text-center">
-        <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-300">
+        <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-themed-secondary text-themed-muted">
           <BillingOverviewIcon name="server" class="h-7 w-7" />
         </div>
         <div class="mt-4 text-base font-medium text-themed">{{ $t('admin.billing.noInstances') }}</div>
@@ -2233,7 +2233,7 @@ function copyToClipboard(text: string) {
                 <div class="text-sm font-medium text-themed">{{ getRecordTypeLabel(rec.type) }}</div>
                 <div class="mt-1 text-xs text-themed-muted">{{ formatDate(rec.createdAt) }}</div>
               </div>
-              <div class="shrink-0 text-sm font-semibold" :class="rec.amount >= 0 ? 'text-green-500' : 'text-red-500'">
+              <div class="shrink-0 text-sm font-semibold" :class="rec.amount >= 0 ? 'text-green-500' : 'text-rose-500'">
                 {{ formatMoney(rec.amount) }}
               </div>
             </div>
@@ -2269,7 +2269,7 @@ function copyToClipboard(text: string) {
             <tbody>
               <tr v-for="rec in records" :key="rec.id" class="border-t border-themed hover:bg-themed-secondary/40 transition-colors">
                 <td class="p-3 whitespace-nowrap">{{ getRecordTypeLabel(rec.type) }}</td>
-                <td class="p-3 whitespace-nowrap" :class="rec.amount >= 0 ? 'text-green-500' : 'text-red-500'">
+                <td class="p-3 whitespace-nowrap" :class="rec.amount >= 0 ? 'text-green-500' : 'text-rose-500'">
                   {{ formatMoney(rec.amount) }}
                 </td>
                 <td class="p-3 truncate" :title="rec.instance?.name">{{ rec.instance?.name || '-' }}</td>
@@ -2283,7 +2283,7 @@ function copyToClipboard(text: string) {
       </div>
 
       <div v-else class="card p-10 text-center">
-        <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-300">
+        <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-themed-secondary text-themed-muted">
           <BillingOverviewIcon name="chart" class="h-7 w-7" />
         </div>
         <div class="mt-4 text-base font-medium text-themed">{{ $t('admin.billing.noRecords') }}</div>
@@ -2365,7 +2365,7 @@ function copyToClipboard(text: string) {
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
                 <div class="truncate font-mono text-xs text-themed">
-                  <span class="cursor-pointer hover:text-blue-500" @click="copyToClipboard(rec.orderNo)">{{ rec.orderNo }}</span>
+                  <span class="cursor-pointer hover:text-themed" @click="copyToClipboard(rec.orderNo)">{{ rec.orderNo }}</span>
                 </div>
                 <div class="mt-1 text-sm text-themed">{{ rec.user?.username || '-' }}</div>
                 <div class="mt-1 text-xs text-themed-muted">{{ formatDate(rec.createdAt) }}</div>
@@ -2412,7 +2412,7 @@ function copyToClipboard(text: string) {
               </button>
               <button
                 v-if="rec.status === 'pending'"
-                class="btn btn-sm btn-ghost text-blue-500"
+                class="btn btn-sm btn-ghost text-themed"
                 :disabled="syncingRecordId === rec.id"
                 @click="syncRechargeRecord(rec)"
               >
@@ -2441,7 +2441,7 @@ function copyToClipboard(text: string) {
             <tbody>
               <tr v-for="rec in rechargeRecords" :key="rec.id" class="border-t border-themed hover:bg-themed-secondary/40 transition-colors">
                 <td class="p-3 font-mono text-xs whitespace-nowrap">
-                  <span class="cursor-pointer hover:text-blue-500" @click="copyToClipboard(rec.orderNo)">{{ rec.orderNo }}</span>
+                  <span class="cursor-pointer hover:text-themed" @click="copyToClipboard(rec.orderNo)">{{ rec.orderNo }}</span>
                 </td>
                 <td class="p-3 whitespace-nowrap">{{ rec.user?.username || '-' }}</td>
                 <td class="p-3 whitespace-nowrap">{{ formatMoney(rec.amount) }}</td>
@@ -2468,7 +2468,7 @@ function copyToClipboard(text: string) {
                 <td class="p-3 font-mono text-xs whitespace-nowrap text-themed-muted max-w-[150px] truncate" :title="rec.tradeNo || ''">
                   <span 
                     v-if="rec.tradeNo" 
-                    class="cursor-pointer hover:text-blue-500" 
+                    class="cursor-pointer hover:text-themed"
                     @click="copyToClipboard(rec.tradeNo)"
                   >{{ rec.tradeNo }}</span>
                   <span v-else>-</span>
@@ -2485,7 +2485,7 @@ function copyToClipboard(text: string) {
                   </button>
                   <button
                     v-if="rec.status === 'pending'"
-                    class="btn btn-sm btn-ghost text-blue-500"
+                    class="btn btn-sm btn-ghost text-themed"
                     :disabled="syncingRecordId === rec.id"
                     @click="syncRechargeRecord(rec)"
                   >
@@ -2501,7 +2501,7 @@ function copyToClipboard(text: string) {
       </div>
 
       <div v-else class="card p-10 text-center">
-        <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-600 dark:text-cyan-300">
+        <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-themed-secondary text-themed-muted">
           <BillingOverviewIcon name="wallet" class="h-7 w-7" />
         </div>
         <div class="mt-4 text-base font-medium text-themed">{{ $t('admin.billing.noRechargeRecords') }}</div>
@@ -2601,7 +2601,7 @@ function copyToClipboard(text: string) {
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
                 <div class="truncate font-mono text-xs text-themed">
-                  <span class="cursor-pointer hover:text-blue-500" @click="copyToClipboard(refund.orderNo)">{{ refund.orderNo }}</span>
+                  <span class="cursor-pointer hover:text-themed" @click="copyToClipboard(refund.orderNo)">{{ refund.orderNo }}</span>
                 </div>
                 <div class="mt-1 text-sm text-themed">{{ refund.user?.username || '-' }}</div>
                 <div class="mt-1 text-xs text-themed-muted">{{ formatDate(refund.createdAt) }}</div>
@@ -2631,7 +2631,7 @@ function copyToClipboard(text: string) {
             <div class="flex justify-end">
               <button
                 v-if="refund.status === 'pending' || refund.status === 'processing' || refund.status === 'failed'"
-                class="btn btn-sm btn-ghost text-blue-500"
+                class="btn btn-sm btn-ghost text-themed"
                 :disabled="retryingRefundId === refund.id"
                 @click="retryRechargeRefund(refund)"
               >
@@ -2660,7 +2660,7 @@ function copyToClipboard(text: string) {
               <tr v-for="refund in refundRequests" :key="refund.id" class="border-t border-themed transition-colors hover:bg-themed-secondary/40">
                 <td class="p-3 font-mono text-xs whitespace-nowrap">#{{ refund.id }}</td>
                 <td class="p-3 font-mono text-xs whitespace-nowrap">
-                  <span class="cursor-pointer hover:text-blue-500" @click="copyToClipboard(refund.orderNo)">{{ refund.orderNo }}</span>
+                  <span class="cursor-pointer hover:text-themed" @click="copyToClipboard(refund.orderNo)">{{ refund.orderNo }}</span>
                 </td>
                 <td class="p-3 whitespace-nowrap">{{ refund.user?.username || '-' }}</td>
                 <td class="p-3 whitespace-nowrap">{{ formatMoney(refund.amount) }}</td>
@@ -2673,7 +2673,7 @@ function copyToClipboard(text: string) {
                   <div v-if="refund.providerRefundId" class="mt-1 truncate font-mono" :title="refund.providerRefundId">
                     {{ $t('admin.billing.providerRefundId') }} {{ refund.providerRefundId }}
                   </div>
-                  <div v-if="refund.failureReason" class="mt-1 truncate text-red-600 dark:text-red-400" :title="refund.failureReason">
+                  <div v-if="refund.failureReason" class="mt-1 truncate text-rose-600 dark:text-rose-400" :title="refund.failureReason">
                     {{ refund.failureReason }}
                   </div>
                 </td>
@@ -2684,7 +2684,7 @@ function copyToClipboard(text: string) {
                 <td class="p-3 whitespace-nowrap">
                   <button
                     v-if="refund.status === 'pending' || refund.status === 'processing' || refund.status === 'failed'"
-                    class="btn btn-sm btn-ghost text-blue-500"
+                    class="btn btn-sm btn-ghost text-themed"
                     :disabled="retryingRefundId === refund.id"
                     @click="retryRechargeRefund(refund)"
                   >
@@ -2699,7 +2699,7 @@ function copyToClipboard(text: string) {
       </div>
 
       <div v-else class="card p-10 text-center">
-        <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-300">
+        <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-themed-secondary text-themed-muted">
           <BillingOverviewIcon name="ban" class="h-7 w-7" />
         </div>
         <div class="mt-4 text-base font-medium text-themed">{{ $t('admin.billing.noRefundRequests') }}</div>
@@ -3007,8 +3007,8 @@ function copyToClipboard(text: string) {
 
             <!-- 删除并退款 -->
             <template v-if="actionType === 'deleteRefund'">
-              <div class="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-                <p class="text-sm text-red-600 dark:text-red-400">
+              <div class="p-3 bg-rose-50 dark:bg-rose-900/20 rounded-lg border border-rose-200 dark:border-rose-800">
+                <p class="text-sm text-rose-600 dark:text-rose-400">
                   {{ $t('admin.billing.deleteRefundWarning') }}
                 </p>
               </div>
@@ -3033,8 +3033,8 @@ function copyToClipboard(text: string) {
 
             <!-- 应用折扣 -->
             <template v-if="actionType === 'applyDiscount'">
-              <div class="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
-                <p class="text-sm text-purple-600 dark:text-purple-400">
+              <div class="p-3 bg-gray-50 dark:bg-gray-800/40 rounded-lg border border-gray-200 dark:border-gray-700">
+                <p class="text-sm text-themed-secondary">
                   {{ $t('admin.billing.applyDiscountHint') }}
                 </p>
               </div>
@@ -3099,7 +3099,7 @@ function copyToClipboard(text: string) {
               </div>
               <div class="rounded-lg bg-themed-secondary p-3">
                 <div class="text-xs text-themed-muted">{{ $t('admin.billing.batchPreviewFailed') }}</div>
-                <div class="mt-1 text-lg font-semibold" :class="(batchPricePreview?.summary.failedCount || 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-themed'">
+                <div class="mt-1 text-lg font-semibold" :class="(batchPricePreview?.summary.failedCount || 0) > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-themed'">
                   {{ batchPricePreview?.summary.failedCount || 0 }}
                 </div>
               </div>
@@ -3140,12 +3140,12 @@ function copyToClipboard(text: string) {
             <template v-else-if="batchPricePreview">
               <div
                 class="rounded-lg border p-3"
-                :class="batchPricePreview.canSubmit ? 'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20' : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20'"
+                :class="batchPricePreview.canSubmit ? 'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20' : 'border-rose-200 bg-rose-50 dark:border-rose-800 dark:bg-rose-900/20'"
               >
                 <div class="grid gap-3 sm:grid-cols-3">
                   <div>
                     <div class="text-xs text-themed-muted">{{ $t('admin.billing.batchTotalCharge') }}</div>
-                    <div class="mt-1 text-base font-semibold text-red-600 dark:text-red-400">{{ formatMoney(batchPricePreview.summary.totalCharge) }}</div>
+                    <div class="mt-1 text-base font-semibold text-rose-600 dark:text-rose-400">{{ formatMoney(batchPricePreview.summary.totalCharge) }}</div>
                   </div>
                   <div>
                     <div class="text-xs text-themed-muted">{{ $t('admin.billing.batchTotalRefund') }}</div>
@@ -3156,7 +3156,7 @@ function copyToClipboard(text: string) {
                     <div class="mt-1 text-base font-semibold text-themed">{{ formatPriceDiff(batchPricePreview.summary.netAmount) }}</div>
                   </div>
                 </div>
-                <p v-if="!batchPricePreview.canSubmit" class="mt-3 text-sm font-medium text-red-700 dark:text-red-300">
+                <p v-if="!batchPricePreview.canSubmit" class="mt-3 text-sm font-medium text-rose-700 dark:text-rose-300">
                   {{ $t('admin.billing.batchPreviewBlocked') }}
                 </p>
               </div>
@@ -3179,11 +3179,11 @@ function copyToClipboard(text: string) {
                     </div>
                     <div>
                       <div class="text-xs text-themed-muted">{{ $t('admin.billing.priceDifference') }}</div>
-                      <div :class="impact.netDiff > 0 ? 'text-red-600 dark:text-red-400' : impact.netDiff < 0 ? 'text-green-600 dark:text-green-400' : 'text-themed-muted'">{{ formatPriceDiff(impact.netDiff) }}</div>
+                      <div :class="impact.netDiff > 0 ? 'text-rose-600 dark:text-rose-400' : impact.netDiff < 0 ? 'text-green-600 dark:text-green-400' : 'text-themed-muted'">{{ formatPriceDiff(impact.netDiff) }}</div>
                     </div>
                     <div>
                       <div class="text-xs text-themed-muted">{{ $t('admin.billing.userBalance') }}</div>
-                      <div :class="impact.insufficientBalance ? 'text-red-600 dark:text-red-400 font-medium' : 'text-themed'">{{ formatMoney(impact.balanceAfter) }}</div>
+                      <div :class="impact.insufficientBalance ? 'text-rose-600 dark:text-rose-400 font-medium' : 'text-themed'">{{ formatMoney(impact.balanceAfter) }}</div>
                     </div>
                   </div>
                 </div>
@@ -3216,7 +3216,7 @@ function copyToClipboard(text: string) {
                         </div>
                         <div>
                           <div class="text-xs text-themed-muted">{{ $t('admin.billing.priceDifference') }}</div>
-                          <div :class="item.priceDiff > 0 ? 'text-red-600 dark:text-red-400' : item.priceDiff < 0 ? 'text-green-600 dark:text-green-400' : 'text-themed-muted'">
+                          <div :class="item.priceDiff > 0 ? 'text-rose-600 dark:text-rose-400' : item.priceDiff < 0 ? 'text-green-600 dark:text-green-400' : 'text-themed-muted'">
                             {{ formatPriceDiff(item.priceDiff) }}
                           </div>
                         </div>
@@ -3244,7 +3244,7 @@ function copyToClipboard(text: string) {
                         <td class="p-2 text-themed-muted truncate" :title="item.user?.username || ''">{{ item.user?.username || '-' }}</td>
                         <td class="p-2 text-right">{{ item.oldPrice !== null ? formatMoney(item.oldPrice) : '-' }}</td>
                         <td class="p-2 text-right">{{ formatMoney(item.newPrice) }}</td>
-                        <td class="p-2 text-right" :class="item.priceDiff > 0 ? 'text-red-600 dark:text-red-400' : item.priceDiff < 0 ? 'text-green-600 dark:text-green-400' : 'text-themed-muted'">
+                        <td class="p-2 text-right" :class="item.priceDiff > 0 ? 'text-rose-600 dark:text-rose-400' : item.priceDiff < 0 ? 'text-green-600 dark:text-green-400' : 'text-themed-muted'">
                           {{ formatPriceDiff(item.priceDiff) }}
                         </td>
                         <td class="p-2">
@@ -3308,7 +3308,7 @@ function copyToClipboard(text: string) {
               </div>
               <div class="flex justify-between text-sm">
                 <span class="text-themed-muted">{{ $t('admin.billing.currentPrice') }}:</span>
-                <span class="font-medium text-blue-500">¥{{ (priceTarget?.billingPrice || 0).toFixed(2) }}</span>
+                <span class="font-medium text-themed">¥{{ (priceTarget?.billingPrice || 0).toFixed(2) }}</span>
               </div>
               <!-- 优惠码状态 -->
               <div v-if="priceTarget?.hasAffBinding && priceTarget?.affDiscountRate > 0" class="flex justify-between text-sm">
@@ -3382,19 +3382,19 @@ function copyToClipboard(text: string) {
               {{ $t('common.loading') }}
             </div>
 
-            <div v-else-if="priceForm.settleBalance && (pricePreview?.remainingDays || 0) > 0 && priceForm.newPrice !== priceTarget?.billingPrice" class="p-3 rounded-lg border" :class="priceDiff > 0 && priceDiff > (pricePreview?.userBalance || priceTarget?.user?.balance || 0) ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'">
+            <div v-else-if="priceForm.settleBalance && (pricePreview?.remainingDays || 0) > 0 && priceForm.newPrice !== priceTarget?.billingPrice" class="p-3 rounded-lg border" :class="priceDiff > 0 && priceDiff > (pricePreview?.userBalance || priceTarget?.user?.balance || 0) ? 'bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800' : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'">
               <div class="flex justify-between items-center">
-                <span class="text-sm" :class="priceDiff > 0 && priceDiff > (pricePreview?.userBalance || priceTarget?.user?.balance || 0) ? 'text-red-700 dark:text-red-300' : 'text-blue-700 dark:text-blue-300'">
+                <span class="text-sm" :class="priceDiff > 0 && priceDiff > (pricePreview?.userBalance || priceTarget?.user?.balance || 0) ? 'text-rose-700 dark:text-rose-300' : 'text-blue-700 dark:text-blue-300'">
                   {{ priceDiff > 0 ? $t('admin.billing.needPay') : $t('admin.billing.willRefund') }}:
                 </span>
-                <span class="text-xl font-bold" :class="priceDiff > 0 && priceDiff > (pricePreview?.userBalance || priceTarget?.user?.balance || 0) ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'">
+                <span class="text-xl font-bold" :class="priceDiff > 0 && priceDiff > (pricePreview?.userBalance || priceTarget?.user?.balance || 0) ? 'text-rose-600 dark:text-rose-400' : 'text-blue-600 dark:text-blue-400'">
                   ¥{{ Math.abs(priceDiff).toFixed(2) }}
                 </span>
               </div>
-              <p v-if="priceDiff > 0 && priceDiff > (pricePreview?.userBalance || priceTarget?.user?.balance || 0)" class="text-xs text-red-600 dark:text-red-400 mt-2 font-medium">
+              <p v-if="priceDiff > 0 && priceDiff > (pricePreview?.userBalance || priceTarget?.user?.balance || 0)" class="text-xs text-rose-600 dark:text-rose-400 mt-2 font-medium">
                 {{ $t('admin.billing.insufficientBalance') }}
               </p>
-              <p v-else class="text-xs mt-1" :class="priceDiff > 0 && priceDiff > (pricePreview?.userBalance || priceTarget?.user?.balance || 0) ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'">
+              <p v-else class="text-xs mt-1" :class="priceDiff > 0 && priceDiff > (pricePreview?.userBalance || priceTarget?.user?.balance || 0) ? 'text-rose-600 dark:text-rose-400' : 'text-blue-600 dark:text-blue-400'">
                 {{ $t('admin.billing.priceDiffHint', { days: Math.ceil(pricePreview?.remainingDays || 0) }) }}
               </p>
             </div>
@@ -3469,7 +3469,7 @@ function copyToClipboard(text: string) {
                     class="flex items-start gap-3 p-3 rounded-lg border transition-colors"
                     :class="[
                       plan.canUpgrade === false
-                        ? 'cursor-not-allowed opacity-60 border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20'
+                        ? 'cursor-not-allowed opacity-60 border-rose-200 bg-rose-50 dark:border-rose-800 dark:bg-rose-900/20'
                         : 'cursor-pointer',
                       selectedPlanId === plan.id
                         ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
@@ -3486,7 +3486,7 @@ function copyToClipboard(text: string) {
                       <div class="text-xs text-themed-muted mt-1">
                         CPU {{ plan.cpu }}% | {{ plan.memory }}MB RAM | {{ plan.disk }}MB {{ $t('admin.billing.diskLabel') }}
                       </div>
-                      <div v-if="plan.canUpgrade === false && plan.resourceWarnings?.length" class="mt-2 text-xs text-red-600 dark:text-red-300">
+                      <div v-if="plan.canUpgrade === false && plan.resourceWarnings?.length" class="mt-2 text-xs text-rose-600 dark:text-rose-300">
                         {{ plan.resourceWarnings[0] }}
                       </div>
                     </div>
@@ -3498,22 +3498,22 @@ function copyToClipboard(text: string) {
               </div>
 
               <!-- 差价计算结果 -->
-              <div v-if="selectedPlanId" class="p-3 rounded-lg border" :class="upgradePriceDiff > upgradeData.userBalance ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'">
+              <div v-if="selectedPlanId" class="p-3 rounded-lg border" :class="upgradePriceDiff > upgradeData.userBalance ? 'bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800' : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'">
                 <div class="flex justify-between items-center">
-                  <span :class="upgradePriceDiff > upgradeData.userBalance ? 'text-red-700 dark:text-red-300' : 'text-blue-700 dark:text-blue-300'">{{ $t('admin.billing.priceDifference') }}:</span>
-                  <span class="text-xl font-bold" :class="upgradePriceDiff > upgradeData.userBalance ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'">¥{{ upgradePriceDiff.toFixed(2) }}</span>
+                  <span :class="upgradePriceDiff > upgradeData.userBalance ? 'text-rose-700 dark:text-rose-300' : 'text-blue-700 dark:text-blue-300'">{{ $t('admin.billing.priceDifference') }}:</span>
+                  <span class="text-xl font-bold" :class="upgradePriceDiff > upgradeData.userBalance ? 'text-rose-600 dark:text-rose-400' : 'text-blue-600 dark:text-blue-400'">¥{{ upgradePriceDiff.toFixed(2) }}</span>
                 </div>
                 <div class="flex justify-between items-center mt-1">
-                  <span :class="upgradePriceDiff > upgradeData.userBalance ? 'text-red-700 dark:text-red-300' : 'text-blue-700 dark:text-blue-300'" class="text-sm">{{ $t('admin.billing.userBalance') }}:</span>
-                  <span class="font-medium" :class="upgradePriceDiff > upgradeData.userBalance ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'">¥{{ upgradeData.userBalance.toFixed(2) }}</span>
+                  <span :class="upgradePriceDiff > upgradeData.userBalance ? 'text-rose-700 dark:text-rose-300' : 'text-blue-700 dark:text-blue-300'" class="text-sm">{{ $t('admin.billing.userBalance') }}:</span>
+                  <span class="font-medium" :class="upgradePriceDiff > upgradeData.userBalance ? 'text-rose-600 dark:text-rose-400' : 'text-blue-600 dark:text-blue-400'">¥{{ upgradeData.userBalance.toFixed(2) }}</span>
                 </div>
-                <p v-if="upgradePriceDiff > upgradeData.userBalance" class="text-xs text-red-600 dark:text-red-400 mt-2 font-medium">
+                <p v-if="upgradePriceDiff > upgradeData.userBalance" class="text-xs text-rose-600 dark:text-rose-400 mt-2 font-medium">
                   {{ $t('admin.billing.insufficientBalance') }}
                 </p>
-                <p v-else-if="selectedUpgradePlanBlocked" class="text-xs text-red-600 dark:text-red-400 mt-2 font-medium">
+                <p v-else-if="selectedUpgradePlanBlocked" class="text-xs text-rose-600 dark:text-rose-400 mt-2 font-medium">
                   {{ selectedUpgradePlan?.resourceWarnings?.[0] || '实例所在节点资源不足，无法升级方案' }}
                 </p>
-                <p v-else class="text-xs mt-1" :class="upgradePriceDiff > upgradeData.userBalance ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'">
+                <p v-else class="text-xs mt-1" :class="upgradePriceDiff > upgradeData.userBalance ? 'text-rose-600 dark:text-rose-400' : 'text-blue-600 dark:text-blue-400'">
                   {{ $t('admin.billing.priceDifferenceHint') }}
                 </p>
               </div>

@@ -202,11 +202,11 @@ function statusLabel(status: ProofStatus): string {
 
 function statusClass(status: ProofStatus): string {
   const classes: Record<ProofStatus, string> = {
-    verified: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-    partial: 'border-blue-200 bg-blue-50 text-blue-700',
-    pending: 'border-amber-200 bg-amber-50 text-amber-700',
-    operator: 'border-rose-200 bg-rose-50 text-rose-700',
-    waived: 'border-slate-200 bg-slate-50 text-slate-700'
+    verified: 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300',
+    partial: 'border-gray-200 bg-gray-100 text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300',
+    pending: 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300',
+    operator: 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300',
+    waived: 'border-gray-200 bg-gray-50 text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400'
   }
   return classes[status]
 }
@@ -222,9 +222,9 @@ function riskLabel(risk: RiskLevel): string {
 
 function riskClass(risk: RiskLevel): string {
   const classes: Record<RiskLevel, string> = {
-    low: 'text-emerald-600',
-    medium: 'text-amber-600',
-    high: 'text-rose-600'
+    low: 'text-emerald-600 dark:text-emerald-400',
+    medium: 'text-amber-600 dark:text-amber-400',
+    high: 'text-rose-600 dark:text-rose-400'
   }
   return classes[risk]
 }
@@ -260,7 +260,7 @@ async function copyCommand(key: string, command: string): Promise<void> {
         <div class="text-sm text-themed-muted">生产 proof 收口</div>
         <div class="mt-2 text-3xl font-semibold text-themed">{{ progressPercent }}%</div>
         <div class="mt-2 h-2 rounded-full bg-themed-muted">
-          <div class="h-2 rounded-full bg-blue-500" :style="{ width: `${progressPercent}%` }"></div>
+          <div class="h-2 rounded-full bg-accent" :style="{ width: `${progressPercent}%` }"></div>
         </div>
         <div class="mt-2 text-xs text-themed-muted">{{ closedProofItems }}/{{ proofStats.total }} 项已证明或已豁免</div>
       </div>

@@ -318,7 +318,7 @@ function getNetworkModeText(mode: string | null | undefined) {
           {{ $t('transfer.receivedTab') }}
           <span 
             v-if="pendingCount > 0"
-            class="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-xs font-bold text-white bg-red-500 rounded-full"
+            class="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-xs font-bold text-white dark:text-black bg-accent rounded-full"
           >
             {{ pendingCount > 9 ? '9+' : pendingCount }}
           </span>
@@ -460,7 +460,7 @@ function getNetworkModeText(mode: string | null | undefined) {
                 </button>
                 <button
                   type="button"
-                  class="btn-ghost text-red-500 hover:text-red-600"
+                  class="btn-ghost text-rose-600 hover:text-rose-700 dark:text-rose-400"
                   :disabled="actionLoading === transfer.id || pushLoading === transfer.id"
                   @click="handleCancel(transfer)"
                 >
@@ -492,7 +492,7 @@ function getNetworkModeText(mode: string | null | undefined) {
                 </button>
                 <button
                   type="button"
-                  class="btn-ghost text-red-500 hover:text-red-600"
+                  class="btn-ghost text-rose-600 hover:text-rose-700 dark:text-rose-400"
                   :disabled="actionLoading === transfer.id"
                   @click="openRejectModal(transfer)"
                 >
@@ -545,15 +545,15 @@ function getNetworkModeText(mode: string | null | undefined) {
         <table class="w-full table-fixed">
           <thead :class="themeStore.isDark ? 'bg-gray-800' : 'bg-gray-50'">
             <tr>
-              <th class="w-[17%] px-4 py-3 text-left text-sm font-medium whitespace-nowrap">{{ $t('transfer.detail.instance') }}</th>
-              <th class="w-[15%] px-4 py-3 text-left text-sm font-medium whitespace-nowrap">
+              <th class="px-4 py-3 text-left text-sm font-medium whitespace-nowrap">{{ $t('transfer.detail.instance') }}</th>
+              <th class="px-4 py-3 text-left text-sm font-medium whitespace-nowrap">
                 {{ activeTab === 'sent' ? $t('transfer.detail.toUser') : $t('transfer.detail.fromUser') }}
               </th>
-              <th class="w-[14%] px-4 py-3 text-left text-sm font-medium whitespace-nowrap">{{ $t('transfer.detail.snapshot') }}</th>
-              <th class="w-[18%] px-4 py-3 text-left text-sm font-medium whitespace-nowrap">{{ $t('transfer.modal.remark') }}</th>
-              <th class="w-[11%] px-4 py-3 text-left text-sm font-medium whitespace-nowrap">{{ $t('common.status') }}</th>
-              <th class="w-[13%] px-4 py-3 text-left text-sm font-medium whitespace-nowrap">{{ $t('common.createdAt') }}</th>
-              <th class="w-[12%] px-4 py-3 text-right text-sm font-medium whitespace-nowrap">{{ $t('common.actions') }}</th>
+              <th class="px-4 py-3 text-left text-sm font-medium whitespace-nowrap">{{ $t('transfer.detail.snapshot') }}</th>
+              <th class="px-4 py-3 text-left text-sm font-medium whitespace-nowrap">{{ $t('transfer.modal.remark') }}</th>
+              <th class="px-4 py-3 text-left text-sm font-medium whitespace-nowrap">{{ $t('common.status') }}</th>
+              <th class="px-4 py-3 text-left text-sm font-medium whitespace-nowrap">{{ $t('common.createdAt') }}</th>
+              <th class="px-4 py-3 text-right text-sm font-medium whitespace-nowrap">{{ $t('common.actions') }}</th>
             </tr>
           </thead>
           <tbody class="divide-y" :class="themeStore.isDark ? 'divide-gray-800' : 'divide-gray-100'">
@@ -638,7 +638,7 @@ function getNetworkModeText(mode: string | null | undefined) {
               <td class="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
                 {{ formatDate(transfer.createdAt) }}
               </td>
-              <td class="px-4 py-3 text-right">
+              <td class="px-4 py-3 text-right whitespace-nowrap">
                 <div class="flex flex-wrap items-center justify-end gap-2">
                   <!-- Sent tab actions -->
                   <template v-if="activeTab === 'sent'">
@@ -653,7 +653,7 @@ function getNetworkModeText(mode: string | null | undefined) {
                         {{ pushLoading === transfer.id ? $t('common.processing') : $t('transfer.actions.push') }}
                       </button>
                       <button
-                        class="btn-ghost text-red-500 hover:text-red-600"
+                        class="btn-ghost text-rose-600 hover:text-rose-700 dark:text-rose-400"
                         :disabled="actionLoading === transfer.id || pushLoading === transfer.id"
                         @click="handleCancel(transfer)"
                       >
@@ -684,7 +684,7 @@ function getNetworkModeText(mode: string | null | undefined) {
                         {{ $t('transfer.actions.accept') }}
                       </button>
                       <button
-                        class="btn-ghost text-red-500 hover:text-red-600"
+                        class="btn-ghost text-rose-600 hover:text-rose-700 dark:text-rose-400"
                         :disabled="actionLoading === transfer.id"
                         @click="openRejectModal(transfer)"
                       >

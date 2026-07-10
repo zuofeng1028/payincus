@@ -163,19 +163,19 @@ function caseStatusLabel(status: DeliveryAssuranceCaseStatus | null | undefined)
 }
 
 function caseStatusClass(status: DeliveryAssuranceCaseStatus | null | undefined): string {
-  if (status === 'auto_retryable') return 'border-amber-200 bg-amber-50 text-amber-700'
-  if (status === 'pending_manual') return 'border-red-200 bg-red-50 text-red-700'
-  if (status === 'in_progress') return 'border-blue-200 bg-blue-50 text-blue-700'
-  if (status === 'recovered') return 'border-emerald-200 bg-emerald-50 text-emerald-700'
+  if (status === 'auto_retryable') return 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300'
+  if (status === 'pending_manual') return 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300'
+  if (status === 'in_progress') return 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300'
+  if (status === 'recovered') return 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300'
   if (status === 'closed') return 'border-themed bg-themed-tertiary text-themed-muted'
   return 'border-themed bg-themed-secondary text-themed-muted'
 }
 
 function badgeClass(status: string): string {
-  if (status === 'COMPLETED') return 'border-emerald-200 bg-emerald-50 text-emerald-700'
-  if (status === 'FAILED') return 'border-red-200 bg-red-50 text-red-700'
-  if (status === 'PROCESSING') return 'border-blue-200 bg-blue-50 text-blue-700'
-  return 'border-amber-200 bg-amber-50 text-amber-700'
+  if (status === 'COMPLETED') return 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300'
+  if (status === 'FAILED') return 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300'
+  if (status === 'PROCESSING') return 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300'
+  return 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300'
 }
 
 function formatAmount(value: number | null | undefined): string {
@@ -262,10 +262,10 @@ async function runRepairCaseAction(item: DeliveryCaseContext, action: 'retry-syn
 }
 
 function toneClass(tone: string): string {
-  if (tone === 'success') return 'border-emerald-200 bg-emerald-50 text-emerald-700'
-  if (tone === 'danger') return 'border-red-200 bg-red-50 text-red-700'
-  if (tone === 'warning') return 'border-amber-200 bg-amber-50 text-amber-700'
-  if (tone === 'info') return 'border-blue-200 bg-blue-50 text-blue-700'
+  if (tone === 'success') return 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300'
+  if (tone === 'danger') return 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300'
+  if (tone === 'warning') return 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300'
+  if (tone === 'info') return 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300'
   return 'border-themed bg-themed-secondary text-themed'
 }
 
@@ -517,8 +517,8 @@ onMounted(() => {
             </div>
           </div>
         </div>
-        <div class="hidden overflow-hidden lg:block">
-          <table class="w-full table-fixed text-left text-sm">
+        <div class="hidden overflow-x-auto lg:block">
+          <table class="w-full min-w-[900px] text-left text-sm">
             <thead class="border-b border-themed text-xs uppercase text-themed-muted">
               <tr>
                 <th class="px-4 py-3 font-medium">Case</th>
@@ -684,8 +684,8 @@ onMounted(() => {
             </div>
           </button>
         </div>
-        <div class="hidden overflow-hidden lg:block">
-          <table class="w-full table-fixed text-left text-sm">
+        <div class="hidden overflow-x-auto lg:block">
+          <table class="w-full min-w-[900px] text-left text-sm">
               <thead class="border-b border-themed text-xs uppercase text-themed-muted">
                 <tr>
                   <th class="px-4 py-3 font-medium">任务</th>

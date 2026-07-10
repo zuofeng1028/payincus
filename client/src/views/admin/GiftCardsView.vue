@@ -53,10 +53,10 @@ function statusLabel(status: GiftCardStatus): string {
 
 function statusClass(status: GiftCardStatus): string {
   return {
-    active: 'text-green-500',
+    active: 'text-green-600 dark:text-green-400',
     used: 'text-themed-muted',
-    disabled: 'text-yellow-500',
-    expired: 'text-red-500'
+    disabled: 'text-gray-400 dark:text-gray-500',
+    expired: 'text-rose-600 dark:text-rose-400'
   }[status]
 }
 
@@ -245,7 +245,7 @@ onMounted(loadData)
       </div>
     </section>
 
-    <section v-if="batchResult" class="rounded-lg border border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-800">
+    <section v-if="batchResult" class="rounded-lg border border-themed bg-themed-secondary p-4 text-sm text-themed">
       <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
           <div class="font-medium">{{ t('giftCardsAdmin.batchResultTitle') }}</div>
@@ -253,7 +253,7 @@ onMounted(loadData)
         </div>
         <button class="btn-secondary btn-sm" @click="copyCodes(batchResult.codes)">{{ t('giftCardsAdmin.copyAll') }}</button>
       </div>
-      <pre class="mt-3 max-h-56 overflow-auto rounded bg-white/70 p-3 font-mono text-xs">{{ batchResult.codes.map(card => card.code).join('\n') }}</pre>
+      <pre class="mt-3 max-h-56 overflow-auto rounded bg-black/5 dark:bg-white/5 p-3 font-mono text-xs">{{ batchResult.codes.map(card => card.code).join('\n') }}</pre>
     </section>
 
     <section class="card p-6">

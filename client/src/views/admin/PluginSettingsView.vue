@@ -453,7 +453,7 @@ onMounted(() => {
           </div>
         </div>
 
-        <div v-if="!plugin.enabled" class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+        <div v-if="!plugin.enabled" class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
           扩展当前未启用。请先在扩展中心启用扩展，然后再保存和使用 AI 工单助手配置。
         </div>
 
@@ -614,13 +614,13 @@ onMounted(() => {
                   <label v-else-if="field.type === 'checkbox'" class="flex items-start gap-3">
                     <input v-model="standardConfigForm[key]" type="checkbox" class="mt-1 rounded border-themed text-primary-600 focus:ring-primary-500" />
                     <span>
-                      <span class="block font-medium text-themed">{{ field.label }}<span v-if="field.required" class="text-red-500"> *</span></span>
+                      <span class="block font-medium text-themed">{{ field.label }}<span v-if="field.required" class="text-rose-600 dark:text-rose-400"> *</span></span>
                       <span v-if="field.description" class="mt-1 block text-sm text-themed-muted">{{ field.description }}</span>
                     </span>
                   </label>
 
                   <label v-else class="block">
-                    <span class="label">{{ field.label }}<span v-if="field.required" class="text-red-500"> *</span></span>
+                    <span class="label">{{ field.label }}<span v-if="field.required" class="text-rose-600 dark:text-rose-400"> *</span></span>
                     <textarea
                       v-if="field.type === 'textarea' || field.type === 'markdown'"
                       :value="standardStringValue(standardConfigForm[key])"

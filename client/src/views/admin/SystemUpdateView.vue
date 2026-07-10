@@ -131,11 +131,11 @@ function statusLabel(status: SystemUpdateTask['status']): string {
 }
 
 function statusClass(status: SystemUpdateTask['status']): string {
-  if (status === 'success') return 'bg-emerald-50 text-emerald-700 border-emerald-200'
-  if (status === 'failed') return 'bg-red-50 text-red-700 border-red-200'
-  if (status === 'rolled_back') return 'bg-amber-50 text-amber-700 border-amber-200'
-  if (status === 'running') return 'bg-blue-50 text-blue-700 border-blue-200'
-  return 'bg-gray-50 text-gray-700 border-gray-200'
+  if (status === 'success') return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/30'
+  if (status === 'failed') return 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-300 dark:border-rose-500/30'
+  if (status === 'rolled_back') return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/30'
+  if (status === 'running') return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-300 dark:border-blue-500/30'
+  return 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
 }
 
 async function loadVersion() {
@@ -352,14 +352,14 @@ onUnmounted(() => {
             </div>
             <span
               class="rounded border px-2 py-1 text-xs"
-              :class="updateCheck?.updateAvailable ? 'border-blue-200 bg-blue-50 text-blue-700' : 'border-themed text-themed-muted'"
+              :class="updateCheck?.updateAvailable ? 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300' : 'border-themed text-themed-muted'"
             >
               {{ updateCheck ? (updateCheck.updateAvailable ? '可更新' : '已最新') : '未检查' }}
             </span>
           </div>
           <div
             v-if="repositoryUnavailable"
-            class="mt-4 rounded border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+            class="mt-4 rounded border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200"
           >
             {{ updateCheck?.repositoryError || '当前部署目录不是 Git 工作区，无法在线更新。' }}
           </div>
@@ -385,7 +385,7 @@ onUnmounted(() => {
               <h3 class="text-sm font-medium text-themed">OTA 发行包</h3>
               <span
                 class="rounded border px-2 py-0.5 text-xs"
-                :class="displayLatestUpdate?.ota?.manifestAvailable ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-amber-200 bg-amber-50 text-amber-700'"
+                :class="displayLatestUpdate?.ota?.manifestAvailable ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300' : 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300'"
               >
                 {{ displayLatestUpdate?.ota?.manifestAvailable ? '已校验 manifest' : 'Git 更新兼容模式' }}
               </span>
@@ -427,7 +427,7 @@ onUnmounted(() => {
             <div>
               <div class="font-semibold text-themed">{{ item.version }}</div>
               <div class="mt-1 text-xs text-themed-muted">{{ formatDate(item.date) }} · {{ item.commit || '-' }}</div>
-              <div class="mt-1 text-xs" :class="item.ota.manifestAvailable ? 'text-emerald-700' : 'text-amber-700'">
+              <div class="mt-1 text-xs" :class="item.ota.manifestAvailable ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400'">
                 {{ item.ota.manifestAvailable ? `OTA manifest · ${item.ota.artifacts.length} 个包` : (item.ota.error || '未发现 OTA manifest') }}
               </div>
               <ul v-if="item.changelog.length" class="mt-2 list-disc space-y-1 pl-5 text-sm text-themed-muted">
@@ -468,7 +468,7 @@ onUnmounted(() => {
               <div class="mt-1 text-xs text-themed-muted">
                 {{ task.startedByUsername || '-' }} · {{ formatDate(task.createdAt) }}
               </div>
-              <p v-if="task.errorMessage" class="mt-1 truncate text-xs text-red-600">{{ task.errorMessage }}</p>
+              <p v-if="task.errorMessage" class="mt-1 truncate text-xs text-rose-600 dark:text-rose-400">{{ task.errorMessage }}</p>
             </button>
           </div>
           <div class="flex min-h-[54px] items-center justify-between border-t border-themed px-5 py-3 text-xs text-themed-muted">

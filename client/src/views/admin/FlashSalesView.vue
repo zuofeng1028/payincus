@@ -81,10 +81,10 @@ function formatDate(value: string): string {
 }
 
 function statusClass(status: FlashSaleCampaignStatus): string {
-  if (status === 'active') return 'bg-emerald-100 text-emerald-700'
-  if (status === 'paused') return 'bg-amber-100 text-amber-700'
-  if (status === 'ended' || status === 'cancelled') return 'bg-gray-100 text-gray-600'
-  return 'bg-blue-100 text-blue-700'
+  if (status === 'active') return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300'
+  if (status === 'paused') return 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300'
+  if (status === 'ended' || status === 'cancelled') return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+  return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
 }
 
 function defaultFlashSaleItem(): FlashSaleFormItem {
@@ -419,11 +419,11 @@ onMounted(async () => {
         </div>
         <div class="card p-4">
           <div class="text-sm text-themed-muted">已售名额</div>
-          <div class="mt-2 text-2xl font-semibold text-orange-500">{{ soldCount }}</div>
+          <div class="mt-2 text-2xl font-semibold text-themed">{{ soldCount }}</div>
         </div>
         <div class="card p-4">
           <div class="text-sm text-themed-muted">已交付</div>
-          <div class="mt-2 text-2xl font-semibold text-emerald-500">{{ deliveredCount }}</div>
+          <div class="mt-2 text-2xl font-semibold text-themed">{{ deliveredCount }}</div>
         </div>
       </section>
 
@@ -658,8 +658,8 @@ onMounted(async () => {
 	                    <div class="mt-1 text-xs text-themed-muted">库存 {{ item.remainingStock }} / {{ item.totalStock }}，已售 {{ item.soldCount }}，失败 {{ item.failedCount }}，限购 {{ item.perUserLimit }}</div>
 	                  </div>
 	                  <div class="text-right">
-	                    <div class="font-semibold text-orange-500">{{ formatMoneyCents(item.flashPrice) }}</div>
-	                    <button class="mt-2 text-xs text-blue-500" @click="beginEditItem(item)">编辑商品</button>
+	                    <div class="font-semibold text-themed">{{ formatMoneyCents(item.flashPrice) }}</div>
+	                    <button class="mt-2 text-xs text-accent" @click="beginEditItem(item)">编辑商品</button>
 	                  </div>
 	                </div>
 	                <div v-if="editingItemId === item.id" class="mt-4 rounded-lg border border-themed bg-themed-surface p-3">
@@ -722,7 +722,7 @@ onMounted(async () => {
                   <div class="truncate font-medium text-themed">{{ record.user?.username || `UID ${record.userId}` }}</div>
                   <div class="mt-1 truncate text-xs text-themed-muted">{{ record.packageName }} / {{ record.planName }}</div>
                 </div>
-                <div class="shrink-0 text-sm font-semibold text-orange-500">¥{{ record.amount.toFixed(2) }}</div>
+                <div class="shrink-0 text-sm font-semibold text-themed">¥{{ record.amount.toFixed(2) }}</div>
               </div>
               <div class="mt-3 grid grid-cols-2 gap-3 text-xs">
                 <div>
@@ -757,7 +757,7 @@ onMounted(async () => {
                   <td class="truncate px-5 py-3 text-themed">{{ record.user?.username || `UID ${record.userId}` }}</td>
                   <td class="truncate px-5 py-3 text-themed-muted">{{ record.packageName }} / {{ record.planName }}</td>
                   <td class="truncate px-5 py-3 text-themed-muted">{{ record.instance?.name || '-' }}</td>
-                  <td class="px-5 py-3 text-orange-500">¥{{ record.amount.toFixed(2) }}</td>
+                  <td class="px-5 py-3 text-themed">¥{{ record.amount.toFixed(2) }}</td>
                   <td class="truncate px-5 py-3 text-themed-muted">{{ record.status }}</td>
                   <td class="truncate px-5 py-3 text-themed-muted">{{ formatDate(record.createdAt) }}</td>
                 </tr>

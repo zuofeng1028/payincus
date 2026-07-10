@@ -524,11 +524,11 @@ function getActionTypeBadgeClass(actionType: string | null): string {
   const classes: Record<string, string> = {
     purchase: 'badge-success',
     renew: 'badge-info',
-    upgrade: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+    upgrade: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
     destroy: 'badge-error',
     unfreeze: 'badge-warning',
     withdraw: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
-    admin_adjust: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
+    admin_adjust: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
   }
   return classes[actionType || ''] || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
 }

@@ -759,7 +759,7 @@ onMounted(() => {
         </div>
         <div class="card p-4">
           <div class="text-xs text-themed-muted">限制下单账号</div>
-          <div class="mt-2 text-2xl font-semibold text-red-600">{{ activeRestrictionCount }}</div>
+          <div class="mt-2 text-2xl font-semibold text-rose-600 dark:text-rose-400">{{ activeRestrictionCount }}</div>
         </div>
       </section>
 
@@ -862,8 +862,8 @@ onMounted(() => {
             </div>
           </div>
         </div>
-        <div class="hidden overflow-hidden lg:block">
-          <table class="w-full table-fixed text-sm">
+        <div class="hidden overflow-x-auto lg:block">
+          <table class="w-full min-w-[900px] text-sm">
             <thead class="bg-themed-secondary text-themed-muted">
               <tr>
                 <th class="p-3 text-left">实例</th>
@@ -1005,8 +1005,8 @@ onMounted(() => {
             </div>
           </div>
         </div>
-        <div class="hidden overflow-hidden lg:block">
-          <table class="w-full table-fixed text-sm">
+        <div class="hidden overflow-x-auto lg:block">
+          <table class="w-full min-w-[900px] text-sm">
             <thead class="bg-themed-secondary text-themed-muted">
               <tr>
                 <th class="p-3 text-left">时间</th>
@@ -1088,8 +1088,8 @@ onMounted(() => {
             </div>
           </div>
         </div>
-        <div class="hidden overflow-hidden lg:block">
-          <table class="w-full table-fixed text-sm">
+        <div class="hidden overflow-x-auto lg:block">
+          <table class="w-full min-w-[900px] text-sm">
             <thead class="bg-themed-secondary text-themed-muted">
               <tr>
                 <th class="p-3 text-left">用户</th>
@@ -1255,8 +1255,8 @@ onMounted(() => {
               </div>
             </div>
           </div>
-          <div class="hidden overflow-hidden rounded-lg border border-themed lg:block">
-            <table class="w-full table-fixed text-sm">
+          <div class="hidden overflow-x-auto rounded-lg border border-themed lg:block">
+            <table class="w-full min-w-[900px] text-sm">
               <thead class="bg-themed-secondary text-themed-muted">
                 <tr>
                   <th class="p-3 text-left">档位</th>
@@ -1274,22 +1274,22 @@ onMounted(() => {
               <tbody>
                 <tr v-for="(tier, index) in policyForm.qosTiers" :key="index" class="border-t border-themed">
                   <td class="p-3">
-                    <input v-model.number="tier.level" class="input w-20" type="number" min="1" />
+                    <input v-model.number="tier.level" class="input w-full" type="number" min="1" />
                   </td>
                   <td class="p-3">
-                    <input v-model.number="tier.bandwidthMbps" class="input w-28" type="number" min="1" />
+                    <input v-model.number="tier.bandwidthMbps" class="input w-full" type="number" min="1" />
                   </td>
                   <td class="p-3">
-                    <input v-model.number="tier.score" class="input w-24" type="number" min="1" max="100" />
+                    <input v-model.number="tier.score" class="input w-full" type="number" min="1" max="100" />
                   </td>
                   <td class="p-3">
-                    <input v-model.number="tier.recoverScore" class="input w-24" type="number" min="0" max="99" />
+                    <input v-model.number="tier.recoverScore" class="input w-full" type="number" min="0" max="99" />
                   </td>
                   <td class="p-3">
-                    <input v-model.number="tier.minDurationMinutes" class="input w-28" type="number" min="1" />
+                    <input v-model.number="tier.minDurationMinutes" class="input w-full" type="number" min="1" />
                   </td>
                   <td class="p-3">
-                    <input v-model.number="tier.cooldownMinutes" class="input w-28" type="number" min="1" />
+                    <input v-model.number="tier.cooldownMinutes" class="input w-full" type="number" min="1" />
                   </td>
                   <td class="p-3">
                     <input v-model="tier.allowFurtherDowngrade" type="checkbox" />
@@ -1326,15 +1326,15 @@ onMounted(() => {
               </div>
               <div class="rounded border border-themed bg-themed-surface p-3">
                 <div class="text-xs text-themed-muted">会限速</div>
-                <div class="mt-1 font-semibold text-blue-600">{{ policySimulation.wouldQosLimit }}</div>
+                <div class="mt-1 font-semibold text-themed">{{ policySimulation.wouldQosLimit }}</div>
               </div>
               <div class="rounded border border-themed bg-themed-surface p-3">
                 <div class="text-xs text-themed-muted">会限单</div>
-                <div class="mt-1 font-semibold text-red-600">{{ policySimulation.wouldRestrictOrders }}</div>
+                <div class="mt-1 font-semibold text-rose-600 dark:text-rose-400">{{ policySimulation.wouldRestrictOrders }}</div>
               </div>
               <div class="rounded border border-themed bg-themed-surface p-3">
                 <div class="text-xs text-themed-muted">会暂停</div>
-                <div class="mt-1 font-semibold text-red-700">{{ policySimulation.wouldAutoSuspend }}</div>
+                <div class="mt-1 font-semibold text-rose-700 dark:text-rose-300">{{ policySimulation.wouldAutoSuspend }}</div>
               </div>
             </div>
           </div>
@@ -1559,8 +1559,8 @@ onMounted(() => {
                   </div>
                 </div>
               </div>
-              <div class="hidden overflow-hidden lg:block">
-                <table class="w-full table-fixed text-sm">
+              <div class="hidden overflow-x-auto lg:block">
+                <table class="w-full min-w-[900px] text-sm">
                   <thead class="resource-risk-evidence-code text-themed-muted">
                     <tr>
                       <th class="p-3 text-left">时间</th>
@@ -1620,8 +1620,8 @@ onMounted(() => {
                   </div>
                 </div>
               </div>
-              <div class="hidden overflow-hidden lg:block">
-                <table class="w-full table-fixed text-sm">
+              <div class="hidden overflow-x-auto lg:block">
+                <table class="w-full min-w-[900px] text-sm">
                   <thead class="resource-risk-evidence-code text-themed-muted">
                     <tr>
                       <th class="p-3 text-left">日期</th>
@@ -1686,8 +1686,8 @@ onMounted(() => {
                 </div>
               </div>
             </div>
-            <div class="hidden overflow-hidden lg:block">
-              <table class="w-full table-fixed text-sm">
+            <div class="hidden overflow-x-auto lg:block">
+              <table class="w-full min-w-[900px] text-sm">
                 <thead class="resource-risk-evidence-code text-themed-muted">
                   <tr>
                     <th class="p-3 text-left">采样时间</th>
@@ -1785,8 +1785,8 @@ onMounted(() => {
                 </div>
               </div>
             </div>
-            <div class="hidden overflow-hidden lg:block">
-              <table class="w-full table-fixed text-sm">
+            <div class="hidden overflow-x-auto lg:block">
+              <table class="w-full min-w-[900px] text-sm">
                 <thead class="resource-risk-evidence-code text-themed-muted">
                   <tr>
                     <th class="p-3 text-left">ID</th>

@@ -435,11 +435,11 @@ function formatDate(value: string): string {
                 </div>
                 <div>
                   <div class="text-themed-muted">{{ t('admin.hosting.owners.frozenBalance') }}</div>
-                  <div class="mt-1 font-mono font-medium text-amber-600 dark:text-amber-400">{{ formatMoney(owner.hostingBalance.frozen) }}</div>
+                  <div class="mt-1 font-mono font-medium text-themed">{{ formatMoney(owner.hostingBalance.frozen) }}</div>
                 </div>
                 <div>
                   <div class="text-themed-muted">{{ t('admin.hosting.owners.totalIncome') }}</div>
-                  <div class="mt-1 font-mono font-medium text-emerald-600 dark:text-emerald-400">{{ formatMoney(owner.hostingBalance.historicalTotal) }}</div>
+                  <div class="mt-1 font-mono font-medium text-themed">{{ formatMoney(owner.hostingBalance.historicalTotal) }}</div>
                 </div>
                 <div>
                   <div class="text-themed-muted">{{ t('admin.hosting.owners.createdAt') }}</div>
@@ -456,8 +456,8 @@ function formatDate(value: string): string {
               </div>
             </div>
           </div>
-          <div class="hidden overflow-hidden lg:block">
-            <table class="w-full table-fixed">
+          <div class="hidden overflow-x-auto lg:block">
+            <table class="w-full min-w-[1000px]">
               <thead class="bg-themed-secondary border-b border-themed">
                 <tr>
                   <th class="w-[20%] text-left px-4 py-3 text-xs font-medium text-themed-muted uppercase tracking-wider">{{ t('admin.hosting.owners.user') }}</th>
@@ -526,8 +526,8 @@ function formatDate(value: string): string {
                     </span>
                   </td>
                   <td class="px-4 py-3 text-right font-mono text-sm text-themed">{{ formatMoney(owner.hostingBalance.available) }}</td>
-                  <td class="px-4 py-3 text-right font-mono text-sm text-amber-600 dark:text-amber-400">{{ formatMoney(owner.hostingBalance.frozen) }}</td>
-                  <td class="px-4 py-3 text-right font-mono text-sm text-emerald-600 dark:text-emerald-400">{{ formatMoney(owner.hostingBalance.historicalTotal) }}</td>
+                  <td class="px-4 py-3 text-right font-mono text-sm text-themed">{{ formatMoney(owner.hostingBalance.frozen) }}</td>
+                  <td class="px-4 py-3 text-right font-mono text-sm text-themed">{{ formatMoney(owner.hostingBalance.historicalTotal) }}</td>
                   <td class="px-4 py-3 text-right text-sm text-themed">{{ numberFormatter.format(owner.hostCount) }}</td>
                   <td class="px-4 py-3 text-right text-sm text-themed">{{ numberFormatter.format(owner.listedPackageCount) }}</td>
                   <td class="px-4 py-3 text-right text-sm text-themed">{{ numberFormatter.format(owner.instanceCount) }}</td>
@@ -666,7 +666,7 @@ function formatDate(value: string): string {
                     <div class="text-xs text-themed-muted">#{{ zone.id }}</div>
                   </div>
                 </div>
-                <button class="btn btn-ghost btn-sm shrink-0 text-red-600 dark:text-red-400" :disabled="deletingZoneId === zone.id" @click="deleteZone(zone)">
+                <button class="btn btn-ghost btn-sm shrink-0 text-rose-600 dark:text-rose-400" :disabled="deletingZoneId === zone.id" @click="deleteZone(zone)">
                   {{ deletingZoneId === zone.id ? t('common.processing') : t('common.delete') }}
                 </button>
               </div>
@@ -699,8 +699,8 @@ function formatDate(value: string): string {
               </div>
             </div>
           </div>
-          <div class="hidden overflow-hidden lg:block">
-            <table class="w-full table-fixed">
+          <div class="hidden overflow-x-auto lg:block">
+            <table class="w-full min-w-[1000px]">
               <thead class="bg-themed-secondary border-b border-themed">
                 <tr>
                   <th class="w-[22%] text-left px-4 py-3 text-xs font-medium text-themed-muted uppercase tracking-wider">{{ t('admin.hosting.zones.zone') }}</th>
@@ -741,7 +741,7 @@ function formatDate(value: string): string {
                   <td class="px-4 py-3 text-right text-sm text-themed">{{ numberFormatter.format(zone.listedPackageCount) }}</td>
                   <td class="truncate px-4 py-3 text-sm text-themed-muted">{{ formatDate(zone.createdAt) }}</td>
                   <td class="px-4 py-3 text-right">
-                    <button class="btn btn-ghost btn-sm text-red-600 dark:text-red-400" :disabled="deletingZoneId === zone.id" @click="deleteZone(zone)">
+                    <button class="btn btn-ghost btn-sm text-rose-600 dark:text-rose-400" :disabled="deletingZoneId === zone.id" @click="deleteZone(zone)">
                       {{ deletingZoneId === zone.id ? t('common.processing') : t('common.delete') }}
                     </button>
                   </td>

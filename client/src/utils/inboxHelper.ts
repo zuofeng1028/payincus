@@ -118,42 +118,42 @@ const CATEGORY_CONFIG: Record<MessageCategory, CategoryConfig> = {
   instance: {
     label: 'inbox.categories.instance',
     icon: 'server',
-    color: 'blue'
+    color: 'gray'
   },
   snapshot: {
     label: 'inbox.categories.snapshot',
     icon: 'camera',
-    color: 'purple'
+    color: 'gray'
   },
   social: {
     label: 'inbox.categories.social',
     icon: 'users',
-    color: 'pink'
+    color: 'gray'
   },
   transfer: {
     label: 'inbox.categories.transfer',
     icon: 'arrow-right',
-    color: 'orange'
+    color: 'gray'
   },
   package: {
     label: 'inbox.categories.package',
     icon: 'gift',
-    color: 'cyan'
+    color: 'gray'
   },
   security: {
     label: 'inbox.categories.security',
     icon: 'shield',
-    color: 'red'
+    color: 'gray'
   },
   quota: {
     label: 'inbox.categories.quota',
     icon: 'chart',
-    color: 'yellow'
+    color: 'gray'
   },
   ticket: {
     label: 'inbox.categories.ticket',
     icon: 'ticket',
-    color: 'indigo'
+    color: 'gray'
   },
   system: {
     label: 'inbox.categories.system',

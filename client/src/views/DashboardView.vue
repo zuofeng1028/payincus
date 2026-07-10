@@ -549,7 +549,7 @@ function getInstanceRowClass(): string {
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
               <div class="text-xs font-semibold uppercase text-themed-muted">{{ t('dashboard.accountOverview') }}</div>
-              <div class="mt-3 break-all text-3xl font-black leading-none text-teal-600 dark:text-teal-300 sm:text-4xl">
+              <div class="mt-3 break-all text-3xl font-black leading-none text-themed sm:text-4xl">
                 {{ formatCurrency(balanceOverview.balance) }}
               </div>
               <div class="mt-2 text-sm text-themed-muted">{{ accountPanelHint }}</div>
@@ -779,8 +779,8 @@ function getInstanceRowClass(): string {
                     <span
                       class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] sm:text-[11px] font-medium"
                       :class="instance.instanceType === 'vm'
-                        ? (themeStore.isDark ? 'bg-amber-500/15 text-amber-300' : 'bg-amber-100 text-amber-700')
-                        : (themeStore.isDark ? 'bg-sky-500/15 text-sky-300' : 'bg-sky-100 text-sky-700')"
+                        ? (themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700')
+                        : (themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700')"
                     >
                       {{ getInstanceTypeLabel(instance) }}
                     </span>

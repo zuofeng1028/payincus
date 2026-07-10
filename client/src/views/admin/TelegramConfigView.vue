@@ -636,7 +636,7 @@ async function testChannel(id: number) {
               class="relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2"
               :class="[
                 form.telegram_bot_enabled
-                  ? 'bg-green-500 focus:ring-green-500'
+                  ? 'bg-accent focus:ring-accent'
                   : 'bg-gray-400 dark:bg-gray-500 focus:ring-gray-400'
               ]"
               @click="form.telegram_bot_enabled = !form.telegram_bot_enabled"
@@ -705,11 +705,11 @@ async function testChannel(id: number) {
           </div>
         </div>
 
-        <div class="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-          <p class="text-sm text-blue-400">
+        <div class="mt-4 p-3 rounded-lg bg-themed-secondary/50 border border-themed">
+          <p class="text-sm text-themed-muted">
             Webhook 地址：<code class="px-1 py-0.5 rounded bg-black/20">{{ telegramWebhookUrl }}</code>
           </p>
-          <p class="text-xs text-blue-400/80 mt-1">
+          <p class="text-xs text-themed-muted mt-1">
             按当前访问域名动态生成；点击“设置 Webhook”时会使用该地址。
           </p>
         </div>
@@ -790,7 +790,7 @@ async function testChannel(id: number) {
                 class="relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2"
                 :class="[
                   form.telegram_group_join_enabled
-                    ? 'bg-green-500 focus:ring-green-500'
+                    ? 'bg-accent focus:ring-accent'
                     : 'bg-gray-400 dark:bg-gray-500 focus:ring-gray-400'
                 ]"
                 @click="form.telegram_group_join_enabled = !form.telegram_group_join_enabled"
@@ -909,7 +909,7 @@ async function testChannel(id: number) {
                 class="relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2"
                 :class="[
                   form.telegram_vip_group_join_enabled
-                    ? 'bg-green-500 focus:ring-green-500'
+                    ? 'bg-accent focus:ring-accent'
                     : 'bg-gray-400 dark:bg-gray-500 focus:ring-gray-400'
                 ]"
                 @click="form.telegram_vip_group_join_enabled = !form.telegram_vip_group_join_enabled"
@@ -1086,7 +1086,7 @@ async function testChannel(id: number) {
                   <span
                     v-if="binding.user"
                     class="text-xs px-1.5 py-0.5 rounded-full"
-                    :class="binding.user.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'"
+                    :class="binding.user.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-rose-500/20 text-rose-400'"
                   >
                     {{ binding.user.status === 'active' ? '正常' : '已封禁' }}
                   </span>
@@ -1116,7 +1116,7 @@ async function testChannel(id: number) {
                 </span>
                 <button
                   type="button"
-                  class="text-xs text-red-400 hover:text-red-300"
+                  class="text-xs text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300"
                   :disabled="unlinkingBindingId === binding.id"
                   @click="unlinkTelegramBinding(binding)"
                 >
@@ -1188,7 +1188,7 @@ async function testChannel(id: number) {
             <div class="flex items-center gap-2 md:ml-4">
               <button
                 type="button"
-                class="text-xs text-blue-400 hover:text-blue-300"
+                class="text-xs text-themed-muted hover:text-themed"
                 :disabled="testingChannelId === ch.id"
                 @click="testChannel(ch.id)"
               >
@@ -1197,7 +1197,7 @@ async function testChannel(id: number) {
               <button type="button" class="text-xs text-themed-muted hover:text-themed" @click="openEditChannelForm(ch)">编辑</button>
               <button
                 type="button"
-                class="text-xs text-red-400 hover:text-red-300"
+                class="text-xs text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300"
                 :disabled="deletingChannelId === ch.id"
                 @click="deleteChannel(ch.id)"
               >
@@ -1209,7 +1209,7 @@ async function testChannel(id: number) {
 
         <div v-if="showChannelForm" class="mt-4 p-4 rounded-lg border border-themed-border bg-themed-secondary/20 space-y-3">
           <h4 class="font-medium text-sm text-themed">{{ editingChannel ? '编辑渠道' : '新建渠道' }}</h4>
-          <div v-if="channelFormError" class="text-xs text-red-400">{{ channelFormError }}</div>
+          <div v-if="channelFormError" class="text-xs text-rose-600 dark:text-rose-400">{{ channelFormError }}</div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div class="space-y-1">
               <label class="block text-xs text-themed-muted">渠道名称 *</label>
@@ -1237,10 +1237,10 @@ async function testChannel(id: number) {
           </div>
         </div>
 
-        <div class="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-          <p class="text-sm text-blue-400">
+        <div class="mt-4 p-3 rounded-lg bg-themed-secondary/50 border border-themed">
+          <p class="text-sm text-themed-muted">
             需要 Telegram Bot Token？去
-            <a href="https://t.me/BotFather" target="_blank" rel="noopener noreferrer" class="underline hover:text-blue-300">@BotFather</a>
+            <a href="https://t.me/BotFather" target="_blank" rel="noopener noreferrer" class="underline hover:text-themed">@BotFather</a>
             创建机器人，并将机器人添加为群组/频道管理员。
           </p>
         </div>

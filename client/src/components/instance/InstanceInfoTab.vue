@@ -70,10 +70,10 @@ function getInstanceTypeClass(type: string | undefined | null): string {
   const normalizedType = String(type || 'container').toLowerCase()
   switch (normalizedType) {
     case 'vm':
-      return 'bg-purple-900/50 text-purple-400 border border-purple-500/30'
+      return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
     case 'container':
     default:
-      return 'bg-green-900/50 text-green-400 border border-green-500/30'
+      return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
   }
 }
 
@@ -92,19 +92,20 @@ function getInstanceTypeLabel(type: string | undefined | null): string {
 // 获取网络模式的样式类
 function getNetworkModeClass(mode: string | undefined | null): string {
   const normalizedMode = String(mode || 'nat').toLowerCase()
+  const neutralChip = 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
   switch (normalizedMode) {
     case 'nat':
-      return 'bg-red-900/30 text-red-400 border border-red-500/30'
+      return neutralChip
     case 'nat_ipv6':
-      return 'bg-blue-900/50 text-blue-400 border border-blue-500/30'
+      return neutralChip
     case 'nat_ipv6_nat':
-      return 'bg-cyan-900/50 text-cyan-400 border border-cyan-500/30'
+      return neutralChip
     case 'ipv6_only':
-      return 'bg-purple-900/50 text-purple-400 border border-purple-500/30'
+      return neutralChip
     case 'ipv6_nat':
-      return 'bg-teal-900/50 text-teal-400 border border-teal-500/30'
+      return neutralChip
     default:
-      return 'bg-red-900/30 text-red-400 border border-red-500/30'
+      return neutralChip
   }
 }
 
@@ -193,7 +194,7 @@ function formatBandwidth(bandwidth: string | null | undefined): string {
             <!-- 托管UID：仅托管节点实例显示 -->
             <button
               v-if="instance.hostOwnerInfo"
-              class="text-xs px-1.5 py-0.5 rounded-lg bg-blue-900/30 text-blue-400 hover:bg-blue-900/50 hover:shadow-glow-sakura transition-all border border-blue-500/30"
+              class="text-xs px-1.5 py-0.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 hover:shadow-glow-sakura transition-all border border-gray-200 dark:border-gray-700"
               @click="showHostOwnerModal = true"
             >
               {{ t('instance.detail.info.hostUid') }}:{{ instance.hostOwnerInfo.id }}
@@ -206,7 +207,7 @@ function formatBandwidth(bandwidth: string | null | undefined): string {
         </div>
         <div class="flex justify-between items-center">
           <dt class="text-themed-muted">{{ t('instance.detail.info.instanceMode') }}</dt>
-          <dd class="flex items-center gap-2">
+          <dd class="flex flex-wrap items-center gap-2">
             <span
               :class="[
                 'text-xs px-1.5 py-0.5 rounded-lg',
@@ -230,7 +231,7 @@ function formatBandwidth(bandwidth: string | null | undefined): string {
           <dd class="flex items-center gap-2 text-themed font-medium">
             <span class="font-mono">{{ instance.ssh_port }}</span>
             <button
-              class="text-blue-400/70 hover:text-blue-400 transition-colors"
+              class="text-themed-muted hover:text-themed transition-colors"
               :title="t('instance.detail.info.sshHelpTitle')"
               @click="showSshHelpModal = true"
             >
@@ -239,7 +240,7 @@ function formatBandwidth(bandwidth: string | null | undefined): string {
               </svg>
             </button>
             <button
-              class="text-xs text-blue-400 hover:text-sakura-300 transition-colors"
+              class="text-xs text-themed-muted hover:text-themed transition-colors"
               @click="emit('copy', instance.ssh_port?.toString() || '')"
             >
               {{ t('instance.detail.info.copy') }}
@@ -254,14 +255,14 @@ function formatBandwidth(bandwidth: string | null | undefined): string {
               class="font-mono"
             >{{ showPassword[instance.id] && instancePassword?.[instance.id] ? instancePassword[instance.id] : '••••••••' }}</span>
             <button
-              class="text-xs text-blue-400 hover:text-sakura-300 transition-colors"
+              class="text-xs text-themed-muted hover:text-themed transition-colors"
               @click="emit('toggle-password', instance.id)"
             >
               {{ showPassword[instance.id] ? t('instance.detail.info.hide') : t('instance.detail.info.show') }}
             </button>
             <button
               v-if="showPassword[instance.id] && instancePassword?.[instance.id]"
-              class="text-xs text-blue-400 hover:text-sakura-300 transition-colors"
+              class="text-xs text-themed-muted hover:text-themed transition-colors"
               @click="emit('copy', instancePassword[instance.id] || '')"
             >
               {{ t('instance.detail.info.copy') }}
@@ -287,27 +288,27 @@ function formatBandwidth(bandwidth: string | null | undefined): string {
           <dt class="text-themed-muted">{{ t('instance.detail.info.expiresAt') }}</dt>
           <dd
             class="text-xs"
-            :class="new Date(instance.expires_at) <= new Date() ? 'text-red-400' : 'text-themed-muted'"
+            :class="new Date(instance.expires_at) <= new Date() ? 'text-rose-600 dark:text-rose-400' : 'text-themed-muted'"
           >
             {{ formatDate(instance.expires_at) }}
           </dd>
         </div>
         <!-- 封停信息 -->
-        <div v-if="instance.status === 'suspended'" class="p-2 rounded-lg bg-red-900/30 border border-red-500/30">
+        <div v-if="instance.status === 'suspended'" class="p-2 rounded-lg bg-rose-50 border border-rose-200 dark:bg-rose-500/15 dark:border-rose-500/30">
           <div class="flex items-center gap-2 mb-1">
-            <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
-            <span class="text-sm font-medium text-red-400">{{ t('instance.detail.info.suspended') }}</span>
+            <span class="text-sm font-medium text-rose-600 dark:text-rose-400">{{ t('instance.detail.info.suspended') }}</span>
           </div>
-          <p class="text-xs text-red-300">
+          <p class="text-xs text-rose-700 dark:text-rose-300">
             <span class="font-medium">{{ t('instance.detail.info.suspendReasonLabel') }}:</span>
             {{ getSuspendReasonText(instance.suspend_reason) }}
           </p>
-          <p v-if="instance.suspended_at" class="text-xs mt-1 text-red-400/70">
+          <p v-if="instance.suspended_at" class="text-xs mt-1 text-rose-600/70 dark:text-rose-400/70">
             {{ t('instance.detail.info.suspendedAt') }}: {{ formatDate(instance.suspended_at) }}
           </p>
-          <p class="text-xs mt-2 text-red-400/80">
+          <p class="text-xs mt-2 text-rose-600/80 dark:text-rose-400/80">
             {{ t('instance.detail.info.suspendTip') }}
           </p>
         </div>
@@ -324,7 +325,7 @@ function formatBandwidth(bandwidth: string | null | undefined): string {
           <!-- 兑换按钮 -->
           <button
             v-if="props.enableResourcePool"
-            class="text-xs px-2 py-1 rounded-lg bg-emerald-900/50 hover:bg-emerald-800/50 text-emerald-400 hover:shadow-glow-sakura transition-all border border-emerald-500/30"
+            class="text-xs px-2 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-300 hover:shadow-glow-sakura transition-all border border-gray-200 dark:border-gray-700"
             @click="emit('redeem')"
           >
             <svg class="w-3.5 h-3.5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -467,11 +468,11 @@ function formatBandwidth(bandwidth: string | null | undefined): string {
         <div class="pt-2 border-t-2 border-themed">
           <div class="flex justify-between text-xs text-themed-muted">
             <span>
-              <span class="inline-block w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+              <span class="inline-block w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full mr-1"></span>
               {{ t('instance.detail.info.ingressLimit') }}: {{ formatBandwidth(instance.limitsIngress) }}
             </span>
             <span>
-              <span class="inline-block w-2 h-2 bg-blue-500 rounded-full mr-1"></span>
+              <span class="inline-block w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full mr-1"></span>
               {{ t('instance.detail.info.egressLimit') }}: {{ formatBandwidth(instance.limitsEgress) }}
             </span>
           </div>
@@ -506,12 +507,12 @@ function formatBandwidth(bandwidth: string | null | undefined): string {
               <!-- IPv6 连接说明（仅在 nat_ipv6 模式下显示） -->
               <div
                 v-if="instance.network_mode === 'nat_ipv6'"
-                class="p-3 rounded-lg bg-blue-900/30 border border-blue-500/30"
+                class="p-3 rounded-lg bg-themed/30 border border-themed/30"
               >
                 <div class="flex items-center gap-2 mb-2">
-                  <span class="text-xs font-medium px-2 py-0.5 rounded-lg bg-blue-800/50 text-blue-300 border border-blue-500/30">IPv6</span>
+                  <span class="text-xs font-medium px-2 py-0.5 rounded-lg bg-themed/50 text-themed border border-themed/30">IPv6</span>
                 </div>
-                <p class="text-sm text-blue-200">
+                <p class="text-sm text-themed">
                   {{ t('instance.detail.info.sshHelpIpv6') }}
                 </p>
               </div>
@@ -577,7 +578,7 @@ function formatBandwidth(bandwidth: string | null | undefined): string {
                     </svg>
                     {{ t('instance.detail.info.hostOwnerHostCount') }}
                   </span>
-                  <span class="text-sm font-semibold text-blue-400">
+                  <span class="text-sm font-semibold text-themed">
                     {{ instance.hostOwnerInfo.hostCount }}
                   </span>
                 </div>
@@ -590,7 +591,7 @@ function formatBandwidth(bandwidth: string | null | undefined): string {
                     </svg>
                     {{ t('instance.detail.info.hostOwnerInstanceCount') }}
                   </span>
-                  <span class="text-sm font-semibold text-green-400">
+                  <span class="text-sm font-semibold text-themed">
                     {{ instance.hostOwnerInfo.instanceCount }}
                   </span>
                 </div>
@@ -603,7 +604,7 @@ function formatBandwidth(bandwidth: string | null | undefined): string {
                     </svg>
                     {{ t('instance.detail.info.hostOwnerRegisteredDays') }}
                   </span>
-                  <span class="text-sm font-semibold text-purple-400">
+                  <span class="text-sm font-semibold text-themed">
                     {{ instance.hostOwnerInfo.registeredDays }} {{ t('common.days') }}
                   </span>
                 </div>

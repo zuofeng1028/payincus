@@ -325,17 +325,17 @@ function openDeveloperSubmissions(): void {
 }
 
 function submissionStatusClass(status: PluginMarketSubmission['reviewStatus']): string {
-  if (status === 'listed') return 'bg-emerald-50 text-emerald-700 border-emerald-200'
-  if (status === 'rejected') return 'bg-red-50 text-red-700 border-red-200'
-  if (status === 'delisted') return 'bg-amber-50 text-amber-700 border-amber-200'
-  return 'bg-blue-50 text-blue-700 border-blue-200'
+  if (status === 'listed') return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/20'
+  if (status === 'rejected') return 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-300 dark:border-rose-500/20'
+  if (status === 'delisted') return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/20'
+  return 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
 }
 
 function eventHealthStatusClass(health?: EventHealthStatus): string {
-  if (!health || health.total === 0) return 'border-gray-200 bg-gray-50 text-gray-700'
-  if (health.deadLetter > 0) return 'border-red-200 bg-red-50 text-red-700'
-  if (health.retryPending > 0 || health.failed > 0) return 'border-amber-200 bg-amber-50 text-amber-700'
-  return 'border-emerald-200 bg-emerald-50 text-emerald-700'
+  if (!health || health.total === 0) return 'border-gray-200 bg-gray-50 text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
+  if (health.deadLetter > 0) return 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300'
+  if (health.retryPending > 0 || health.failed > 0) return 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300'
+  return 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300'
 }
 
 function eventHealthStatusText(health?: EventHealthStatus): string {
@@ -348,8 +348,8 @@ function eventHealthStatusText(health?: EventHealthStatus): string {
 
 function eventHealthAlertClass(level: 'warning' | 'critical'): string {
   return level === 'critical'
-    ? 'border-red-200 bg-red-50 text-red-700'
-    : 'border-amber-200 bg-amber-50 text-amber-700'
+    ? 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300'
+    : 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300'
 }
 
 function formatEventSuccessRate(value?: number | null): string {
@@ -837,14 +837,14 @@ loadCommands()
                   </label>
                 </div>
               </div>
-              <div class="mt-3 grid grid-cols-3 gap-2 text-xs text-themed-muted">
+              <div class="mt-3 grid grid-cols-2 gap-2 text-xs text-themed-muted">
                 <div>成功：{{ eventHealthByPluginId.get(submission.pluginId)?.success || 0 }}</div>
                 <div>待重试：{{ eventHealthByPluginId.get(submission.pluginId)?.retryPending || 0 }}</div>
                 <div>死信：{{ eventHealthByPluginId.get(submission.pluginId)?.deadLetter || 0 }}</div>
                 <div>去重：{{ eventHealthByPluginId.get(submission.pluginId)?.deduped || 0 }}</div>
                 <div class="col-span-2">最后事件：{{ formatOptionalDate(eventHealthByPluginId.get(submission.pluginId)?.lastEventAt || null) }}</div>
               </div>
-              <div class="mt-3 grid grid-cols-3 gap-2 rounded bg-themed-hover p-2 text-xs text-themed-muted">
+              <div class="mt-3 grid grid-cols-2 gap-2 rounded bg-themed-hover p-2 text-xs text-themed-muted">
                 <div>最近 {{ eventHealthByPluginId.get(submission.pluginId)?.recentWindowHours || 24 }}h</div>
                 <div>总量：{{ eventHealthByPluginId.get(submission.pluginId)?.recentTotal || 0 }}</div>
                 <div>成功率：{{ formatEventSuccessRate(eventHealthByPluginId.get(submission.pluginId)?.recentSuccessRate) }}</div>
@@ -880,7 +880,7 @@ loadCommands()
                   </div>
                 </div>
               </div>
-              <p v-if="eventHealthByPluginId.get(submission.pluginId)?.lastError" class="mt-2 rounded bg-themed-hover p-2 text-xs text-red-600">
+              <p v-if="eventHealthByPluginId.get(submission.pluginId)?.lastError" class="mt-2 rounded bg-themed-hover p-2 text-xs text-rose-600 dark:text-rose-400">
                 {{ eventHealthByPluginId.get(submission.pluginId)?.lastError }}
               </p>
               <div v-if="eventHealthByPluginId.get(submission.pluginId)?.breakdown?.length" class="mt-3 space-y-2">
@@ -898,14 +898,14 @@ loadCommands()
                       {{ eventHealthStatusText(item) }}
                     </span>
                   </div>
-                  <div class="mt-2 grid grid-cols-4 gap-1 text-[11px] text-themed-muted">
+                  <div class="mt-2 grid grid-cols-2 gap-1 text-xs text-themed-muted">
                     <div>成功 {{ item.success }}</div>
                     <div>重试 {{ item.retryPending }}</div>
                     <div>死信 {{ item.deadLetter }}</div>
                     <div>去重 {{ item.deduped }}</div>
                     <div class="col-span-2">最近 {{ item.recentWindowHours }}h {{ item.recentTotal }} 次</div>
                     <div class="col-span-2">成功率 {{ formatEventSuccessRate(item.recentSuccessRate) }}</div>
-                    <div v-if="item.alerts?.length" class="col-span-4 flex flex-wrap gap-1">
+                    <div v-if="item.alerts?.length" class="col-span-2 flex flex-wrap gap-1">
                       <span
                         v-for="alert in item.alerts"
                         :key="`${submission.pluginId}:${item.eventName}:${item.handler}:alert:${alert.code}`"
@@ -915,7 +915,7 @@ loadCommands()
                         {{ alert.message }}：{{ alert.count }}
                       </span>
                     </div>
-                    <div class="col-span-4">最后事件 {{ formatOptionalDate(item.lastEventAt) }}</div>
+                    <div class="col-span-2">最后事件 {{ formatOptionalDate(item.lastEventAt) }}</div>
                   </div>
                 </div>
               </div>

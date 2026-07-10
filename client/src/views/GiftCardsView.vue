@@ -62,7 +62,7 @@ function statusClass(status: GiftCardStatus): string {
   return {
     active: 'text-green-500',
     used: 'text-themed-muted',
-    disabled: 'text-yellow-500',
+    disabled: 'text-gray-400 dark:text-gray-500',
     expired: 'text-red-500'
   }[status]
 }
@@ -237,10 +237,10 @@ onMounted(async () => {
       </button>
     </div>
 
-    <div v-if="lastGeneratedCode" class="rounded-lg border border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-800">
+    <div v-if="lastGeneratedCode" class="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
       <div class="font-medium">{{ t('giftCards.lastCodeNotice') }}</div>
       <div class="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
-        <code class="min-w-0 flex-1 break-all rounded bg-white/70 p-2 font-mono text-xs">{{ lastGeneratedCode }}</code>
+        <code class="min-w-0 flex-1 break-all rounded bg-white/70 dark:bg-black/30 p-2 font-mono text-xs">{{ lastGeneratedCode }}</code>
         <button class="btn-secondary btn-sm" @click="copyCode(lastGeneratedCode)">{{ t('giftCards.copy') }}</button>
       </div>
     </div>
@@ -325,15 +325,15 @@ onMounted(async () => {
         <div v-if="!loading && cards.length === 0" class="py-8 text-center text-themed-muted">{{ t('giftCards.empty') }}</div>
       </div>
 
-      <div class="mt-5 hidden overflow-hidden lg:block">
-        <table class="w-full table-fixed text-sm">
+      <div class="mt-5 hidden overflow-x-auto lg:block">
+        <table class="w-full min-w-[720px] text-sm">
           <thead class="border-b border-themed text-left text-themed-muted">
             <tr>
-              <th class="w-[38%] py-3 pr-4">{{ t('giftCards.code') }}</th>
-              <th class="w-[14%] py-3 pr-4">{{ t('giftCards.amount') }}</th>
-              <th class="w-[14%] py-3 pr-4">{{ t('giftCards.statusTitle') }}</th>
-              <th class="w-[18%] py-3 pr-4">{{ t('giftCards.expiresAt') }}</th>
-              <th class="w-[16%] py-3 pr-4">{{ t('giftCards.action') }}</th>
+              <th class="py-3 pr-4">{{ t('giftCards.code') }}</th>
+              <th class="py-3 pr-4">{{ t('giftCards.amount') }}</th>
+              <th class="py-3 pr-4">{{ t('giftCards.statusTitle') }}</th>
+              <th class="py-3 pr-4">{{ t('giftCards.expiresAt') }}</th>
+              <th class="py-3 pr-4">{{ t('giftCards.action') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -344,8 +344,8 @@ onMounted(async () => {
               <td class="py-3 pr-4 text-themed">{{ formatMoney(card.balanceValue) }}</td>
               <td class="py-3 pr-4" :class="statusClass(card.status)">{{ statusLabel(card.status) }}</td>
               <td class="py-3 pr-4 text-themed-muted">{{ formatDate(card.expiresAt) }}</td>
-              <td class="py-3 pr-4">
-                <div class="flex flex-wrap gap-2">
+              <td class="py-3 pr-4 whitespace-nowrap">
+                <div class="flex gap-2">
                   <button class="btn-secondary btn-sm" @click="toggleCodeReveal(card)">
                     {{ isCodeRevealed(card) ? t('giftCards.hideCode') : t('giftCards.showCode') }}
                   </button>

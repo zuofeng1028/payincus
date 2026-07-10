@@ -492,7 +492,7 @@ function togglePaymentMethod(method: string) {
               </svg>
             </button>
             
-            <button class="btn btn-sm btn-ghost text-red-500" @click="confirmDelete(provider)">
+            <button class="btn btn-sm btn-ghost text-rose-600 dark:text-rose-400" @click="confirmDelete(provider)">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
@@ -516,7 +516,7 @@ function togglePaymentMethod(method: string) {
     <!-- 创建/编辑弹窗 -->
     <Teleport to="body">
       <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
-        <div class="modal-content max-w-lg">
+        <div class="modal-content max-w-2xl">
           <div class="modal-header">
             <h3 class="modal-title">
               {{ isEditing ? $t('admin.paymentProviders.edit') : $t('admin.paymentProviders.add') }}
@@ -703,7 +703,7 @@ function togglePaymentMethod(method: string) {
                 <p class="mt-1 text-xs text-themed-muted">{{ getSecretHint('merchant_private_key', $t('admin.paymentProviders.config.antomPrivateKeyHint')) }}</p>
               </div>
 
-              <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label class="label">{{ $t('admin.paymentProviders.config.antomCurrency') }} *</label>
                   <input v-model="(formData.config as any).currency" type="text" class="input w-full uppercase" placeholder="USD" maxlength="3" />
@@ -868,7 +868,7 @@ function togglePaymentMethod(method: string) {
       <div v-if="showDeleteModal" class="modal-overlay" @click.self="showDeleteModal = false">
         <div class="modal-content max-w-sm">
           <div class="modal-header">
-            <h3 class="modal-title text-red-500">{{ $t('admin.paymentProviders.deleteConfirm') }}</h3>
+            <h3 class="modal-title text-rose-600 dark:text-rose-400">{{ $t('admin.paymentProviders.deleteConfirm') }}</h3>
           </div>
           <div class="modal-body">
             <p class="text-themed-secondary">

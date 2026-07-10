@@ -482,7 +482,7 @@ onMounted(async () => {
                       <span class="text-themed-secondary truncate flex-1">{{ formatContent(log.content).slice(0, 50) }}...</span>
                       <button
                         class="flex-shrink-0 p-1 rounded transition-colors"
-                        :class="themeStore.isDark ? 'hover:bg-gray-700 text-blue-400' : 'hover:bg-gray-100 text-blue-500'"
+                        :class="themeStore.isDark ? 'hover:bg-gray-700 text-themed-secondary' : 'hover:bg-gray-100 text-themed-secondary'"
                         :title="$t('logs.expand')"
                         @click="toggleContent(log.id)"
                       >
@@ -495,7 +495,7 @@ onMounted(async () => {
                       <p class="text-themed-secondary whitespace-pre-wrap break-words">{{ formatContent(log.content) }}</p>
                       <button
                         class="text-xs flex items-center gap-1 transition-colors"
-                        :class="themeStore.isDark ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-600'"
+                        :class="themeStore.isDark ? 'text-themed-secondary hover:text-themed' : 'text-themed-secondary hover:text-themed'"
                         @click="toggleContent(log.id)"
                       >
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

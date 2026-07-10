@@ -105,8 +105,8 @@ function statusLabel(order: OrderItem): string {
 function statusClass(statusValue: string): string {
   if (statusValue === 'completed') return 'bg-green-50 text-green-700 border-green-200'
   if (statusValue === 'pending') return 'bg-yellow-50 text-yellow-700 border-yellow-200'
-  if (statusValue === 'refunded') return 'bg-blue-50 text-blue-700 border-blue-200'
-  if (statusValue === 'failed' || statusValue === 'cancelled') return 'bg-red-50 text-red-700 border-red-200'
+  if (statusValue === 'refunded') return 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
+  if (statusValue === 'failed' || statusValue === 'cancelled') return 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-300 dark:border-rose-500/20'
   return 'bg-gray-50 text-gray-700 border-gray-200'
 }
 

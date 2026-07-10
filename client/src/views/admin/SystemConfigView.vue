@@ -741,7 +741,7 @@ async function sendTestEmail() {
           />
           <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
             <p class="text-xs text-themed-muted">{{ t('admin.system.popupAnnouncement.hint') }}</p>
-            <p class="text-xs" :class="form.popup_announcement.length > 5000 ? 'text-red-500' : 'text-themed-muted'">
+            <p class="text-xs" :class="form.popup_announcement.length > 5000 ? 'text-rose-600 dark:text-rose-400' : 'text-themed-muted'">
               {{ form.popup_announcement.length }}/5000
             </p>
           </div>
@@ -779,7 +779,7 @@ async function sendTestEmail() {
               />
               <div class="mt-1 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                 <p class="text-xs text-themed-muted">{{ t('admin.system.popupAnnouncement.promoImageHint') }}</p>
-                <p class="text-xs" :class="form.popup_promo_image_url.length > 1000 ? 'text-red-500' : 'text-themed-muted'">
+                <p class="text-xs" :class="form.popup_promo_image_url.length > 1000 ? 'text-rose-600 dark:text-rose-400' : 'text-themed-muted'">
                   {{ form.popup_promo_image_url.length }}/1000
                 </p>
               </div>
@@ -956,7 +956,7 @@ async function sendTestEmail() {
                 role="switch"
                 :aria-checked="form.plugin_storage_backup_schedule_enabled"
                 class="relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2"
-                :class="form.plugin_storage_backup_schedule_enabled ? 'bg-green-500 focus:ring-green-500' : 'bg-gray-400 dark:bg-gray-500 focus:ring-gray-400'"
+                :class="form.plugin_storage_backup_schedule_enabled ? 'bg-accent focus:ring-accent' : 'bg-gray-400 dark:bg-gray-500 focus:ring-gray-400'"
                 @click="form.plugin_storage_backup_schedule_enabled = !form.plugin_storage_backup_schedule_enabled"
               >
                 <span
@@ -1018,7 +1018,7 @@ async function sendTestEmail() {
                 class="relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2"
                 :class="[
                   form.registration_enabled
-                    ? 'bg-green-500 focus:ring-green-500'
+                    ? 'bg-accent focus:ring-accent'
                     : 'bg-gray-400 dark:bg-gray-500 focus:ring-gray-400'
                 ]"
                 @click="form.registration_enabled = !form.registration_enabled"
@@ -1050,7 +1050,7 @@ async function sendTestEmail() {
                 class="relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2"
                 :class="[
                   form.require_invite_code
-                    ? 'bg-green-500 focus:ring-green-500'
+                    ? 'bg-accent focus:ring-accent'
                     : 'bg-gray-400 dark:bg-gray-500 focus:ring-gray-400'
                 ]"
                 @click="form.require_invite_code = !form.require_invite_code"
@@ -1101,7 +1101,7 @@ async function sendTestEmail() {
                   role="switch"
                   :aria-checked="option.enabled"
                   class="relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2"
-                  :class="option.enabled ? 'bg-green-500 focus:ring-green-500' : 'bg-gray-400 dark:bg-gray-500 focus:ring-gray-400'"
+                  :class="option.enabled ? 'bg-accent focus:ring-accent' : 'bg-gray-400 dark:bg-gray-500 focus:ring-gray-400'"
                   @click="option.enabled = !option.enabled"
                 >
                   <span
@@ -1178,7 +1178,7 @@ async function sendTestEmail() {
                   class="relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2"
                   :class="[
                     form.hosting_feature_enabled
-                      ? 'bg-green-500 focus:ring-green-500'
+                      ? 'bg-accent focus:ring-accent'
                       : 'bg-gray-400 dark:bg-gray-500 focus:ring-gray-400'
                   ]"
                   @click="form.hosting_feature_enabled = !form.hosting_feature_enabled"
@@ -1210,7 +1210,7 @@ async function sendTestEmail() {
                   class="relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2"
                   :class="[
                     form.hosting_market_entry_enabled
-                      ? 'bg-green-500 focus:ring-green-500'
+                      ? 'bg-accent focus:ring-accent'
                       : 'bg-gray-400 dark:bg-gray-500 focus:ring-gray-400'
                   ]"
                   @click="form.hosting_market_entry_enabled = !form.hosting_market_entry_enabled"
@@ -1396,7 +1396,7 @@ async function sendTestEmail() {
                   class="relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2"
                   :class="[
                     form.free_site_mode
-                      ? 'bg-green-500 focus:ring-green-500'
+                      ? 'bg-accent focus:ring-accent'
                       : 'bg-gray-400 dark:bg-gray-500 focus:ring-gray-400'
                   ]"
                   @click="toggleFreeSiteMode"
@@ -1433,7 +1433,7 @@ async function sendTestEmail() {
                     class="relative inline-flex h-7 w-12 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed"
                     :class="[
                       form.free_site_mode && form.free_site_register_gift_enabled
-                        ? 'bg-green-500 focus:ring-green-500 cursor-pointer'
+                        ? 'bg-accent focus:ring-accent cursor-pointer'
                         : 'bg-gray-400 dark:bg-gray-500 focus:ring-gray-400',
                       form.free_site_mode ? 'cursor-pointer' : 'cursor-not-allowed'
                     ]"
@@ -1525,7 +1525,7 @@ async function sendTestEmail() {
                 class="relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2"
                 :class="[
                   form.ticket_enabled
-                    ? 'bg-green-500 focus:ring-green-500'
+                    ? 'bg-accent focus:ring-accent'
                     : 'bg-gray-400 dark:bg-gray-500 focus:ring-gray-400'
                 ]"
                 @click="form.ticket_enabled = !form.ticket_enabled"
@@ -1676,7 +1676,7 @@ async function sendTestEmail() {
                 class="relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2"
                 :class="[
                   form.turnstile_enabled
-                    ? 'bg-green-500 focus:ring-green-500'
+                    ? 'bg-accent focus:ring-accent'
                     : 'bg-gray-400 dark:bg-gray-500 focus:ring-gray-400'
                 ]"
                 @click="form.turnstile_enabled = !form.turnstile_enabled"
@@ -1721,14 +1721,14 @@ async function sendTestEmail() {
           </div>
 
           <!-- Help Link -->
-          <div class="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-            <p class="text-sm text-blue-400">
+          <div class="mt-4 p-3 rounded-lg bg-themed-secondary/50 border border-themed">
+            <p class="text-sm text-themed-muted">
               {{ t('admin.system.turnstile.helpText') }}
               <a
                 href="https://dash.cloudflare.com/?to=/:account/turnstile"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="underline hover:text-blue-300"
+                class="underline hover:text-themed"
               >
                 Cloudflare Turnstile Dashboard
               </a>
@@ -1765,14 +1765,14 @@ async function sendTestEmail() {
           </div>
 
           <!-- Help Link -->
-          <div class="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-            <p class="text-sm text-blue-400">
+          <div class="mt-4 p-3 rounded-lg bg-themed-secondary/50 border border-themed">
+            <p class="text-sm text-themed-muted">
               {{ t('admin.system.avatar.helpText') }}
               <a
                 href="https://www.dicebear.com/how-to-use/http-api"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="underline hover:text-blue-300"
+                class="underline hover:text-themed"
               >
                 DiceBear HTTP API
               </a>
@@ -1812,7 +1812,7 @@ async function sendTestEmail() {
                 class="relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2"
                 :class="[
                   form.smtp_enabled
-                    ? 'bg-green-500 focus:ring-green-500'
+                    ? 'bg-accent focus:ring-accent'
                     : 'bg-gray-400 dark:bg-gray-500 focus:ring-gray-400'
                 ]"
                 @click="form.smtp_enabled = !form.smtp_enabled"
@@ -1860,7 +1860,7 @@ async function sendTestEmail() {
               id="smtp_secure"
               v-model="form.smtp_secure"
               type="checkbox"
-              class="h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
+              class="h-4 w-4 text-accent rounded border-gray-300 focus:ring-accent"
             />
             <label for="smtp_secure" class="text-sm text-themed">
               {{ t('admin.system.smtp.secure') }}
@@ -1963,8 +1963,8 @@ async function sendTestEmail() {
           </div>
 
           <!-- Help Link -->
-          <div class="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-            <p class="text-sm text-blue-400">
+          <div class="mt-4 p-3 rounded-lg bg-themed-secondary/50 border border-themed">
+            <p class="text-sm text-themed-muted">
               {{ t('admin.system.smtp.helpText') }}
             </p>
           </div>
@@ -2002,7 +2002,7 @@ async function sendTestEmail() {
                 class="relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2"
                 :class="[
                   form.email_domain_whitelist_enabled
-                    ? 'bg-green-500 focus:ring-green-500'
+                    ? 'bg-accent focus:ring-accent'
                     : 'bg-gray-400 dark:bg-gray-500 focus:ring-gray-400'
                 ]"
                 @click="form.email_domain_whitelist_enabled = !form.email_domain_whitelist_enabled"
@@ -2033,8 +2033,8 @@ async function sendTestEmail() {
           </div>
 
           <!-- Help Link -->
-          <div class="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-            <p class="text-sm text-blue-400">
+          <div class="mt-4 p-3 rounded-lg bg-themed-secondary/50 border border-themed">
+            <p class="text-sm text-themed-muted">
               {{ t('admin.system.emailDomain.helpText') }}
             </p>
           </div>
