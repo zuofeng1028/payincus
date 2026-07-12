@@ -13,6 +13,22 @@ const neutralRamp = {
   950: '#0a0a0a'
 }
 
+// Nimbus 信号色阶（靛蓝）：给散落的 bg-primary-*/text-primary-*/ring-primary-* 等
+// accent 死类恢复为可见的靛蓝主色（与 --kawaii-primary=#4f46e5 一致）。
+const indigoRamp = {
+  50: '#eef0fe',
+  100: '#e0e2fd',
+  200: '#c7c8fb',
+  300: '#a5a3f7',
+  400: '#847ff1',
+  500: '#4f46e5',
+  600: '#4338ca',
+  700: '#3730a3',
+  800: '#2e2a82',
+  900: '#26236a',
+  950: '#1a183f'
+}
+
 // rose 在代码里被广泛用作「危险/严重/亏损」的红色语义（非装饰），
 // 因此保留为真红（与 error=#dc2626 对齐），避免被灰化后危险态静默失色。
 const dangerRamp = {
@@ -127,9 +143,9 @@ export default {
           primary: 'var(--accent)',
           secondary: 'var(--accent)'
         },
-        // primary 色阶 - 代码里散落 bg-primary-*/text-primary-*/ring-primary-* 但从未定义，
-        // 会导致强调色/选中态/复选框静默失效；收敛为中性墨阶令其可见（纯黑白）
-        primary: neutralRamp,
+        // primary 色阶 - 代码里散落 bg-primary-*/text-primary-*/ring-primary-* 作强调用；
+        // Nimbus 下恢复为靛蓝信号色阶（选中态/复选框/强调可见且成品牌）
+        primary: indigoRamp,
         // 状态色。保留 Tailwind 自带 blue/sky/teal 等语义色，
         // 避免处理中、信息、选中和图表状态被全局灰化后失去区分。
         success: '#16a34a',
@@ -139,32 +155,36 @@ export default {
         rose: dangerRamp
       },
       fontFamily: {
-        // Apple SF 系统字体栈（中文 苹方 / Noto Sans SC；Inter 作为非苹果平台回退）
+        // Nimbus：Inter(自托管 variable) 为 UI 主字，系统栈 + 中文回退
         sans: [
+          '"Inter Variable"',
+          'Inter',
           '-apple-system',
           'BlinkMacSystemFont',
           '"SF Pro Text"',
-          '"SF Pro Display"',
           '"Helvetica Neue"',
-          'Inter',
           '"PingFang SC"',
           '"Noto Sans SC"',
           '"Microsoft YaHei"',
           'sans-serif'
         ],
         display: [
+          '"Inter Variable"',
+          'Inter',
           '-apple-system',
           'BlinkMacSystemFont',
           '"SF Pro Display"',
           '"Helvetica Neue"',
-          'Inter',
           '"PingFang SC"',
           '"Noto Sans SC"',
           'sans-serif'
         ],
+        // Nimbus：JetBrains Mono(自托管 variable) 做数据/ID/哈希/终端的等宽声部
         mono: [
-          'Geist Mono',
-          'SF Mono',
+          '"JetBrains Mono Variable"',
+          '"JetBrains Mono"',
+          'ui-monospace',
+          '"SF Mono"',
           'Monaco',
           'Consolas',
           'monospace'

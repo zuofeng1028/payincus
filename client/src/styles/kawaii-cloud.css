@@ -1,39 +1,44 @@
 @layer base {
-  /* 纯黑白 · Apple 中性色板（浅色白黑 / 深色黑白，主色=墨色，状态色单独保留） */
+  /* ============================================================
+     Nimbus 设计系统 · 白色为主 + 单一靛蓝信号色（明暗双主题）
+     - 正文/标题用墨色（--kawaii-text），保持克制；
+     - 主色 --kawaii-primary=靛蓝，只驱动 交互/选中/CTA/链接；
+     - 状态色 mint/amber 语义保留；中性色带冷 slate 偏色（刻意选，非默认灰）。
+     ============================================================ */
   .light {
-    --kawaii-bg: #f5f5f7;
+    --kawaii-bg: #f5f6f8;
     --kawaii-surface: #ffffff;
-    --kawaii-surface-soft: #f2f2f4;
-    --kawaii-line: #e6e6e9;
-    --kawaii-line-strong: #d7d7dc;
-    --kawaii-text: #111113;
-    --kawaii-muted: #6e6e73;
-    --kawaii-primary: #111113;
-    --kawaii-primary-strong: #000000;
+    --kawaii-surface-soft: #f1f4f6;
+    --kawaii-line: #e9ebf0;
+    --kawaii-line-strong: #dfe2e9;
+    --kawaii-text: #0b0e14;
+    --kawaii-muted: #525a68;
+    --kawaii-primary: #4f46e5;
+    --kawaii-primary-strong: #4338ca;
     --kawaii-pink: var(--kawaii-primary);
-    --kawaii-mint: #28a745;
+    --kawaii-mint: #16a34a;
     --kawaii-lavender: var(--kawaii-primary);
-    --kawaii-amber: #e08600;
-    --kawaii-faint: #8e8e93;
-    --kawaii-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
+    --kawaii-amber: #c2770b;
+    --kawaii-faint: #868e9c;
+    --kawaii-shadow: 0 1px 2px rgb(16 24 40 / 0.06), 0 4px 12px rgb(16 24 40 / 0.05);
   }
 
   .dark {
-    --kawaii-bg: #000000;
-    --kawaii-surface: #0d0d0f;
-    --kawaii-surface-soft: #151518;
-    --kawaii-line: #262629;
-    --kawaii-line-strong: #37373b;
-    --kawaii-text: #f5f5f7;
-    --kawaii-muted: #98989d;
-    --kawaii-primary: #f5f5f7;
-    --kawaii-primary-strong: #ffffff;
+    --kawaii-bg: #08090c;
+    --kawaii-surface: #111319;
+    --kawaii-surface-soft: #171a21;
+    --kawaii-line: #1e222b;
+    --kawaii-line-strong: #2a303b;
+    --kawaii-text: #eef1f6;
+    --kawaii-muted: #98a1b0;
+    --kawaii-primary: #8b87ff;
+    --kawaii-primary-strong: #a6a2ff;
     --kawaii-pink: var(--kawaii-primary);
-    --kawaii-mint: #30d158;
+    --kawaii-mint: #3ad07f;
     --kawaii-lavender: var(--kawaii-primary);
-    --kawaii-amber: #ff9f0a;
-    --kawaii-faint: #6e6e73;
-    --kawaii-shadow: 0 1px 3px rgb(0 0 0 / 0.5);
+    --kawaii-amber: #e0a13a;
+    --kawaii-faint: #6b7280;
+    --kawaii-shadow: 0 1px 2px rgb(0 0 0 / 0.5), 0 10px 30px rgb(0 0 0 / 0.4);
   }
 }
 

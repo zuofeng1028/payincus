@@ -10,6 +10,8 @@ import {
   scheduleStaleAssetReload,
   shouldReloadForServiceWorkerControllerChange
 } from '../utils/staleAssetRecovery'
+import '@fontsource-variable/inter'
+import '@fontsource-variable/jetbrains-mono'
 import '../styles/main.css'
 import 'flag-icons/css/flag-icons.min.css'
 

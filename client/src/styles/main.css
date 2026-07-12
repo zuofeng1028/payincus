@@ -1,5 +1,5 @@
-/* Geist 字体 - 必须在 @tailwind 之前 */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+/* Nimbus 字体：Inter(UI) + JetBrains Mono(数据/等宽) 由 @fontsource-variable 自托管，
+   在 main.ts / admin/main.ts 中 import（对 CN 受众更快，且无 Google CDN 依赖）。 */
 @import './kawaii-cloud.css';
 
 @tailwind base;
@@ -8,38 +8,38 @@
 
 @layer base {
 
-  /* 暗色主题变量 (默认) · 纯黑白 Apple */
+  /* 暗色主题变量 (默认) · Nimbus 深色（白色为主的暗面 + 靛蓝信号） */
   :root {
-    --bg-primary: #000000;
-    --bg-secondary: #0d0d0f;
-    --bg-tertiary: #151518;
-    --bg-elevated: #1a1a1d;
-    --border-color: #262629;
-    --border-hover: #37373b;
-    --text-primary: #f5f5f7;
-    --text-secondary: #98989d;
-    --text-tertiary: #6e6e73;
-    --accent: #f5f5f7;
-    --success: #30d158;
-    --warning: #ff9f0a;
-    --error: #ff453a;
+    --bg-primary: #08090c;
+    --bg-secondary: #111319;
+    --bg-tertiary: #171a21;
+    --bg-elevated: #181c23;
+    --border-color: #1e222b;
+    --border-hover: #2a303b;
+    --text-primary: #eef1f6;
+    --text-secondary: #98a1b0;
+    --text-tertiary: #6b7280;
+    --accent: #8b87ff;
+    --success: #3ad07f;
+    --warning: #e0a13a;
+    --error: #f2686c;
   }
 
-  /* 亮色主题变量 · 纯黑白 Apple */
+  /* 亮色主题变量 · Nimbus 浅色（白色为主 + 靛蓝信号） */
   .light {
-    --bg-primary: #f5f5f7;
+    --bg-primary: #f5f6f8;
     --bg-secondary: #ffffff;
-    --bg-tertiary: #ececee;
+    --bg-tertiary: #f1f4f6;
     --bg-elevated: #ffffff;
-    --border-color: #e6e6e9;
-    --border-hover: #d7d7dc;
-    --text-primary: #111113;
-    --text-secondary: #6e6e73;
-    --text-tertiary: #8e8e93;
-    --accent: #111113;
-    --success: #28a745;
-    --warning: #e08600;
-    --error: #e5342b;
+    --border-color: #e9ebf0;
+    --border-hover: #dfe2e9;
+    --text-primary: #0b0e14;
+    --text-secondary: #525a68;
+    --text-tertiary: #868e9c;
+    --accent: #4f46e5;
+    --success: #16a34a;
+    --warning: #c2770b;
+    --error: #e5484d;
   }
 
   html {
@@ -50,7 +50,7 @@
   body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Inter, 'PingFang SC', 'Noto Sans SC', sans-serif;
+    font-family: 'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
     transition: background-color 0.2s ease, color 0.2s ease;
   }
 
@@ -1260,24 +1260,24 @@
 .dark .kawaii-header-cta,
 .dark .kawaii-primary-button,
 .dark .btn-primary {
-  background-color: #f5f5f7 !important;
-  color: #000000 !important;
+  background-color: #8b87ff !important;
+  color: #0a0a1a !important;
 }
 .light .kawaii-header-cta,
 .light .kawaii-primary-button,
 .light .btn-primary {
-  background-color: #111113 !important;
+  background-color: #4f46e5 !important;
   color: #ffffff !important;
 }
 .dark .kawaii-header-cta:hover,
 .dark .kawaii-primary-button:hover,
 .dark .btn-primary:hover {
-  background-color: #e6e6ea !important;
+  background-color: #a6a2ff !important;
 }
 .light .kawaii-header-cta:hover,
 .light .kawaii-primary-button:hover,
 .light .btn-primary:hover {
-  background-color: #000000 !important;
+  background-color: #4338ca !important;
 }
 .kawaii-header-cta:hover,
 .kawaii-primary-button:hover,
