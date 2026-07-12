@@ -128,7 +128,7 @@ onUnmounted(() => {
     <!-- 主内容区 -->
     <div class="flex-1 flex flex-col min-w-0 h-full">
       <!-- 顶部栏 -->
-      <header class="kawaii-topbar h-14 flex items-center justify-between px-4 md:px-6 border-b">
+      <header class="kawaii-topbar nimbus-topbar h-14 flex items-center justify-between px-4 md:px-6 border-b border-themed">
         <div class="flex items-center gap-2 md:gap-4">
           <!-- Mobile: Hamburger menu -->
           <button 
@@ -273,8 +273,8 @@ onUnmounted(() => {
 
           <!-- 用户菜单 -->
           <div ref="userMenuRef" class="relative">
-            <button 
-              class="kawaii-header-icon flex items-center gap-2 px-2 py-1 rounded transition-colors cursor-pointer"
+            <button
+              class="kawaii-header-icon nimbus-userpill flex items-center gap-2 px-2 py-1 rounded transition-colors cursor-pointer"
               @click.stop="toggleUserMenu"
             >
               <UserAvatar 
@@ -338,11 +338,64 @@ onUnmounted(() => {
       </header>
 
       <!-- 页面内容 -->
-      <main class="kawaii-workspace flex-1 p-4 md:p-6 xl:px-14 2xl:px-24" :class="isSplitPane ? 'overflow-auto lg:overflow-hidden' : 'overflow-auto'">
-        <div class="w-full mx-auto" :class="isSplitPane ? 'lg:h-full' : ''">
+      <main class="kawaii-workspace nimbus-workspace flex-1 px-4 md:px-6 xl:px-10 py-5 md:py-6" :class="isSplitPane ? 'overflow-auto lg:overflow-hidden' : 'overflow-auto'">
+        <div class="w-full mx-auto" :class="isSplitPane ? 'lg:h-full' : 'max-w-[1680px]'">
           <slot />
         </div>
       </main>
     </div>
   </div>
 </template>
+
+<style scoped>
+/* ============================================================
+   Nimbus topbar — translucent blurred console header + clean
+   34px icon buttons with indigo hover. Colors from CSS tokens.
+   ============================================================ */
+
+.kawaii-topbar.nimbus-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: color-mix(in srgb, var(--kawaii-surface) 72%, transparent) !important;
+  backdrop-filter: blur(12px) saturate(1.05) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(1.05) !important;
+  box-shadow: none !important;
+  border-color: var(--kawaii-line) !important;
+}
+
+/* Icon buttons — covers direct topbar buttons + child components
+   (e.g. NotificationBell) that carry the shared .kawaii-header-icon class */
+.kawaii-topbar :deep(.kawaii-header-icon) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  min-width: 34px;
+  padding: 0 7px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  color: var(--kawaii-muted) !important;
+  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease;
+}
+
+.kawaii-topbar :deep(.kawaii-header-icon:hover) {
+  color: var(--kawaii-primary) !important;
+  border-color: color-mix(in srgb, var(--kawaii-primary) 42%, transparent) !important;
+  background: color-mix(in srgb, var(--kawaii-primary) 8%, transparent) !important;
+}
+
+/* Account chip keeps avatar + name; resting hairline border, indigo hover */
+.kawaii-topbar :deep(.nimbus-userpill) {
+  gap: 8px;
+  padding: 0 10px 0 6px;
+  border-color: var(--kawaii-line) !important;
+  color: var(--kawaii-text) !important;
+}
+
+.kawaii-topbar :deep(.nimbus-userpill:hover) {
+  border-color: color-mix(in srgb, var(--kawaii-primary) 42%, transparent) !important;
+  background: color-mix(in srgb, var(--kawaii-primary) 8%, transparent) !important;
+  color: var(--kawaii-text) !important;
+}
+</style>

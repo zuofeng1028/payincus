@@ -419,273 +419,306 @@ function getInstanceRowClass(): string {
 </script>
 
 <template>
-  <div ref="revealRoot" class="kawaii-page kawaii-dashboard-page space-y-6 animate-fade-in">
-    <!-- 欢迎区域 -->
-    <div data-reveal class="kawaii-dashboard-hero kawaii-dashboard-command-center rounded-lg p-5 page-header flex-col gap-4 sm:flex-row sm:gap-0">
-      <div class="kawaii-dashboard-hero-main flex w-full items-start justify-between gap-3 sm:w-auto sm:items-center sm:justify-start">
-        <div class="min-w-0 flex-1 sm:flex-none">
-          <h1 class="page-title text-lg sm:text-xl">{{ greetingText }}</h1>
-          <p class="page-description">{{ funnyQuote }}</p>
-          <div class="kawaii-dashboard-quick-metrics mt-4 grid grid-cols-3 gap-2">
-            <div class="kawaii-dashboard-quick-metric rounded-xl px-3 py-2">
-              <span>{{ t('dashboard.runningInstances') }}</span>
-              <strong>{{ stats.running }}</strong>
-            </div>
-            <div class="kawaii-dashboard-quick-metric rounded-xl px-3 py-2">
-              <span>{{ t('dashboard.accountOverview') }}</span>
-              <strong>{{ formatCurrency(balanceOverview.balance) }}</strong>
-            </div>
-            <div class="kawaii-dashboard-quick-metric rounded-xl px-3 py-2">
-              <span>{{ t('dashboard.userPoints') }}</span>
-              <strong>{{ formatPoints(userPoints) }}</strong>
-            </div>
-          </div>
-        </div>
-        <div class="flex flex-shrink-0 items-center gap-2 sm:hidden">
-          <a
-            v-if="footerTelegramLink"
-            :href="footerTelegramLink"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-flex h-11 w-11 items-center justify-center rounded-lg transition-colors"
-            :class="themeStore.isDark ? 'bg-sky-900/30 hover:bg-sky-900/50 text-sky-300' : 'bg-sky-100 hover:bg-sky-200 text-sky-600'"
-            title="Telegram"
-            aria-label="Telegram"
-          >
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
-            </svg>
-          </a>
-        </div>
+  <div ref="revealRoot" class="kawaii-page kawaii-dashboard-page nimbus-dashboard space-y-6 animate-fade-in">
+    <!-- 页头：问候语 + 主 CTA -->
+    <header data-reveal class="nimbus-header flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div class="min-w-0">
+        <h1 class="truncate text-xl font-semibold tracking-tight text-themed sm:text-2xl">{{ greetingText }}</h1>
+        <p class="mt-1 text-sm text-themed-muted">{{ funnyQuote }}</p>
       </div>
-      <div class="flex items-center gap-2 w-full sm:w-auto">
+      <div class="flex items-center gap-2">
         <a
           v-if="footerTelegramLink"
           :href="footerTelegramLink"
           target="_blank"
           rel="noopener noreferrer"
-          class="hidden sm:inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg transition-colors"
-          :class="themeStore.isDark ? 'bg-sky-900/30 hover:bg-sky-900/50 text-sky-300' : 'bg-sky-100 hover:bg-sky-200 text-sky-600'"
+          class="nimbus-icon-btn inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl"
           title="Telegram"
           aria-label="Telegram"
         >
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
           </svg>
         </a>
-        <RouterLink :to="instanceCreatePath()" class="btn-primary w-full sm:w-auto justify-center">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <RouterLink :to="instanceCreatePath()" class="btn-primary w-full justify-center sm:w-auto">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
           {{ configStore.freeSiteMode ? freeSiteCopy.dashboardNewInstance : $t('dashboard.newInstance') }}
         </RouterLink>
       </div>
-    </div>
+    </header>
 
     <ThemeTemplateSlot slot-name="user.dashboard.banner" container-class="overflow-hidden rounded-lg border border-themed bg-themed-surface" />
     <ThemeTemplateSlot slot-name="user.dashboard.cards" container-class="overflow-hidden rounded-lg border border-themed bg-themed-surface" />
 
-    <!-- 总览面板 -->
-    <div class="grid gap-4">
-      <section data-reveal class="kawaii-card dashboard-overview-card kawaii-dashboard-orbit-card relative overflow-hidden rounded-lg border p-5 shadow-sm sm:p-6" :class="overviewShellClass">
-        <div class="relative flex flex-col gap-4">
-          <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div class="min-w-0">
-              <div class="flex items-center justify-between gap-3">
-                <div class="text-xs font-semibold uppercase text-themed-muted">{{ t('dashboard.instanceStatusOverview') }}</div>
-                <RouterLink
-                  :to="instancesPath()"
-                  class="inline-flex items-center justify-center rounded-lg border px-3.5 py-2 text-sm font-medium transition-colors sm:hidden"
-                  :class="themeStore.isDark ? 'border-gray-700 bg-gray-900/70 text-gray-200 hover:bg-gray-800' : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'"
-                >
-                  {{ t('dashboard.viewAll') }}
-                  <svg class="ml-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </RouterLink>
-              </div>
-              <div class="mt-3 flex items-end gap-3">
-                <div class="text-5xl font-black leading-none text-themed sm:text-6xl">{{ stats.total }}</div>
-                <div class="pb-1 text-sm text-themed-muted">{{ t('dashboard.totalInstances') }}</div>
-              </div>
-            </div>
+    <!-- 指标卡：总实例 / 运行中 / 账户余额 / 积分 -->
+    <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <!-- 总实例 -->
+      <div class="nimbus-card nimbus-metric overflow-hidden p-4 sm:p-5" :class="overviewShellClass" style="--i: 0">
+        <div class="flex items-start justify-between gap-3">
+          <span class="nimbus-tile-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="7" rx="2" /><rect x="3" y="13" width="18" height="7" rx="2" />
+              <path d="M7 7.5h.01M7 16.5h.01" />
+            </svg>
+          </span>
+          <svg class="nimbus-spark" viewBox="0 0 60 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="0,17 10,15 20,16 30,10 40,12 50,6 60,8" />
+          </svg>
+        </div>
+        <div class="mt-4 nimbus-metric-label">{{ t('dashboard.totalInstances') }}</div>
+        <div class="mt-1 nimbus-metric-value font-mono tabular-nums">{{ stats.total }}</div>
+        <div class="mt-1.5 nimbus-metric-delta">
+          <span class="text-themed-muted">{{ t('dashboard.stoppedInstances') }}</span>
+          <span class="font-mono tabular-nums text-themed">{{ stats.stopped }}</span>
+        </div>
+      </div>
 
-            <RouterLink
-              :to="instancesPath()"
-              class="hidden items-center justify-center rounded-lg border px-3.5 py-2 text-sm font-medium transition-colors sm:inline-flex"
-              :class="themeStore.isDark ? 'border-gray-700 bg-gray-900/70 text-gray-200 hover:bg-gray-800' : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'"
-            >
-              {{ t('dashboard.viewAll') }}
-              <svg class="ml-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </RouterLink>
+      <!-- 运行中 -->
+      <div class="nimbus-card nimbus-metric overflow-hidden p-4 sm:p-5" :class="overviewShellClass" style="--i: 1">
+        <div class="flex items-start justify-between gap-3">
+          <span class="nimbus-tile-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 12h4l2 6 4-13 2 8h6" />
+            </svg>
+          </span>
+          <svg class="nimbus-spark" viewBox="0 0 60 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="0,18 10,12 20,14 30,8 40,9 50,5 60,3" />
+          </svg>
+        </div>
+        <div class="mt-4 nimbus-metric-label">{{ t('dashboard.runningInstances') }}</div>
+        <div class="mt-1 nimbus-metric-value font-mono tabular-nums">{{ stats.running }}</div>
+        <div class="mt-1.5 nimbus-metric-delta" :class="stats.running > 0 ? 'nimbus-metric-delta--up' : ''">
+          <svg v-if="stats.running > 0" class="h-3 w-3" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+            <path d="M6 2.5 10 8H2z" />
+          </svg>
+          <span class="font-mono tabular-nums">{{ stats.running }}</span>
+          <span class="text-themed-muted">/ {{ stats.total }} {{ t('dashboard.totalInstances') }}</span>
+        </div>
+      </div>
+
+      <!-- 账户余额 -->
+      <div class="nimbus-card nimbus-metric overflow-hidden p-4 sm:p-5" :class="overviewShellClass" style="--i: 2">
+        <div class="flex items-start justify-between gap-3">
+          <span class="nimbus-tile-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <path d="M3 8V7a2 2 0 0 1 2-2h11" /><path d="M16.5 12.5h.01" />
+            </svg>
+          </span>
+          <svg class="nimbus-spark" viewBox="0 0 60 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="0,14 10,15 20,11 30,12 40,7 50,9 60,5" />
+          </svg>
+        </div>
+        <div class="mt-4 nimbus-metric-label">{{ t('dashboard.accountOverview') }}</div>
+        <div class="mt-1 nimbus-metric-value font-mono tabular-nums">{{ formatCurrency(balanceOverview.balance) }}</div>
+        <div class="mt-1.5 nimbus-metric-delta">
+          <span class="text-themed-muted">{{ t('dashboard.totalRecharge') }}</span>
+          <span class="font-mono tabular-nums text-themed">{{ formatCurrency(balanceOverview.totalRecharge || 0) }}</span>
+        </div>
+      </div>
+
+      <!-- 用户积分 -->
+      <div class="nimbus-card nimbus-metric overflow-hidden p-4 sm:p-5" :class="overviewShellClass" style="--i: 3">
+        <div class="flex items-start justify-between gap-3">
+          <span class="nimbus-tile-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3.5 14.4 8.6 20 9.4l-4 3.9 1 5.6-5-2.7-5 2.7 1-5.6-4-3.9 5.6-.8z" />
+            </svg>
+          </span>
+          <svg class="nimbus-spark" viewBox="0 0 60 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="0,16 10,14 20,15 30,11 40,12 50,9 60,10" />
+          </svg>
+        </div>
+        <div class="mt-4 nimbus-metric-label">{{ t('dashboard.userPoints') }}</div>
+        <div class="mt-1 nimbus-metric-value font-mono tabular-nums">{{ formatPoints(userPoints) }}</div>
+        <div class="mt-1.5 nimbus-metric-delta">
+          <span class="text-themed-muted">{{ t('dashboard.memberLevel') }}</span>
+          <span class="font-semibold text-themed">{{ formatUserVipLevel(userVipLevel) }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 两栏：账户总览（含会员进度） + 实例状态分布 -->
+    <section data-reveal class="grid gap-4 lg:grid-cols-3">
+      <!-- 左：账户总览 -->
+      <div class="nimbus-card nimbus-card--hover p-5 sm:p-6 lg:col-span-2" :class="overviewShellClass">
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <div class="nimbus-eyebrow">{{ t('dashboard.accountOverview') }}</div>
+            <div class="mt-3 break-all nimbus-hero-value font-mono tabular-nums">{{ formatCurrency(balanceOverview.balance) }}</div>
+            <div class="mt-2 text-sm text-themed-muted">{{ accountPanelHint }}</div>
           </div>
+          <span
+            class="inline-flex max-w-[11rem] items-center rounded-full px-3 py-1.5 text-sm font-bold"
+            :class="memberBadgeClass"
+            :style="memberBadgeStyle"
+          >
+            {{ formatUserVipLevel(userVipLevel) }}
+          </span>
+        </div>
 
-          <div class="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
-            <div
-              v-for="item in statusOverviewItems"
-              :key="item.key"
-              class="rounded-lg px-3 py-3"
-              :class="item.className"
-            >
-              <div class="text-xl font-black leading-none sm:text-2xl">{{ item.value }}</div>
-              <div class="mt-1 text-xs font-medium opacity-80">{{ item.label }}</div>
-            </div>
-            <div class="rounded-lg border px-3 py-3" :class="subtlePanelClass">
-              <div class="text-xl font-black leading-none text-themed sm:text-2xl">{{ instanceTypeStats.container }}</div>
-              <div class="mt-1 text-xs font-medium text-themed-muted">{{ t('dashboard.containerInstances') }}</div>
-            </div>
-            <div class="rounded-lg border px-3 py-3" :class="subtlePanelClass">
-              <div class="text-xl font-black leading-none text-themed sm:text-2xl">{{ instanceTypeStats.vm }}</div>
-              <div class="mt-1 text-xs font-medium text-themed-muted">{{ t('dashboard.vmInstances') }}</div>
-            </div>
+        <div class="mt-5 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+          <div
+            v-for="item in balanceSummaryItems"
+            :key="item.label"
+            class="nimbus-inner rounded-xl border px-3.5 py-3"
+            :class="subtlePanelClass"
+          >
+            <div class="text-xs text-themed-muted">{{ item.label }}</div>
+            <div class="mt-1 truncate text-sm font-semibold text-themed">{{ item.value }}</div>
           </div>
         </div>
-      </section>
 
-      <section data-reveal class="kawaii-card dashboard-overview-card kawaii-dashboard-orbit-card relative overflow-hidden rounded-lg border p-5 shadow-sm sm:p-6" :class="overviewShellClass">
-        <div class="relative flex h-full flex-col gap-5">
-          <div class="flex items-start justify-between gap-3">
+        <div class="nimbus-inner mt-4 rounded-xl border p-4" :class="subtlePanelClass">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div class="min-w-0">
-              <div class="text-xs font-semibold uppercase text-themed-muted">{{ t('dashboard.accountOverview') }}</div>
-              <div class="mt-3 break-all text-3xl font-black leading-none text-themed sm:text-4xl">
-                {{ formatCurrency(balanceOverview.balance) }}
-              </div>
-              <div class="mt-2 text-sm text-themed-muted">{{ accountPanelHint }}</div>
+              <div class="text-sm font-semibold text-themed">{{ t('dashboard.vipProgressTitle') }}</div>
+              <div class="mt-1 text-xs text-themed-muted">{{ vipProgressTargetText }}</div>
             </div>
-            <span
-              class="inline-flex max-w-[11rem] items-center rounded-full px-3 py-1.5 text-sm font-bold"
-              :class="memberBadgeClass"
-              :style="memberBadgeStyle"
-            >
-              {{ formatUserVipLevel(userVipLevel) }}
-            </span>
+            <div class="nimbus-pct inline-flex flex-shrink-0 items-center rounded-full px-2.5 py-1 text-xs font-bold font-mono tabular-nums">
+              {{ vipProgressPercent }}%
+            </div>
           </div>
 
-          <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <div class="nimbus-bar mt-4">
+            <div class="nimbus-bar-fill" :style="vipProgressStyle"></div>
+          </div>
+          <div class="mt-2 text-xs text-themed-muted">{{ vipProgressHint }}</div>
+
+          <div v-if="vipProgressConditions.length > 0" class="mt-4 grid gap-2" :class="vipProgressConditionGridClass">
             <div
-              v-for="item in balanceSummaryItems"
-              :key="item.label"
-              class="rounded-lg border px-3.5 py-3"
+              v-for="condition in vipProgressConditions"
+              :key="condition.metric"
+              class="nimbus-inner rounded-xl border px-3.5 py-3"
               :class="subtlePanelClass"
             >
-              <div class="text-xs text-themed-muted">{{ item.label }}</div>
-              <div class="mt-1 truncate text-sm font-semibold text-themed">{{ item.value }}</div>
-            </div>
-          </div>
-
-          <div class="rounded-lg border p-4" :class="subtlePanelClass">
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div class="min-w-0">
-                <div class="text-sm font-semibold text-themed">{{ t('dashboard.vipProgressTitle') }}</div>
-                <div class="mt-1 text-xs text-themed-muted">{{ vipProgressTargetText }}</div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-medium text-themed-muted">{{ getVipProgressMetricLabel(condition.metric) }}</span>
+                <span
+                  class="rounded-full px-2 py-0.5 text-[11px] font-semibold font-mono tabular-nums"
+                  :class="condition.matched ? 'nimbus-chip-ok' : 'nimbus-chip-idle'"
+                >
+                  {{ condition.progress }}%
+                </span>
               </div>
-              <div
-                class="inline-flex flex-shrink-0 items-center rounded-full px-2.5 py-1 text-xs font-bold"
-                :class="themeStore.isDark ? 'bg-blue-500/15 text-blue-300' : 'bg-blue-50 text-blue-700'"
-              >
-                {{ vipProgressPercent }}%
-              </div>
-            </div>
-
-            <div class="mt-4 h-2.5 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800">
-              <div class="h-full rounded-full bg-blue-600 transition-all duration-500" :style="vipProgressStyle"></div>
-            </div>
-            <div class="mt-2 text-xs text-themed-muted">{{ vipProgressHint }}</div>
-
-            <div v-if="vipProgressConditions.length > 0" class="mt-4 grid gap-2" :class="vipProgressConditionGridClass">
-              <div
-                v-for="condition in vipProgressConditions"
-                :key="condition.metric"
-                class="rounded-lg border px-3.5 py-3"
-                :class="themeStore.isDark ? 'border-gray-800 bg-gray-950/50' : 'border-gray-200 bg-white'"
-              >
-                <div class="flex items-center justify-between gap-2">
-                  <span class="text-xs font-medium text-themed-muted">{{ getVipProgressMetricLabel(condition.metric) }}</span>
-                  <span
-                    class="rounded-full px-2 py-0.5 text-[11px] font-semibold"
-                    :class="condition.matched
-                      ? (themeStore.isDark ? 'bg-emerald-500/15 text-emerald-300' : 'bg-emerald-50 text-emerald-700')
-                      : (themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-600')"
+              <div class="mt-3 grid gap-2 sm:grid-cols-3">
+                <div class="min-w-0 rounded-lg px-2.5 py-2" :class="subtlePanelClass">
+                  <div class="text-[11px] text-themed-muted">{{ t('dashboard.vipProgressCurrent') }}</div>
+                  <div class="mt-1 truncate text-sm font-semibold text-themed font-mono tabular-nums">{{ formatVipProgressValue(condition, condition.current) }}</div>
+                </div>
+                <div class="min-w-0 rounded-lg px-2.5 py-2" :class="subtlePanelClass">
+                  <div class="text-[11px] text-themed-muted">{{ t('dashboard.vipProgressTarget') }}</div>
+                  <div class="mt-1 truncate text-sm font-semibold text-themed font-mono tabular-nums">{{ formatVipProgressValue(condition, condition.target) }}</div>
+                </div>
+                <div class="min-w-0 rounded-lg px-2.5 py-2" :class="subtlePanelClass">
+                  <div class="text-[11px] text-themed-muted">{{ t('dashboard.vipProgressRemaining') }}</div>
+                  <div
+                    class="mt-1 truncate text-sm font-semibold font-mono tabular-nums"
+                    :class="condition.matched ? 'nimbus-ok-text' : 'text-themed'"
                   >
-                    {{ condition.progress }}%
-                  </span>
-                </div>
-                <div class="mt-3 grid gap-2 sm:grid-cols-3">
-                  <div class="min-w-0 rounded-md px-2.5 py-2" :class="subtlePanelClass">
-                    <div class="text-[11px] text-themed-muted">{{ t('dashboard.vipProgressCurrent') }}</div>
-                    <div class="mt-1 truncate text-sm font-semibold text-themed">{{ formatVipProgressValue(condition, condition.current) }}</div>
+                    {{ formatVipProgressRemaining(condition) }}
                   </div>
-                  <div class="min-w-0 rounded-md px-2.5 py-2" :class="subtlePanelClass">
-                    <div class="text-[11px] text-themed-muted">{{ t('dashboard.vipProgressTarget') }}</div>
-                    <div class="mt-1 truncate text-sm font-semibold text-themed">{{ formatVipProgressValue(condition, condition.target) }}</div>
-                  </div>
-                  <div class="min-w-0 rounded-md px-2.5 py-2" :class="subtlePanelClass">
-                    <div class="text-[11px] text-themed-muted">{{ t('dashboard.vipProgressRemaining') }}</div>
-                    <div
-                      class="mt-1 truncate text-sm font-semibold"
-                      :class="condition.matched ? 'text-emerald-600 dark:text-emerald-300' : 'text-themed'"
-                    >
-                      {{ formatVipProgressRemaining(condition) }}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div v-if="availableLifecycleOffers.length > 0" class="rounded-lg border p-4" :class="subtlePanelClass">
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <div class="text-sm font-semibold text-themed">可用运营优惠</div>
-                <div class="mt-1 text-xs text-themed-muted">管理员为您定向发放的资源兑换码。</div>
-              </div>
-              <RouterLink
-                :to="{ path: entertainmentPath(), query: { tab: 'checkin' } }"
-                class="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-semibold transition-colors"
-                :class="themeStore.isDark ? 'border-gray-700 bg-gray-900 text-gray-200 hover:bg-gray-800' : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'"
-              >
-                去兑换
-              </RouterLink>
-            </div>
-            <div class="mt-3 grid gap-2">
-              <div
-                v-for="offer in availableLifecycleOffers"
-                :key="offer.id"
-                class="rounded-lg border px-3 py-2"
-                :class="themeStore.isDark ? 'border-gray-800 bg-gray-950/50' : 'border-gray-200 bg-white'"
-              >
-                <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                  <div class="min-w-0">
-                    <div class="truncate text-sm font-semibold text-themed">{{ offer.code }}</div>
-                    <div class="text-xs text-themed-muted">{{ offer.host.name }} · {{ offer.codeType }} +{{ offer.codeValue }}{{ getLifecycleOfferUnit(offer.codeType) }}</div>
-                  </div>
-                  <div class="text-xs text-themed-muted">{{ offer.expiresAt ? new Date(offer.expiresAt).toLocaleDateString() : '长期有效' }}</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </section>
-    </div>
+
+        <div v-if="availableLifecycleOffers.length > 0" class="nimbus-inner mt-4 rounded-xl border p-4" :class="subtlePanelClass">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <div class="text-sm font-semibold text-themed">可用运营优惠</div>
+              <div class="mt-1 text-xs text-themed-muted">管理员为您定向发放的资源兑换码。</div>
+            </div>
+            <RouterLink
+              :to="{ path: entertainmentPath(), query: { tab: 'checkin' } }"
+              class="nimbus-ghost-btn inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-semibold"
+            >
+              去兑换
+            </RouterLink>
+          </div>
+          <div class="mt-3 grid gap-2">
+            <div
+              v-for="offer in availableLifecycleOffers"
+              :key="offer.id"
+              class="nimbus-inner rounded-xl border px-3 py-2"
+              :class="subtlePanelClass"
+            >
+              <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <div class="min-w-0">
+                  <div class="truncate text-sm font-semibold text-themed font-mono">{{ offer.code }}</div>
+                  <div class="text-xs text-themed-muted">{{ offer.host.name }} · {{ offer.codeType }} +{{ offer.codeValue }}{{ getLifecycleOfferUnit(offer.codeType) }}</div>
+                </div>
+                <div class="text-xs text-themed-muted">{{ offer.expiresAt ? new Date(offer.expiresAt).toLocaleDateString() : '长期有效' }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右：实例状态分布 -->
+      <div class="nimbus-card nimbus-card--hover flex flex-col p-5 sm:p-6" :class="overviewShellClass">
+        <div class="flex items-start justify-between gap-3">
+          <div class="nimbus-eyebrow">{{ t('dashboard.instanceStatusOverview') }}</div>
+          <RouterLink :to="instancesPath()" class="nimbus-link inline-flex items-center gap-1 text-xs font-medium">
+            {{ t('dashboard.viewAll') }}
+            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </RouterLink>
+        </div>
+
+        <div class="mt-3 flex items-end gap-2">
+          <div class="nimbus-hero-value font-mono tabular-nums leading-none">{{ stats.total }}</div>
+          <div class="pb-1 text-sm text-themed-muted">{{ t('dashboard.totalInstances') }}</div>
+        </div>
+
+        <div class="mt-5 space-y-4">
+          <div v-for="item in statusOverviewItems" :key="item.key">
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-themed-muted">{{ item.label }}</span>
+              <span class="font-mono tabular-nums text-themed">{{ item.value }}</span>
+            </div>
+            <div class="nimbus-bar mt-2">
+              <div class="nimbus-bar-fill" :style="{ width: (stats.total ? Math.round((item.value / stats.total) * 100) : 0) + '%' }"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-themed-muted">{{ t('dashboard.containerInstances') }}</span>
+              <span class="font-mono tabular-nums text-themed">{{ instanceTypeStats.container }}</span>
+            </div>
+            <div class="nimbus-bar mt-2">
+              <div class="nimbus-bar-fill" :style="{ width: (stats.total ? Math.round((instanceTypeStats.container / stats.total) * 100) : 0) + '%' }"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-themed-muted">{{ t('dashboard.vmInstances') }}</span>
+              <span class="font-mono tabular-nums text-themed">{{ instanceTypeStats.vm }}</span>
+            </div>
+            <div class="nimbus-bar mt-2">
+              <div class="nimbus-bar-fill" :style="{ width: (stats.total ? Math.round((instanceTypeStats.vm / stats.total) * 100) : 0) + '%' }"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <PluginFrameSlot slot-name="user.dashboard.cards" surface="user" frame-class="min-h-[220px]" />
 
-    <!-- 实例列表 -->
-    <div data-reveal class="kawaii-card kawaii-dashboard-instance-panel card overflow-hidden rounded-lg">
-      <div 
-        class="px-4 py-4 border-b flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-        :class="themeStore.isDark ? 'border-gray-800' : 'border-gray-200'"
-      >
+    <!-- 最近实例 -->
+    <section data-reveal class="nimbus-card overflow-hidden" :class="overviewShellClass">
+      <div class="nimbus-panel-head flex flex-col gap-3 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 class="text-base font-semibold text-themed">{{ $t('dashboard.myInstances') }}</h2>
           <p class="mt-1 text-xs text-themed-muted">{{ instanceListSummary }}</p>
         </div>
-        <RouterLink 
+        <RouterLink
           :to="instancesPath()"
-          class="inline-flex items-center justify-center rounded-lg px-3 py-2 text-xs font-medium transition-colors"
-          :class="themeStore.isDark ? 'bg-gray-900 text-gray-300 hover:bg-gray-800' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+          class="nimbus-ghost-btn inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-medium"
         >
           {{ $t('dashboard.viewAll') }}
           <svg class="ml-1.5 h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -694,62 +727,50 @@ function getInstanceRowClass(): string {
         </RouterLink>
       </div>
 
-      <div v-if="loading" class="p-3 sm:p-4">
-        <div class="space-y-3">
-          <div
-            v-for="i in 3"
-            :key="i"
-            class="rounded-lg border p-3.5 sm:p-4"
-            :class="themeStore.isDark ? 'border-gray-800 bg-gray-900/40' : 'border-gray-200 bg-gray-50/60'"
-          >
-            <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-              <div class="flex items-center gap-3">
-                <Skeleton type="circle" size="11px" />
-                <div class="space-y-2 min-w-0 flex-1">
-                  <Skeleton type="line" width="150px" height="15px" />
-                  <Skeleton type="line" width="210px" height="11px" />
-                </div>
+      <div v-if="loading" class="space-y-3 p-4 sm:p-5">
+        <div
+          v-for="i in 3"
+          :key="i"
+          class="nimbus-inner rounded-xl border p-4"
+          :class="subtlePanelClass"
+        >
+          <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div class="flex items-center gap-3">
+              <Skeleton type="circle" size="44px" />
+              <div class="min-w-0 flex-1 space-y-2">
+                <Skeleton type="line" width="150px" height="15px" />
+                <Skeleton type="line" width="210px" height="11px" />
               </div>
-              <div class="flex flex-wrap gap-2 lg:justify-end">
-                <Skeleton v-for="metric in 4" :key="metric" type="line" width="74px" height="28px" />
-              </div>
+            </div>
+            <div class="flex flex-wrap gap-2 lg:justify-end">
+              <Skeleton v-for="metric in 3" :key="metric" type="line" width="74px" height="28px" />
             </div>
           </div>
         </div>
       </div>
 
-      <div v-else-if="instances.length === 0" class="p-8 text-center">
-        <div 
-          class="w-16 h-16 mx-auto mb-4 rounded-lg flex items-center justify-center"
-          :class="themeStore.isDark ? 'bg-gray-800' : 'bg-gray-100'"
-        >
-          <svg 
-            class="w-8 h-8" 
-            :class="themeStore.isDark ? 'text-gray-600' : 'text-gray-400'"
-            fill="none" stroke="currentColor" viewBox="0 0 24 24"
-          >
+      <div v-else-if="instances.length === 0" class="p-10 text-center">
+        <div class="nimbus-empty-icon mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl">
+          <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2" />
           </svg>
         </div>
-        <p class="text-themed-muted text-sm mb-4">{{ $t('dashboard.noInstances') }}</p>
+        <p class="mb-4 text-sm text-themed-muted">{{ $t('dashboard.noInstances') }}</p>
         <RouterLink :to="instanceCreatePath()" class="btn-primary btn-sm">{{ configStore.freeSiteMode ? freeSiteCopy.dashboardCreateFirst : $t('dashboard.createFirst') }}</RouterLink>
       </div>
 
-      <div v-else class="p-3 sm:p-4">
-        <RouterLink 
-          v-for="instance in recentInstances" 
+      <div v-else class="space-y-2.5 p-4 sm:p-5">
+        <RouterLink
+          v-for="instance in recentInstances"
           :key="instance.id"
           :to="instanceDetailPath(instance.id)"
-          class="kawaii-dashboard-instance-row group relative block overflow-hidden rounded-lg border p-3.5 transition-all duration-200 mb-3 last:mb-0 sm:p-4"
+          class="nimbus-row group relative block overflow-hidden rounded-xl border p-4"
           :class="getInstanceRowClass()"
         >
           <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div class="min-w-0 flex-1">
               <div class="flex items-start gap-3">
-                <div 
-                  class="w-11 h-11 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors overflow-hidden"
-                  :class="themeStore.isDark ? 'bg-gray-800 group-hover:bg-gray-700' : 'bg-gray-100 group-hover:bg-gray-200'"
-                >
+                <div class="nimbus-row-icon flex h-11 w-11 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl sm:h-12 sm:w-12">
                   <InstanceDisplayIcon
                     v-if="instance.iconBadgeId || getPaidIconType(instance)"
                     :badge-id="instance.iconBadgeId"
@@ -757,72 +778,59 @@ function getInstanceRowClass(): string {
                     :alt="instance.name"
                     :size="48"
                   />
-                  <DistroIcon 
+                  <DistroIcon
                     v-else
-                    :distro="getDistroFromName(instance.image)" 
+                    :distro="getDistroFromName(instance.image)"
                     :size="26"
                   />
                 </div>
 
                 <div class="min-w-0 flex-1">
                   <div class="flex flex-wrap items-center gap-2">
-                    <span 
-                      class="max-w-full truncate text-sm sm:text-[15px] font-semibold"
-                      :class="themeStore.isDark ? 'text-gray-100' : 'text-gray-900'"
-                    >
-                      {{ instance.name }}
-                    </span>
-                    <span :class="['badge inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] sm:text-[11px] flex-shrink-0', getStatusInfo(instance.status, t).class]">
-                      <span :class="['w-1.5 h-1.5 rounded-full', getStatusInfo(instance.status, t).dot]"></span>
+                    <span class="nimbus-row-name max-w-full truncate text-sm sm:text-[15px]">{{ instance.name }}</span>
+                    <span :class="['badge inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] sm:text-[11px] flex-shrink-0', getStatusInfo(instance.status, t).class]">
+                      <span :class="['h-1.5 w-1.5 rounded-full', getStatusInfo(instance.status, t).dot]"></span>
                       {{ getStatusInfo(instance.status, t).label }}
                     </span>
-                    <span
-                      class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] sm:text-[11px] font-medium"
-                      :class="instance.instanceType === 'vm'
-                        ? (themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700')
-                        : (themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700')"
-                    >
+                    <span class="nimbus-chip-idle inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium sm:text-[11px]">
                       {{ getInstanceTypeLabel(instance) }}
                     </span>
                   </div>
 
-                  <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-                    <span class="truncate max-w-[14rem] sm:max-w-[22rem]" :class="themeStore.isDark ? 'text-gray-400' : 'text-gray-500'">
-                      {{ formatImageName(instance.image, (instance as any).imageName) }}
-                    </span>
-                    <span :class="themeStore.isDark ? 'text-gray-600' : 'text-gray-300'">•</span>
-                    <span :class="themeStore.isDark ? 'text-gray-300' : 'text-gray-700'">CPU {{ instance.cpu }}%</span>
-                    <span :class="themeStore.isDark ? 'text-gray-600' : 'text-gray-300'">•</span>
-                    <span :class="themeStore.isDark ? 'text-gray-300' : 'text-gray-700'">{{ formatMemory(instance.memory) }}</span>
-                    <span :class="themeStore.isDark ? 'text-gray-600' : 'text-gray-300'">•</span>
-                    <span :class="themeStore.isDark ? 'text-gray-300' : 'text-gray-700'">{{ formatDisk(instance.disk) }}</span>
+                  <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-themed-muted">
+                    <span class="max-w-[14rem] truncate font-mono sm:max-w-[22rem]">{{ formatImageName(instance.image, (instance as any).imageName) }}</span>
+                    <span class="nimbus-dot">•</span>
+                    <span class="font-mono tabular-nums text-themed">CPU {{ instance.cpu }}%</span>
+                    <span class="nimbus-dot">•</span>
+                    <span class="font-mono text-themed">{{ formatMemory(instance.memory) }}</span>
+                    <span class="nimbus-dot">•</span>
+                    <span class="font-mono text-themed">{{ formatDisk(instance.disk) }}</span>
+                  </div>
+
+                  <div class="nimbus-load mt-2.5 max-w-md">
+                    <div
+                      class="nimbus-load-fill"
+                      :class="{
+                        'nimbus-load-fill--danger': instance.cpu > 85,
+                        'nimbus-load-fill--warn': instance.cpu > 60 && instance.cpu <= 85
+                      }"
+                      :style="{ width: Math.min(Math.max(instance.cpu, 0), 100) + '%' }"
+                    ></div>
                   </div>
                 </div>
               </div>
             </div>
 
             <div class="flex flex-wrap items-center gap-2 lg:justify-end lg:pl-4">
-              <span
-                class="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px]"
-                :class="themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'"
-              >
+              <span class="nimbus-meta-chip inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[11px]">
                 <FlagIcon :code="instance.host?.country_code || instance.hostCountryCode || 'us'" size="xs" />
-                <span class="truncate max-w-[8rem]">{{ getHostName(instance) }}</span>
+                <span class="max-w-[8rem] truncate">{{ getHostName(instance) }}</span>
               </span>
-              <span
-                class="inline-flex items-center rounded-md px-2 py-1 text-[11px] font-mono"
-                :class="themeStore.isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'"
-              >
+              <span class="nimbus-meta-chip inline-flex items-center rounded-lg px-2 py-1 text-[11px] font-mono">
                 {{ getDisplayIp(instance) || $t('dashboard.noPublicIp') }}
               </span>
-              <div
-                class="hidden lg:flex h-9 w-9 items-center justify-center rounded-lg transition-colors"
-                :class="themeStore.isDark ? 'bg-gray-800 text-gray-500 group-hover:bg-gray-700 group-hover:text-gray-300' : 'bg-gray-100 text-gray-400 group-hover:bg-gray-200 group-hover:text-gray-700'"
-              >
-                <svg 
-                  class="w-4 h-4 transition-transform group-hover:translate-x-0.5" 
-                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                >
+              <div class="nimbus-row-chevron hidden h-9 w-9 items-center justify-center rounded-lg lg:flex">
+                <svg class="h-4 w-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
               </div>
@@ -831,35 +839,278 @@ function getInstanceRowClass(): string {
         </RouterLink>
       </div>
 
-      <div 
-        v-if="instances.length > 5" 
-        class="px-4 py-3 border-t text-center"
-        :class="themeStore.isDark ? 'border-gray-800' : 'border-gray-200'"
-      >
-        <RouterLink 
-          :to="instancesPath()"
-          class="text-sm transition-colors"
-          :class="themeStore.isDark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'"
-        >
+      <div v-if="instances.length > 5" class="nimbus-panel-foot border-t px-5 py-3 text-center">
+        <RouterLink :to="instancesPath()" class="nimbus-link text-sm">
           {{ $t('dashboard.viewAllInstancesWithCount', { count: instances.length }) }} →
         </RouterLink>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 <style scoped>
-.dashboard-overview-card {
-  min-height: 260px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+/* ============================================================
+   Nimbus console · 结构化仪表盘（白底为主 + 单一靛蓝信号色）
+   颜色全部走 --kawaii-* token，随 .light/.dark 自动明暗切换。
+   ============================================================ */
+
+/* --- 卡片外壳 --- */
+.nimbus-card {
+  position: relative;
+  border: 1px solid var(--kawaii-line);
+  border-radius: 14px;
+  box-shadow: var(--kawaii-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.dashboard-overview-card:hover {
-  transform: translateY(-1px);
+.nimbus-card--hover:hover {
+  transform: translateY(-2px);
+  border-color: var(--kawaii-line-strong);
+  box-shadow: 0 10px 30px -12px rgb(15 23 42 / 0.22);
 }
 
-@media (max-width: 640px) {
-  .dashboard-overview-card {
-    min-height: auto;
+/* --- 页头图标按钮 --- */
+.nimbus-icon-btn {
+  color: var(--kawaii-primary);
+  background: color-mix(in srgb, var(--kawaii-primary) 10%, transparent);
+  transition: background 0.18s ease, transform 0.18s ease;
+}
+.nimbus-icon-btn:hover {
+  background: color-mix(in srgb, var(--kawaii-primary) 18%, transparent);
+}
+
+/* --- 指标卡 --- */
+.nimbus-metric {
+  animation: nimbusRise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+.nimbus-tile-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  color: var(--kawaii-primary);
+  background: color-mix(in srgb, var(--kawaii-primary) 12%, transparent);
+}
+.nimbus-tile-icon svg {
+  width: 21px;
+  height: 21px;
+}
+
+.nimbus-spark {
+  width: 58px;
+  height: 22px;
+  color: var(--kawaii-primary);
+  opacity: 0.4;
+  flex-shrink: 0;
+}
+
+.nimbus-metric-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--kawaii-muted);
+}
+
+.nimbus-metric-value {
+  font-size: 1.75rem;
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--kawaii-text);
+}
+
+.nimbus-metric-delta {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  color: var(--kawaii-faint);
+}
+.nimbus-metric-delta--up {
+  color: var(--kawaii-mint);
+}
+
+/* --- 大标题数字 / 眉标 --- */
+.nimbus-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kawaii-muted);
+}
+
+.nimbus-hero-value {
+  font-size: 2rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--kawaii-text);
+}
+@media (min-width: 640px) {
+  .nimbus-hero-value {
+    font-size: 2.25rem;
+  }
+}
+
+/* --- 内层面板圆角对齐 --- */
+.nimbus-inner {
+  border-radius: 12px;
+}
+
+/* --- 进度条（会员成长 / 状态分布），靛蓝填充 --- */
+.nimbus-bar {
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--kawaii-muted) 16%, transparent);
+}
+.nimbus-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--kawaii-primary);
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nimbus-pct {
+  color: var(--kawaii-primary-strong);
+  background: color-mix(in srgb, var(--kawaii-primary) 13%, transparent);
+}
+
+/* 语义 chip：已满足=绿，默认=中性 */
+.nimbus-chip-ok {
+  color: var(--kawaii-mint);
+  background: color-mix(in srgb, var(--kawaii-mint) 15%, transparent);
+}
+.nimbus-chip-idle {
+  color: var(--kawaii-muted);
+  background: color-mix(in srgb, var(--kawaii-muted) 12%, transparent);
+}
+.nimbus-ok-text {
+  color: var(--kawaii-mint);
+}
+
+/* --- 链接 / 幽灵按钮 --- */
+.nimbus-link {
+  color: var(--kawaii-primary);
+  transition: color 0.18s ease;
+}
+.nimbus-link:hover {
+  color: var(--kawaii-primary-strong);
+}
+
+.nimbus-ghost-btn {
+  border-color: var(--kawaii-line);
+  color: var(--kawaii-muted);
+  background: var(--kawaii-surface);
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.nimbus-ghost-btn:hover {
+  color: var(--kawaii-text);
+  border-color: var(--kawaii-line-strong);
+  background: var(--kawaii-surface-soft);
+}
+
+/* --- 面板头/脚分隔线 --- */
+.nimbus-panel-head,
+.nimbus-panel-foot {
+  border-color: var(--kawaii-line);
+}
+
+/* --- 最近实例行 --- */
+.nimbus-row {
+  border-radius: 12px !important;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
+.nimbus-row:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px -14px rgb(15 23 42 / 0.28);
+}
+
+.nimbus-row-name {
+  font-weight: 620;
+  color: var(--kawaii-text);
+}
+
+.nimbus-row-icon {
+  color: var(--kawaii-muted);
+  background: color-mix(in srgb, var(--kawaii-muted) 12%, transparent);
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.nimbus-row:hover .nimbus-row-icon {
+  color: var(--kawaii-primary);
+  background: color-mix(in srgb, var(--kawaii-primary) 12%, transparent);
+}
+
+.nimbus-dot {
+  color: color-mix(in srgb, var(--kawaii-muted) 55%, transparent);
+}
+
+.nimbus-meta-chip {
+  color: var(--kawaii-muted);
+  background: color-mix(in srgb, var(--kawaii-muted) 10%, transparent);
+}
+
+.nimbus-row-chevron {
+  color: var(--kawaii-faint);
+  background: color-mix(in srgb, var(--kawaii-muted) 10%, transparent);
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.nimbus-row:hover .nimbus-row-chevron {
+  color: var(--kawaii-primary);
+  background: color-mix(in srgb, var(--kawaii-primary) 12%, transparent);
+}
+
+/* --- 实例负载条：CPU 真实占用，>85% 转红，>60% 转琥珀 --- */
+.nimbus-load {
+  height: 5px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--kawaii-muted) 14%, transparent);
+}
+.nimbus-load-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--kawaii-primary);
+  transition: width 0.4s ease;
+}
+.nimbus-load-fill--warn {
+  background: var(--kawaii-amber);
+}
+.nimbus-load-fill--danger {
+  background: #dc2626;
+}
+
+/* --- 空状态图标 --- */
+.nimbus-empty-icon {
+  color: var(--kawaii-faint);
+  background: color-mix(in srgb, var(--kawaii-muted) 12%, transparent);
+}
+
+/* --- 入场动画（尊重减少动态） --- */
+@keyframes nimbusRise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nimbus-metric {
+    animation: none;
+  }
+  .nimbus-card--hover:hover,
+  .nimbus-row:hover {
+    transform: none;
+  }
+  .nimbus-bar-fill,
+  .nimbus-load-fill {
+    transition: none;
   }
 }
 </style>
