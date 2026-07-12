@@ -17,6 +17,7 @@ This page is generated from Git tags and commits to show system version history.
 
 ### Other Changes / 其他变更
 
+- docs-site: UI 交互/无障碍优化 + 修正 2 处文档错误 `2201bdd41`
 - docs: 补齐版本更新日志到 v1.4.3（含 v1.4.0/1/2/3 OTA 升级记录） `3e89cb210`
 
 ## Historical Versions / 历史版本
