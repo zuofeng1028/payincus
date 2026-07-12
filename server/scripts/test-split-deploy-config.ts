@@ -370,16 +370,12 @@ assertIncludesAll(
     '/opt/incudal/current',
     '/opt/incudal/releases',
     '/opt/incudal/server/certs',
-    '/opt/incudal/plugins',
-    '/opt/incudal/plugin-data',
-    '/opt/incudal/plugin-logs',
-    '/opt/incudal/plugin-staging',
     '/opt/incudal/.npm',
     '/opt/incudal/.cache',
     '/opt/incudal/.git',
     '/opt/incudal/update-logs'
   ],
-  'systemd backend example must keep all runtime, cache, git, update and plugin paths writable'
+  'systemd backend example must keep all runtime, cache, git and update paths writable'
 )
 assert.ok(
     installPanel.includes('Environment=NPM_CONFIG_CACHE=${INSTALL_DIR}/.npm') &&
@@ -398,16 +394,12 @@ assertIncludesAll(
     '${INSTALL_DIR}/current',
     '${INSTALL_DIR}/releases',
     '${INSTALL_DIR}/server/certs',
-    '${INSTALL_DIR}/plugins',
-    '${INSTALL_DIR}/plugin-data',
-    '${INSTALL_DIR}/plugin-logs',
-    '${INSTALL_DIR}/plugin-staging',
     '${INSTALL_DIR}/.npm',
     '${INSTALL_DIR}/.cache',
     '${INSTALL_DIR}/.git',
     '${INSTALL_DIR}/update-logs'
   ],
-  'install script systemd service must keep all runtime, cache, git, update and plugin paths writable'
+  'install script systemd service must keep all runtime, cache, git and update paths writable'
 )
 
 assert.ok(viteConfig.includes('const devPort = Number(process.env.VITE_DEV_PORT || 3000)'), 'Vite dev server must default frontend port to 3000')
@@ -822,14 +814,10 @@ const allowedClientNetworkPrimitiveLines = new Map<string, string[]>([
   ['client/src/admin/AdminApp.vue', ["fetch(buildApiUrl('/auth/refresh'), {"]],
   ['client/src/api/index.ts', ["fetch(buildApiUrl('/auth/refresh'), {"]],
   ['client/src/api/admin.ts', ["fetch(buildApiUrl('/auth/refresh'), {"]],
-  ['client/src/components/layout/SideNav.vue', ["fetch(buildApiUrl('/admin/plugins'), {"]],
-  ['client/src/components/theme/ThemeTemplateSlot.vue', ['fetch(resolveThemeTemplateUrl(url), {']],
   ['client/src/components/TermsOfServiceModal.vue', ['fetch(`/tos/${lang}.md`)']],
-  ['client/src/stores/theme.ts', ["fetch(buildApiUrl('/themes/active'), {"]],
   ['client/src/components/instance/TerminalModal.vue', ['new WebSocket(wsUrl)']],
   ['client/src/composables/useTerminal.ts', ['new WebSocket(wsUrl)']],
-  ['client/src/views/TerminalView.vue', ['new WebSocket(wsUrl)']],
-  ['client/src/views/TicketsView.vue', ['fetch(buildApiUrl(`/tickets/${ticketId}/ai/${action}`), {']]
+  ['client/src/views/TerminalView.vue', ['new WebSocket(wsUrl)']]
 ])
 
 for (const file of clientSourceFiles) {

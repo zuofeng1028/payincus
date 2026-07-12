@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useThemeStore } from '@/stores/theme'
 import { useToast } from '@/stores/toast'
-import ThemeTemplateSlot from '@/components/theme/ThemeTemplateSlot.vue'
 import TurnstileWidget from '@/components/TurnstileWidget.vue'
 import { focusTurnstileSection, readTurnstileToken } from '@/utils/turnstile'
 import { translateError } from '@/utils/errorHandler'
@@ -189,10 +188,6 @@ function backToEmail() {
   <div ref="revealRoot" class="nimbus-auth kawaii-public-shell kawaii-auth-shell kawaii-user-auth min-h-screen flex items-center justify-center p-4 sm:p-6">
     <div class="nimbus-aurora" aria-hidden="true"></div>
     <div class="relative z-10 w-full max-w-sm">
-      <ThemeTemplateSlot
-        slot-name="public.auth.aside"
-        container-class="mb-6"
-      />
 
       <!-- Logo lockup -->
       <div class="nimbus-lockup" data-reveal>

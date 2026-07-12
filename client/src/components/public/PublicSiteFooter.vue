@@ -2,7 +2,6 @@
 import { computed } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import ThemeTemplateSlot from '@/components/theme/ThemeTemplateSlot.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useConfigStore } from '@/stores/config'
 import { useBrand } from '@/composables/useBrand'
@@ -78,10 +77,6 @@ void configStore.loadPublicConfig()
 
 <template>
   <footer class="kawaii-public-footer relative border-t">
-    <ThemeTemplateSlot
-      slot-name="shared.footer"
-      container-class="mx-auto max-w-7xl px-4 pt-10 sm:px-6 lg:px-8"
-    />
 
     <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <div

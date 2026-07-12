@@ -190,47 +190,7 @@ export const RISK_OPERATION_DEFINITIONS: RiskOperationDefinition[] = [
     verificationRequired: true,
     batchSensitive: false
   },
-  {
-    action: 'plugin.install',
-    module: 'plugin',
-    level: 'high',
-    title: '安装插件',
-    description: '插件可能扩展用户端、后台端或 API 能力，必须记录来源和校验值。',
-    approvalRequired: false,
-    verificationRequired: true,
-    batchSensitive: false
-  },
-  {
-    action: 'plugin.enable',
-    module: 'plugin',
-    level: 'high',
-    title: '启用插件',
-    description: '会让插件扩展点生效，需要记录操作人与插件版本。',
-    approvalRequired: false,
-    verificationRequired: true,
-    batchSensitive: false
-  },
-  {
-    action: 'plugin.disable',
-    module: 'plugin',
-    level: 'medium',
-    title: '停用插件',
-    description: '可能影响插件提供的业务能力。',
-    approvalRequired: false,
-    verificationRequired: false,
-    batchSensitive: false
-  },
-  {
-    action: 'plugin.delete',
-    module: 'plugin',
-    level: 'high',
-    title: '卸载插件',
-    description: '可能移除插件资产和配置。',
-    approvalRequired: false,
-    verificationRequired: true,
-    batchSensitive: false
-  }
-]
+  ]
 
 const RISK_LEVEL_RANK: Record<RiskLevel, number> = {
   low: 1,
@@ -244,7 +204,6 @@ const MODULE_DEFAULT_RISK: Record<string, RiskLevel> = {
   billing: 'medium',
   host: 'medium',
   package: 'medium',
-  plugin: 'medium',
   user: 'medium',
   instance: 'low',
   security: 'low',

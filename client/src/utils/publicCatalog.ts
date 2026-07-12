@@ -26,13 +26,6 @@ export interface PublicPackagePlan {
   monthlyPrice: number
 }
 
-export interface PublicPackageCheckoutExtension {
-  pluginId: string
-  serviceExtensionKey: string
-  name: string
-  productId: string | null
-  hook: 'checkoutConfig'
-}
 
 export interface PublicPackage {
   id: number
@@ -50,7 +43,6 @@ export interface PublicPackage {
   sourceType: 'official' | 'market'
   soldOut: boolean
   isPaid: boolean
-  checkoutExtensions?: PublicPackageCheckoutExtension[]
   plans: PublicPackagePlan[]
 }
 

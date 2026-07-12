@@ -21,17 +21,9 @@ assert(
 )
 
 assert(
-  instanceRoutesSource.includes('if (flashSaleItemId === undefined)') &&
-    instanceRoutesSource.includes('await turnstileVerifier(request, reply)') &&
+  instanceRoutesSource.includes('await turnstileVerifier(request, reply)') &&
     instanceRoutesSource.includes('if (reply.sent) return'),
-  'normal instance creation must run global Turnstile verification before order/resource work'
-)
-
-assert(
-  instanceRoutesSource.includes('assertFlashSaleCheckoutEligibility({') &&
-    instanceRoutesSource.includes('turnstileToken,') &&
-    instanceRoutesSource.includes('remoteIp: request.ip'),
-  'flash sale creation must keep its business-level Turnstile validation'
+  'instance creation must run global Turnstile verification before order/resource work'
 )
 
 assert(
@@ -77,15 +69,10 @@ assert(
 
 assert(
   instanceCreateViewSource.includes('const createIntentIdempotencyKey = ref<string | null>(null)') &&
-    instanceCreateViewSource.includes('if (!flashSaleId && isPaidPackage.value && !createIntentIdempotencyKey.value)') &&
-    instanceCreateViewSource.includes(': (isPaidPackage.value ? createIntentIdempotencyKey.value || undefined : undefined)') &&
+    instanceCreateViewSource.includes('if (isPaidPackage.value && !createIntentIdempotencyKey.value)') &&
+    instanceCreateViewSource.includes('idempotencyKey: isPaidPackage.value ? createIntentIdempotencyKey.value || undefined : undefined') &&
     instanceCreateViewSource.includes('createIntentIdempotencyKey.value = null'),
   'normal paid create retries must reuse one client idempotency key until the intent succeeds or changes'
-)
-
-assert(
-  instanceCreateViewSource.includes("? (crypto.randomUUID?.() || `flash-sale-${flashSaleId}-${Date.now()}`)"),
-  'flash-sale creation must keep its existing reservation idempotency key path'
 )
 
 for (const [name, source] of [

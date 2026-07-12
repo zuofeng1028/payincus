@@ -44,9 +44,6 @@ interface DeliveryCleanupSummary extends Record<string, Prisma.JsonValue> {
   snapshotsRemoved: number
   snapshotPoliciesRemoved: number
   backupPoliciesRemoved: number
-  resourceRiskStateRemoved: number
-  resourceRiskEventsRemoved: number
-  resourceRiskSamplesRemoved: number
   cleanupWarnings: number
   cleanupWarningSamples: string[]
 }
@@ -152,17 +149,11 @@ async function cleanupLegacyAccess(instanceId: number): Promise<DeliveryCleanupS
   const [
     snapshotsRemoved,
     snapshotPoliciesRemoved,
-    backupPoliciesRemoved,
-    resourceRiskStateRemoved,
-    resourceRiskEventsRemoved,
-    resourceRiskSamplesRemoved
+    backupPoliciesRemoved
   ] = await Promise.all([
     prisma.snapshot.deleteMany({ where: { instanceId } }),
     prisma.snapshotPolicy.deleteMany({ where: { instanceId } }),
-    prisma.backupPolicy.deleteMany({ where: { instanceId } }),
-    prisma.instanceRiskState.deleteMany({ where: { instanceId } }),
-    prisma.instanceRiskEvent.deleteMany({ where: { instanceId } }),
-    prisma.instanceResourceSample.deleteMany({ where: { instanceId } })
+    prisma.backupPolicy.deleteMany({ where: { instanceId } })
   ])
 
   return {
@@ -174,9 +165,6 @@ async function cleanupLegacyAccess(instanceId: number): Promise<DeliveryCleanupS
     snapshotsRemoved: snapshotsRemoved.count,
     snapshotPoliciesRemoved: snapshotPoliciesRemoved.count,
     backupPoliciesRemoved: backupPoliciesRemoved.count,
-    resourceRiskStateRemoved: resourceRiskStateRemoved.count,
-    resourceRiskEventsRemoved: resourceRiskEventsRemoved.count,
-    resourceRiskSamplesRemoved: resourceRiskSamplesRemoved.count,
     cleanupWarnings: cleanupWarnings.length,
     cleanupWarningSamples: cleanupWarnings.slice(0, 10)
   }
@@ -306,9 +294,6 @@ async function enqueueReinstall(taskId: number): Promise<void> {
 	        removedSnapshots: cleanupSummary.snapshotsRemoved,
 	        removedSnapshotPolicies: cleanupSummary.snapshotPoliciesRemoved,
 	        removedBackupPolicies: cleanupSummary.backupPoliciesRemoved,
-	        removedResourceRiskState: cleanupSummary.resourceRiskStateRemoved,
-	        removedResourceRiskEvents: cleanupSummary.resourceRiskEventsRemoved,
-	        removedResourceRiskSamples: cleanupSummary.resourceRiskSamplesRemoved,
 	        cleanupWarnings: cleanupSummary.cleanupWarnings,
 	        cleanupWarningSamples: cleanupSummary.cleanupWarningSamples,
 	        trafficUsagePreserved: true,
@@ -407,9 +392,6 @@ async function finalizeDelivery(taskId: number): Promise<void> {
         snapshotsRemoved,
         snapshotPoliciesRemoved,
         backupPoliciesRemoved,
-        resourceRiskStateRemoved,
-        resourceRiskEventsRemoved,
-        resourceRiskSamplesRemoved,
         affBindingsRemoved,
         cancelledTransfers
       ] = await Promise.all([
@@ -418,9 +400,6 @@ async function finalizeDelivery(taskId: number): Promise<void> {
         tx.snapshot.deleteMany({ where: { instanceId: task.instanceId } }),
         tx.snapshotPolicy.deleteMany({ where: { instanceId: task.instanceId } }),
         tx.backupPolicy.deleteMany({ where: { instanceId: task.instanceId } }),
-        tx.instanceRiskState.deleteMany({ where: { instanceId: task.instanceId } }),
-        tx.instanceRiskEvent.deleteMany({ where: { instanceId: task.instanceId } }),
-        tx.instanceResourceSample.deleteMany({ where: { instanceId: task.instanceId } }),
         tx.affBinding.deleteMany({ where: { instanceId: task.instanceId } }),
         tx.instanceTransfer.updateMany({
           where: { instanceId: task.instanceId, status: { in: ['pending', 'processing'] } },
@@ -490,9 +469,6 @@ async function finalizeDelivery(taskId: number): Promise<void> {
               snapshotsRemoved: snapshotsRemoved.count,
               snapshotPoliciesRemoved: snapshotPoliciesRemoved.count,
               backupPoliciesRemoved: backupPoliciesRemoved.count,
-              resourceRiskStateRemoved: resourceRiskStateRemoved.count,
-              resourceRiskEventsRemoved: resourceRiskEventsRemoved.count,
-              resourceRiskSamplesRemoved: resourceRiskSamplesRemoved.count,
               affBindingsRemoved: affBindingsRemoved.count,
               cancelledTransfers: cancelledTransfers.count
             },

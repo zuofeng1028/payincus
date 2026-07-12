@@ -37,9 +37,6 @@ interface BandwidthArbitrationSource {
   packagePlan?: {
     trafficLimitSpeed: string | null
   } | null
-  resourceRiskState?: {
-    currentBandwidthLimit: string | null
-  } | null
 }
 
 export interface EffectiveBandwidth {
@@ -111,11 +108,10 @@ export function computeEffectiveBandwidth(
   const baselineIngress = normalLineSpeed ?? instance.package?.limitsIngress ?? null
   const baselineEgress = normalLineSpeed ?? instance.package?.limitsEgress ?? null
   const trafficConstraint = instance.trafficStatus === 'LIMITED' ? overageThrottleSpeed : null
-  const riskConstraint = instance.resourceRiskState?.currentBandwidthLimit ?? null
 
   return {
-    ingress: mostRestrictiveBandwidth(baselineIngress, trafficConstraint, riskConstraint),
-    egress: mostRestrictiveBandwidth(baselineEgress, trafficConstraint, riskConstraint)
+    ingress: mostRestrictiveBandwidth(baselineIngress, trafficConstraint),
+    egress: mostRestrictiveBandwidth(baselineEgress, trafficConstraint)
   }
 }
 
@@ -133,9 +129,6 @@ export async function reconcileEffectiveBandwidth(instanceId: number, existingCl
         },
         packagePlan: {
           select: { trafficLimitSpeed: true }
-        },
-        resourceRiskState: {
-          select: { currentBandwidthLimit: true }
         }
       }
     })

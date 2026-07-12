@@ -41,22 +41,6 @@ assert.ok(
   'Support context, internal notes, linked objects and notify endpoints must be admin-only'
 )
 
-const aiReplyRouteStart = routeSource.indexOf("}>('/:id/ai/reply'")
-const aiReplyRouteEnd = routeSource.indexOf('创建内部备注', aiReplyRouteStart)
-assert.notEqual(aiReplyRouteStart, -1, 'AI reviewed-reply route must exist')
-assert.notEqual(aiReplyRouteEnd, -1, 'AI reviewed-reply route end marker must exist')
-const aiReplyRouteSource = routeSource.slice(aiReplyRouteStart, aiReplyRouteEnd)
-assert.ok(
-  aiReplyRouteSource.includes('const reviewedBody = sanitizeContent(request.body?.reviewedBody)') &&
-    aiReplyRouteSource.includes("code: 'AI_TICKET_REVIEWED_BODY_REQUIRED'") &&
-    aiReplyRouteSource.includes('validateAiTicketReviewedReply(ticketId, reviewedBody)') &&
-    aiReplyRouteSource.includes('ticketDb.addTicketMessage(ticketId, user.id, result.draft, true, [])') &&
-    !aiReplyRouteSource.includes('generateAiTicketReply(') &&
-    ticketsViewSource.includes('requestAiReply(selectedTicket.value.id, reviewedBody)') &&
-    ticketsViewSource.includes("postTicketAiAction<TicketAiReplyResponse>(ticketId, 'reply', { reviewedBody })"),
-  'semi-auto send must require and send the administrator-reviewed draft without regenerating model output'
-)
-
 assert.ok(
   dbSource.includes('getSlaMinutes') &&
     dbSource.includes('firstResponseDueAt: addMinutes') &&
@@ -86,7 +70,6 @@ assert.ok(
   dbSource.includes('maskEmail') &&
     dbSource.includes('emailMasked') &&
     dbSource.includes('recentOrders') &&
-    dbSource.includes('recentDeliveryCases') &&
     dbSource.includes('recentAlerts') &&
     dbSource.includes('knowledgeSuggestions') &&
     !dbSource.includes('callbackData') &&

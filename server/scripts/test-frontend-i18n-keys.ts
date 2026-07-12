@@ -141,14 +141,9 @@ function assertFrontendKeysExist(): void {
   assert.ok(keys.has('entertainment.prizeTypes.badge'), 'frontend i18n guard must cover shared benefits prize type keys')
   assert.ok(keys.has('aff.adminTitle'), 'frontend i18n guard must cover admin AFF review title')
   assert.ok(keys.has('aff.withdrawalStatus.pending'), 'frontend i18n guard must cover admin AFF review nested status labels')
-  assert.ok(keys.has('instance.errorBanner.reasonLabel'), 'frontend i18n guard must cover instance failure reason label')
-  assert.ok(keys.has('extensions.themeSubmissions.entry'), 'frontend i18n guard must cover the user theme submission entry')
-  assert.ok(keys.has('extensions.themeSubmissions.freeReviewHint'), 'frontend i18n guard must cover free-only theme review copy')
-  assert.ok(keys.has('extensions.themeSubmissions.status.pending'), 'frontend i18n guard must cover theme review statuses')
+  assert.ok(!keys.has('instance.errorBanner.reasonLabel'), 'frontend must not reference the removed instance failure reason label')
   for (const key of [
-    'userLifecycle.title',
     'publicSite.portal.heroTitlePrimary',
-    'flashSales.title',
     'hostPublicIpv4.title',
     'terminal.errors.connectionFailed',
     'invites.title',
@@ -175,7 +170,7 @@ function flattenMessageKeys(source: unknown, prefix = ''): string[] {
 }
 
 function assertD152NamespaceParity(): void {
-  const namespaces = ['flashSales', 'hostPublicIpv4', 'invites', 'userLifecycle', 'telegramConfig']
+  const namespaces = ['hostPublicIpv4', 'invites', 'telegramConfig']
   for (const namespace of namespaces) {
     const expected = flattenMessageKeys(resolveMessage(zhCN, namespace), namespace).sort()
     assert.ok(expected.length > 0, `zhCN must define ${namespace}`)

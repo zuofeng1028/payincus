@@ -128,8 +128,7 @@ function toneClass(tone: string): string {
 function objectLink(alert: SlaAlertEvent): string | null {
   if (!alert.objectId) return null
   if (alert.objectType === 'host' || alert.objectType === 'agent') return `/admin/resources/hosts/${alert.detail?.hostId || alert.objectId}`
-  if (alert.objectType === 'task') return `/admin/delivery?search=${alert.objectId}`
-  if (alert.objectType === 'order') return `/admin/orders?search=${alert.objectId}`
+  if (alert.objectType === 'order') return `/admin/orders?keyword=${encodeURIComponent(alert.objectId)}`
   if (alert.objectType === 'system_update') return '/admin/system-update'
   if (alert.objectType === 'notification_channel' || alert.objectType === 'telegram' || alert.objectType === 'smtp') return '/admin/logs'
   return null

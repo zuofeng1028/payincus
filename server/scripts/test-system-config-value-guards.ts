@@ -51,7 +51,8 @@ assert.ok(
 
 assert.ok(
   routeSource.includes("TICKET_AUTO_CLOSE_ENABLED_CONFIG_KEY, 'free_site_mode'") &&
-    routeSource.includes("'plugin_storage_backup_retention_count', TICKET_AUTO_CLOSE_HOURS_CONFIG_KEY") &&
+    routeSource.includes("const numberKeys = ['smtp_port'") &&
+    routeSource.includes("'telegram_vip_group_invite_expire_minutes', TICKET_AUTO_CLOSE_HOURS_CONFIG_KEY]") &&
     routeSource.includes('config.key === TICKET_AUTO_CLOSE_HOURS_CONFIG_KEY && num < 1'),
   'ticket auto-close enabled must be boolean and hours must be an integer of at least 1'
 )
@@ -80,9 +81,7 @@ assert.notEqual(highRiskKeysEnd, -1, 'system config high-risk admin allowlist ke
 const highRiskKeysSection = routeSource.slice(highRiskKeysStart, highRiskKeysEnd)
 for (const key of [
   'system_update_allowed_admin_ids',
-  'payincus_gift_card_admin_ids',
-  'plugin_manager_allowed_admin_ids',
-  'theme_manager_allowed_admin_ids'
+  'payincus_gift_card_admin_ids'
 ]) {
   assert.ok(highRiskKeysSection.includes(`'${key}'`), `system config high-risk keys must include ${key}`)
 }

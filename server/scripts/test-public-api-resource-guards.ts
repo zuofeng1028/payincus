@@ -12,9 +12,6 @@ function read(path: string): string {
 const auth = read('server/src/lib/public-api-auth.ts')
 const route = read('server/src/routes/public-api.ts')
 const rateLimitConfig = read('server/src/config/rate-limit.ts')
-const prismaSchema = read('server/prisma/schema.prisma')
-const rateLimitMigration = read('server/prisma/migrations/20260626203000_add_public_plugin_action_rate_limit_buckets/migration.sql')
-const rateLimitPolicyMigration = read('server/prisma/migrations/20260626210000_add_public_plugin_action_rate_limit_policies/migration.sql')
 const ticketAttachments = read('server/src/lib/ticket-attachments.ts')
 const openapiSource = read('server/src/lib/public-api-openapi.ts')
 const clientTypes = read('client/src/types/api.ts')
@@ -47,8 +44,6 @@ const allowedPublicApiRouteDeclarations = [
   'GET /openapi.yaml',
   'GET /orders',
   'GET /orders/:id',
-  'GET /plugins',
-  'GET /plugins/:pluginId/actions',
   'GET /products',
   'GET /products/:id',
   'GET /services',
@@ -60,7 +55,6 @@ const allowedPublicApiRouteDeclarations = [
   'PATCH /tickets/:id/status',
   'POST /balance/adjustment-requests',
   'POST /notifications',
-  'POST /plugins/:pluginId/actions/:action',
   'POST /services/:id/actions',
   'POST /services/:id/renew',
   'POST /tickets',
@@ -87,7 +81,6 @@ assert.ok(
     auth.includes("'tickets:write'") &&
     auth.includes("'notifications:read'") &&
     auth.includes("'notifications:send'") &&
-    auth.includes("'plugins:action'") &&
     clientTypes.includes("| 'products:read'") &&
     clientTypes.includes("| 'profile:write'") &&
     clientTypes.includes("| 'balance:read'") &&
@@ -101,7 +94,6 @@ assert.ok(
     clientTypes.includes("| 'tickets:write'") &&
     clientTypes.includes("| 'notifications:read'") &&
     clientTypes.includes("| 'notifications:send'") &&
-    clientTypes.includes("| 'plugins:action'") &&
     openapiSource.includes("'products:read'") &&
     openapiSource.includes("'profile:write'") &&
     openapiSource.includes("'balance:read'") &&
@@ -113,7 +105,6 @@ assert.ok(
     openapiSource.includes("'tickets:write'") &&
     openapiSource.includes("'notifications:read'") &&
     openapiSource.includes("'notifications:send'") &&
-    openapiSource.includes("'plugins:action'") &&
     serializedOpenApi.includes('products:read'),
   'public API resource scopes must be exposed consistently in auth, client types, and OpenAPI'
 )
@@ -163,22 +154,6 @@ assert.ok(
     route.includes("ticketReply: { max: 20, timeWindow: '1 minute' }") &&
     route.includes("ticketStatus: { max: 20, timeWindow: '1 minute' }") &&
     route.includes("notificationSend: { max: 20, timeWindow: '1 minute' }") &&
-    route.includes("pluginActionDispatch: { max: 30, timeWindow: '1 minute' }") &&
-    route.includes('PUBLIC_PLUGIN_ACTION_DYNAMIC_RATE_LIMITS') &&
-    route.includes('normal: { max: 30, windowMs: 60_000 }') &&
-    route.includes('strict: { max: 10, windowMs: 60_000 }') &&
-    route.includes('resolvePublicPluginActionRateLimitPolicy') &&
-    route.includes('FROM "public_plugin_action_rate_limit_policies"') &&
-    route.includes('"plugin_id" = ${input.pluginId} AND "action_name" = ${input.actionName}') &&
-    route.includes('"plugin_id" = ${input.pluginId} AND "action_name" = ${PUBLIC_PLUGIN_ACTION_RATE_LIMIT_GLOBAL_SCOPE}') &&
-    route.includes('"plugin_id" = ${PUBLIC_PLUGIN_ACTION_RATE_LIMIT_GLOBAL_SCOPE} AND "action_name" = ${PUBLIC_PLUGIN_ACTION_RATE_LIMIT_GLOBAL_SCOPE}') &&
-    route.includes('checkPublicPluginActionDynamicRateLimit') &&
-    route.includes('INSERT INTO "public_plugin_action_rate_limit_buckets"') &&
-    route.includes('ON CONFLICT ("token_source", "token_id", "plugin_id", "action_name")') &&
-    route.includes('"request_count" + 1') &&
-    route.includes('bucket.requestCount > policy.max') &&
-    route.includes("code: 'PUBLIC_PLUGIN_ACTION_RATE_LIMITED'") &&
-    route.includes("reply.header('Retry-After'") &&
     route.includes('config: { rateLimit: PUBLIC_API_RATE_LIMITS.balanceAdjustmentWrite }') &&
     route.includes('config: { rateLimit: PUBLIC_API_RATE_LIMITS.serviceOperate }') &&
     route.includes('config: { rateLimit: PUBLIC_API_RATE_LIMITS.serviceRenew }') &&
@@ -188,23 +163,9 @@ assert.ok(
     route.includes('config: { rateLimit: PUBLIC_API_RATE_LIMITS.ticketReply }') &&
     route.includes('config: { rateLimit: PUBLIC_API_RATE_LIMITS.ticketStatus }') &&
     route.includes('config: { rateLimit: PUBLIC_API_RATE_LIMITS.notificationSend }') &&
-    route.includes('config: { rateLimit: PUBLIC_API_RATE_LIMITS.pluginActionDispatch }') &&
     rateLimitConfig.includes('globalRateLimit') &&
-    rateLimitConfig.includes('findRateLimitRule') &&
-    prismaSchema.includes('model PublicPluginActionRateLimitBucket') &&
-    prismaSchema.includes('model PublicPluginActionRateLimitPolicy') &&
-    prismaSchema.includes('@@unique([tokenSource, tokenId, pluginId, actionName])') &&
-    prismaSchema.includes('@@unique([pluginId, actionName, rateLimit])') &&
-    prismaSchema.includes('@@map("public_plugin_action_rate_limit_buckets")') &&
-    prismaSchema.includes('@@map("public_plugin_action_rate_limit_policies")') &&
-    rateLimitMigration.includes('CREATE TABLE "public_plugin_action_rate_limit_buckets"') &&
-    rateLimitMigration.includes('CREATE UNIQUE INDEX "public_plugin_action_rate_limit_buckets_token_source_token_id_plugin_id_action_name_key"') &&
-    rateLimitMigration.includes('FOREIGN KEY ("plugin_id")') &&
-    rateLimitPolicyMigration.includes('CREATE TABLE "public_plugin_action_rate_limit_policies"') &&
-    rateLimitPolicyMigration.includes('CHECK ("rate_limit" IN') &&
-    rateLimitPolicyMigration.includes('CHECK ("max_requests" BETWEEN 1 AND 10000)') &&
-    rateLimitPolicyMigration.includes('CHECK ("window_seconds" BETWEEN 10 AND 3600)'),
-  'public API write routes must have operation-specific Fastify rate limits and database-backed public plugin action dynamic quota buckets'
+    rateLimitConfig.includes('findRateLimitRule'),
+  'public API write routes must have operation-specific Fastify rate limits'
 )
 
 assert.ok(
@@ -244,12 +205,10 @@ assert.ok(
     route.includes("data: { avatarStyle }") &&
     route.includes('LogModule.AUTH') &&
     route.includes("'public_api.me_update'") &&
-    route.includes("event: 'user.profile.updated'") &&
-    route.includes("source: 'public_api.me.update'") &&
     !route.includes('data: { email') &&
     !route.includes('data: { balance') &&
     !route.includes('data: { role'),
-  'public profile update API must require profile:write, only accept low-risk avatar style updates, emit events, and avoid sensitive profile fields'
+  'public profile update API must require profile:write, only accept low-risk avatar style updates, and avoid sensitive profile fields'
 )
 
 assert.ok(
@@ -442,13 +401,10 @@ assert.ok(
     route.includes('cleanupUploadedTicketImages(uploadedAttachments)') &&
     route.includes("code: 'INVALID_TICKET_ATTACHMENT'") &&
     route.includes("sendNotification(adminId, 'ticket_created'") &&
-    route.includes("emitPluginEvent('ticket.created'") &&
-    route.includes('attachmentCount: uploadedAttachments.length') &&
-    route.includes("source: 'public_api'") &&
     route.includes("LogModule.PLUGIN, 'public_api.ticket_create'") &&
     !route.includes('targetUserId') &&
     !route.includes('internalNotes'),
-  'public ticket create API must require tickets:write, stay user-scoped, support controlled image attachments, reject internal notes/status overrides, notify recipients, emit events, and audit writes'
+  'public ticket create API must require tickets:write, stay user-scoped, support controlled image attachments, reject internal notes/status overrides, notify recipients, and audit writes'
 )
 
 assert.ok(
@@ -466,11 +422,8 @@ assert.ok(
     route.includes('cleanupUploadedTicketImages(uploadedAttachments)') &&
     route.includes('getAllAdminUserIds') &&
     route.includes("sendNotification(adminId, 'ticket_replied'") &&
-    route.includes("emitPluginEvent('ticket.replied'") &&
-    route.includes('attachmentCount: uploadedAttachments.length') &&
-    route.includes("source: 'public_api'") &&
     route.includes('public_api.ticket_reply_create'),
-  'public ticket reply API must require tickets:write, stay user-scoped, reject closed tickets, support controlled image attachments, avoid status overrides, notify recipients, emit events, and audit writes'
+  'public ticket reply API must require tickets:write, stay user-scoped, reject closed tickets, support controlled image attachments, avoid status overrides, notify recipients, and audit writes'
 )
 
 assert.ok(
@@ -498,11 +451,10 @@ assert.ok(
     route.includes("code: 'TICKET_ALREADY_CLOSED'") &&
     route.includes("code: 'TICKET_NOT_CLOSED'") &&
     route.includes("const nextStatus: TicketStatus = action === 'close' ? 'closed' : 'open'") &&
-    route.includes("emitPluginEvent('ticket.status.changed'") &&
     route.includes("'public_api.ticket_status_update'") &&
     !route.includes('assigneeId') &&
     !route.includes('internalNotes'),
-  'public ticket status API must require tickets:write, stay user-scoped, only close/reopen own tickets, emit sanitized status events, and avoid arbitrary status/internal fields'
+  'public ticket status API must require tickets:write, stay user-scoped, only close/reopen own tickets, and avoid arbitrary status/internal fields'
 )
 
 assert.ok(
@@ -511,16 +463,9 @@ assert.ok(
     route.includes('MAX_PUBLIC_NOTIFICATION_TITLE_LENGTH = 120') &&
     route.includes('MAX_PUBLIC_NOTIFICATION_MESSAGE_LENGTH = 2000') &&
     route.includes("PUBLIC_NOTIFICATION_TEMPLATE_IDS = ['flash_sale_reminder', 'service_action_update', 'billing_notice']") &&
-    route.includes('PUBLIC_PLUGIN_NOTIFICATION_TEMPLATE_PATTERN') &&
-    route.includes('plugin:<pluginId>:<templateId>') &&
-    route.includes('renderPublicPluginNotificationTemplate') &&
     route.includes('resolvePublicNotificationTemplate') &&
-    route.includes('loadEnabledPublicPluginManifest(pluginTemplateRef.pluginId)') &&
-    route.includes("includes('notifications:send')") &&
-    route.includes('manifest.capabilities?.notificationTemplates') &&
     route.includes('MAX_PUBLIC_NOTIFICATION_TEMPLATE_VARIABLES = 10') &&
     route.includes('MAX_PUBLIC_NOTIFICATION_TEMPLATE_VARIABLE_LENGTH = 120') &&
-    route.includes('parsePublicPluginNotificationTemplateRef') &&
     route.includes('normalizePublicNotificationVariables(request.body?.variables)') &&
     route.includes('await resolvePublicNotificationTemplate(request.body.template, variables)') &&
     route.includes("code: 'INVALID_NOTIFICATION_TEMPLATE'") &&
@@ -550,41 +495,6 @@ assert.ok(
 )
 
 assert.ok(
-  route.includes("fastify.get<{ Querystring: PublicApiListQuery }>('/plugins'") &&
-    route.includes("fastify.get<{ Params: PublicApiPluginParams }>('/plugins/:pluginId/actions'") &&
-    route.includes("authenticatePublicApiRequest(request, reply, 'plugins:action')") &&
-    route.includes('PUBLIC_PLUGIN_SORT_FIELDS') &&
-    route.includes("parsePublicApiSort(request.query?.sort, PUBLIC_PLUGIN_SORT_FIELDS, 'pluginId')") &&
-    route.includes('getPublicPluginActions(manifest)') &&
-    route.includes('serializePublicPluginAction') &&
-    route.includes('!action.url') &&
-    route.includes("scope.startsWith('service-extension:')") &&
-    route.includes("scope.startsWith('gateway-extension:')") &&
-    route.includes('requestSchema: action.requestSchema || null') &&
-    route.includes('responseSchema: action.responseSchema || null') &&
-    route.includes('public_api.plugins_list') &&
-    route.includes('public_api.plugin_actions_list') &&
-    !route.includes('url: action.url') &&
-    !route.includes('secret:') &&
-    !route.includes('configValues') &&
-    route.includes("fastify.post<{ Params: PublicApiPluginActionParams; Body: PublicApiPluginActionBody }>('/plugins/:pluginId/actions/:action'") &&
-    route.includes("authenticatePublicApiRequest(request, reply, 'plugins:action')") &&
-    route.includes('normalizePluginId(request.params.pluginId)') &&
-    route.includes('normalizePluginActionName(request.params.action)') &&
-    route.includes('loadEnabledPublicPluginManifest(pluginId)') &&
-    route.includes("code: 'PLUGIN_ACTION_NOT_FOUND'") &&
-    route.includes('!pluginManifestHasActionPermission(manifest, action)') &&
-    route.includes('await checkPublicPluginActionDynamicRateLimit({') &&
-    route.includes('executePluginAction({') &&
-    route.includes("source: 'user'") &&
-    route.includes("LogModule.PLUGIN, 'public_api.plugin_action_dispatch'") &&
-    route.includes("code: 'PUBLIC_PLUGIN_ACTION_FAILED'") &&
-    !route.includes('targetUserId') &&
-    !route.includes('adminOverride'),
-  'public plugin action APIs must require plugins:action, discover only enabled public action contracts, hide webhook/config internals, reject lifecycle hooks, and audit dispatches'
-)
-
-assert.ok(
   !route.includes('callbackData') &&
     !route.includes('providerConfigSnapshot') &&
     !route.includes('paymentDetails') &&
@@ -610,11 +520,7 @@ const forbiddenOpenApiPaths = [
   '/services/{id}/reinstall',
   '/services/{id}/delete',
   '/services/{id}/migrate',
-  '/services/{id}/provision',
-  '/plugins/{pluginId}/install',
-  '/plugins/{pluginId}/enable',
-  '/plugins/{pluginId}/disable',
-  '/plugins/{pluginId}/uninstall'
+  '/services/{id}/provision'
 ]
 
 for (const path of forbiddenOpenApiPaths) {
@@ -627,15 +533,13 @@ for (const path of forbiddenOpenApiPaths) {
 
 assert.ok(
   developmentDocs.includes('## 高风险 Public API 边界') &&
-    developmentDocs.includes('以下能力不是遗漏，也不是通过 `plugins:action`、OAuth scope 或 SDK 示例可以绕开的能力') &&
     developmentDocs.includes('直接余额充值、扣款、退款、审批通过或绕过审批的调账') &&
     developmentDocs.includes('支付建单、支付回调处理、主动验单、退款执行或 provider payload 读取') &&
     developmentDocs.includes('服务创建、暂停、恢复、重装、删除、迁移、资源交付或宿主机操作') &&
-    developmentDocs.includes('扩展安装、启用、停用、卸载、市场发布或主题启用') &&
     platformPlan.includes('这些项目是有意保留在 PayIncus 内部状态机或后台审核流里的高风险边界') &&
     platformPlan.includes('不是当前 Public API 首版未完成的阻塞项') &&
     platformPlan.includes('新增前必须先补 scope 元数据、OpenAPI、SDK、审计日志、限流、幂等、状态机回滚和生产 proof'),
-  'extension docs must define the high-risk Public API boundary as an intentional guardrail, not an accidental gap'
+  'public API docs must define the high-risk boundary as an intentional guardrail, not an accidental gap'
 )
 
 assert.ok(
@@ -666,9 +570,6 @@ assert.ok(
     serializedOpenApi.includes('listPublicNotifications') &&
     serializedOpenApi.includes('getPublicUnreadNotificationCount') &&
     serializedOpenApi.includes('sendPublicNotification') &&
-    serializedOpenApi.includes('listPublicPluginActions') &&
-    serializedOpenApi.includes('getPublicPluginActions') &&
-    serializedOpenApi.includes('dispatchPublicPluginAction') &&
     serializedOpenApi.includes('PublicApiProduct') &&
     serializedOpenApi.includes('PublicApiBalance') &&
     serializedOpenApi.includes('PublicApiBalanceLog') &&
@@ -700,15 +601,8 @@ assert.ok(
     serializedOpenApi.includes('CreatePublicApiNotificationRequest') &&
     serializedOpenApi.includes('PublicApiNotificationResult') &&
     serializedOpenApi.includes('flash_sale_reminder') &&
-    serializedOpenApi.includes('plugin:<pluginId>:<templateId>') &&
-    serializedOpenApi.includes('enabled plugin-declared template') &&
-    serializedOpenApi.includes('PublicPluginActionDescriptor') &&
-    serializedOpenApi.includes('PublicPluginActionCatalogItem') &&
-    serializedOpenApi.includes('PublicPluginActionCatalog') &&
-    serializedOpenApi.includes('DispatchPublicPluginActionRequest') &&
-    serializedOpenApi.includes('PublicPluginActionResult') &&
     serializedOpenApi.includes('PublicApiTicketMessage'),
-  'OpenAPI must document the products, orders, tickets, profile update, public ticket create/reply, self notification, and plugin action resource operations and schemas'
+  'OpenAPI must document the products, orders, tickets, profile update, public ticket create/reply and self notification resource operations and schemas'
 )
 
 assert.ok(
@@ -746,9 +640,6 @@ assert.ok(
     developmentDocs.includes('GET /api/v1/notifications') &&
     developmentDocs.includes('GET /api/v1/notifications/unread-count') &&
     developmentDocs.includes('POST /api/v1/notifications') &&
-    developmentDocs.includes('GET /api/v1/plugins') &&
-    developmentDocs.includes('GET /api/v1/plugins/:pluginId/actions') &&
-    developmentDocs.includes('POST /api/v1/plugins/:pluginId/actions/:action') &&
     developmentDocs.includes('`tickets:write` 已对应受控工单创建、公开回复、图片附件、关闭自己的工单和重新打开自己的已关闭工单接口') &&
     developmentDocs.includes('`multipart/form-data` 可通过 `images` 字段上传最多 6 张图片附件') &&
     developmentDocs.includes('`services:operate` 已对应受控服务电源任务入队') &&
@@ -762,24 +653,10 @@ assert.ok(
     developmentDocs.includes('接口不接受内部备注、状态覆盖、目标用户覆盖、管理员字段、任意文件或存储 provider 文件 ID') &&
     developmentDocs.includes('`notifications:read` 已对应当前用户站内信和未读数量只读接口') &&
     developmentDocs.includes('不返回渠道配置、发送日志或原始事件 payload') &&
-    developmentDocs.includes('`notifications:send` 已对应受控自通知、平台白名单通知模板和已启用扩展声明的受控通知模板接口') &&
-    developmentDocs.includes('已启用扩展在 manifest 里声明的模板 `plugin:<pluginId>:<templateId>`') &&
-    developmentDocs.includes('capabilities.notificationTemplates') &&
     developmentDocs.includes('平台白名单模板 `flash_sale_reminder`、`service_action_update`、`billing_notice`') &&
-    developmentDocs.includes('必须通过已开放的 `/api/v1` 受控资源、扩展 action、事件订阅、服务/支付 lifecycle hook 和插件存储进入平台') &&
-    developmentDocs.includes('已开放低风险资料写入、待审批余额调整申请、受控服务电源任务、受控服务续费、工单创建/回复/状态操作、自通知和扩展 action 触发') &&
-    developmentDocs.includes('直接支付建单/回调/退款、直接余额写入、服务创建/删除/迁移、敏感用户资料和扩展/主题管理等高风险写入仍不通过 Public API 开放') &&
     !developmentDocs.includes('API token/scope 只允许按已开放 scope 访问只读资源') &&
     developmentDocs.includes('Public API 写入型接口已经挂载独立限流') &&
-    developmentDocs.includes('扩展 action dispatch 另有数据库持久化的按 token + 扩展 + action 维度动态配额') &&
-    developmentDocs.includes('后台扩展中心可以配置全局策略、指定扩展策略或指定扩展 action 策略') &&
-    developmentDocs.includes('同一个 token、扩展和 action 在多后端实例之间共享计数窗口') &&
-    developmentDocs.includes('超过后返回 `PUBLIC_PLUGIN_ACTION_RATE_LIMITED` 和 `Retry-After`') &&
     developmentDocs.includes('触发限流会返回 `429 TooManyRequests`') &&
-    developmentDocs.includes('`plugins:action` 已对应受控扩展 action 触发接口') &&
-    developmentDocs.includes('只返回已启用扩展的公开 webhook action 契约') &&
-    developmentDocs.includes('不会返回 webhook URL、secret、扩展配置值、服务扩展 hook 或支付网关扩展 hook') &&
-    developmentDocs.includes('不会绕过扩展 manifest') &&
     developmentDocs.includes('不接受 `userId`、群发、任意渠道选择') &&
     developmentDocs.includes('不会返回 root 密码、Incus ID、宿主机内部配置或特权连接密钥') &&
     developmentDocs.includes('不会返回支付回调数据') &&
@@ -790,49 +667,37 @@ assert.ok(
     overviewDocs.includes('/api/v1/balance/adjustment-requests') &&
     overviewDocs.includes('/api/v1/billing-records') &&
     overviewDocs.includes('/api/v1/notifications') &&
-    overviewDocs.includes('/api/v1/plugins') &&
     overviewDocs.includes('`profile:write` 只允许更新 `avatarStyle`') &&
     overviewDocs.includes('`balance:write` 只允许提交当前 token 用户自己的待审批余额调整申请') &&
     overviewDocs.includes('services:operate') &&
     overviewDocs.includes('services:billing') &&
     overviewDocs.includes('`notifications:send` 只允许给当前 token 用户自己发送短文本通知') &&
-    overviewDocs.includes('`plugins:action` 只允许发现和触发已启用扩展声明过的公开 webhook action') &&
     overviewDocs.includes('再轮询公开任务状态') &&
     overviewDocs.includes('取消仍在等待中的公开电源任务') &&
-    overviewDocs.includes('支付建单、支付回调、退款、直接余额写入、敏感用户资料、扩展安装启停和主题启用也不通过 Public API 开放') &&
     overviewDocs.includes('服务操作首版不开放创建、暂停、恢复、重装、删除、迁移或宿主机操作') &&
-    overviewDocs.includes('完整后端功能必须通过扩展 action runtime、API token/scope、事件系统和扩展存储等受控接口实现') &&
-    !overviewDocs.includes('完整后端功能必须等待扩展 action runtime') &&
     enOverviewDocs.includes('## Public Resource API') &&
     enOverviewDocs.includes('/api/v1/balance') &&
     enOverviewDocs.includes('/api/v1/balance/logs') &&
     enOverviewDocs.includes('/api/v1/balance/adjustment-requests') &&
     enOverviewDocs.includes('/api/v1/billing-records') &&
     enOverviewDocs.includes('/api/v1/notifications') &&
-    enOverviewDocs.includes('/api/v1/plugins') &&
     enOverviewDocs.includes('`profile:write` only allows updating `avatarStyle`') &&
     enOverviewDocs.includes('`balance:write` only allows submitting the current token user') &&
     enOverviewDocs.includes('services:operate') &&
     enOverviewDocs.includes('services:billing') &&
     enOverviewDocs.includes('`notifications:send` only allows sending short text notifications') &&
-    enOverviewDocs.includes('`plugins:action` only allows discovering and triggering public webhook actions') &&
     enOverviewDocs.includes('polling public task state') &&
     enOverviewDocs.includes('canceling still-pending public power tasks') &&
-    enOverviewDocs.includes('Payment creation, payment callback handling, refunds, direct balance writes, sensitive user profiles, extension install/enablement, and theme enablement are not exposed through the Public API') &&
     enOverviewDocs.includes('does not expose service creation, suspend, resume, reinstall, delete, migration, or host operations') &&
-    enOverviewDocs.includes('Complete backend capabilities must use controlled surfaces such as the extension action runtime, API token/scope, event system, and plugin storage') &&
     platformPlan.includes('资源 API 只读首版') &&
     platformPlan.includes('所有公开列表已支持统一 `page`、`pageSize` 和白名单 `sort`') &&
     platformPlan.includes('统一分页、白名单排序、服务/订单/账单/工单列表白名单过滤') &&
     platformPlan.includes('写入型资源 API 首版') &&
     platformPlan.includes('服务 `start`/`stop`/`restart` 任务入队、状态轮询和等待中任务取消') &&
     platformPlan.includes('受控服务续费') &&
-    platformPlan.includes('扩展 action 发现/触发') &&
     platformPlan.includes('Public API 写入面已按操作类型挂载独立限流') &&
-    platformPlan.includes('扩展 action dispatch 另有数据库持久化、后台可配置、按 token + 扩展 + action 维度共享的动态配额') &&
-    platformPlan.includes('余额/余额流水读取、余额调整申请提交和申请列表读取、账单读取、服务读取、服务 `start`/`stop`/`restart` 任务入队、状态轮询和等待中任务取消、受控服务续费、工单创建/回复/关闭/重新打开、工单图片附件上传、站内信读取、自通知发送、白名单通知模板、扩展 manifest 受控通知模板、Public API 写入面独立限流和扩展 action 按 token/扩展/action 数据库持久化动态配额、后台全局/扩展/action 覆盖策略已完成受控首版') &&
     platformPlan.includes('直接余额充值/扣款/退款或绕过审批的调账'),
-  'extension docs must describe the resource API, public profile update, public ticket create/reply, self notification, and plugin action write APIs, and remaining high-risk write APIs'
+  'public API docs must describe the resource API, public profile update, public ticket create/reply, self notification, and remaining high-risk write APIs'
 )
 
 assert.ok(

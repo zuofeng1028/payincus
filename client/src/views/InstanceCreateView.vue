@@ -33,7 +33,7 @@ import ImageSelector from '@/components/instance/ImageSelector.vue'
 import SSHKeySelector from '@/components/instance/SSHKeySelector.vue'
 import InitCommandSelector from '@/components/extensions/InitCommandSelector.vue'
 import TurnstileWidget from '@/components/TurnstileWidget.vue'
-import { instancesPath, profilePath, ticketsPath } from '@/utils/app-paths'
+import { instancesPath, profilePath } from '@/utils/app-paths'
 import UserAvatar from '@/components/UserAvatar.vue'
 import type { Package, UserQuota, SshKey, AvailableHost, CreateInstanceRequest } from '@/types/api'
 import { normalizePackageSourceQuery, toPackageSourceRequest, type PackageSource } from '@/utils/publicCatalog'
@@ -115,9 +115,6 @@ const plansLoading = ref<boolean>(false)
 const loading = ref<boolean>(true)
 const submitting = ref<boolean>(false)
 const error = ref<string>('')
-const orderRiskReviewAvailable = ref(false)
-const creatingRiskReviewTicket = ref(false)
-const orderRiskStatus = ref<Awaited<ReturnType<typeof api.resourceRisk.getMyStatus>> | null>(null)
 const instanceNameEditedByUser = ref<boolean>(false)
 const turnstileToken = ref('')
 const turnstileRef = ref<InstanceType<typeof TurnstileWidget> | null>(null)
@@ -245,11 +242,6 @@ const prerequisiteMessage = computed<string>(() => {
   return t('instance.createPage.packagePrerequisiteRequired', {
     package: prerequisitePackageName.value || ''
   })
-})
-
-const activeOrderRiskRestriction = computed<Record<string, any> | null>(() => {
-  if (!orderRiskStatus.value?.restricted || !orderRiskStatus.value.restriction) return null
-  return orderRiskStatus.value.restriction as Record<string, any>
 })
 
 // 流量格式化
@@ -577,13 +569,7 @@ const selectedHostingZone = computed<HostingZoneTab | null>(() => {
   return hostingZones.value.find(zone => zone.id === zoneId) || null
 })
 
-const flashSaleItemId = computed<number | null>(() => {
-  const raw = Array.isArray(route.query.flashSaleItem) ? route.query.flashSaleItem[0] : route.query.flashSaleItem
-  const parsed = Number(raw)
-  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null
-})
-
-const turnstileAction = computed(() => flashSaleItemId.value ? 'flash_sale_create_instance' : 'create_instance')
+const turnstileAction = computed(() => 'create_instance')
 
 onMounted(async (): Promise<void> => {
   await configStore.loadPublicConfig(true)
@@ -598,17 +584,12 @@ onMounted(async (): Promise<void> => {
   const initialSource = normalizePackageSourceQuery(route.query.source, route.query.zoneId)
   
   try {
-    const [zonesRes, userRes, keysRes, riskStatusRes] = await Promise.all([
+    const [zonesRes, userRes, keysRes] = await Promise.all([
       configStore.hostingMarketEntryEnabled ? api.packages.getHostingZones() : Promise.resolve({ zones: [] as HostingZoneTab[] }),
       api.users.get(authStore.user!.id),
-      api.sshKeys.list(),
-      api.resourceRisk.getMyStatus().catch(() => ({ restricted: false, restriction: null, riskStates: [] }))
+      api.sshKeys.list()
     ])
     hostingZones.value = configStore.hostingMarketEntryEnabled ? (zonesRes.zones || []) : []
-    orderRiskStatus.value = riskStatusRes
-    if (riskStatusRes.restricted) {
-      orderRiskReviewAvailable.value = true
-    }
 
     const effectiveInitialSource = getSelectablePackageSource(initialSource)
     const initialSourceRequest = toPackageSourceRequest(effectiveInitialSource)
@@ -1071,7 +1052,6 @@ async function handleSubmit(): Promise<void> {
   if (!canSubmit.value) return
   
   error.value = ''
-  orderRiskReviewAvailable.value = false
   submitting.value = true
   
   try {
@@ -1089,10 +1069,9 @@ async function handleSubmit(): Promise<void> {
       throw new Error(nameValidation.message)
     }
 
-    const flashSaleId = flashSaleItemId.value
     const verificationToken = await getCreateTurnstileToken()
     if (verificationToken === null) return
-    if (!flashSaleId && isPaidPackage.value && !createIntentIdempotencyKey.value) {
+    if (isPaidPackage.value && !createIntentIdempotencyKey.value) {
       createIntentIdempotencyKey.value = crypto.randomUUID?.() || `instance-create-${Date.now()}-${Math.random().toString(36).slice(2)}`
     }
     const requestPayload: CreateInstanceRequest = {
@@ -1107,10 +1086,7 @@ async function handleSubmit(): Promise<void> {
       sshKeyId: form.value.sshKeyId,
       customInitCommandIds: form.value.customInitCommandIds.length > 0 ? form.value.customInitCommandIds : undefined,
       promoCode: (isPaidPackage.value && promoCodeValid.value && form.value.promoCode.trim()) ? form.value.promoCode.trim() : undefined,
-      flashSaleItemId: flashSaleId || undefined,
-      idempotencyKey: flashSaleId
-        ? (crypto.randomUUID?.() || `flash-sale-${flashSaleId}-${Date.now()}`)
-        : (isPaidPackage.value ? createIntentIdempotencyKey.value || undefined : undefined),
+      idempotencyKey: isPaidPackage.value ? createIntentIdempotencyKey.value || undefined : undefined,
       turnstileToken: verificationToken
     }
 
@@ -1126,7 +1102,6 @@ async function handleSubmit(): Promise<void> {
     })
   } catch (err: any) {
     error.value = translateError(err)
-    orderRiskReviewAvailable.value = err?.code === 'ORDER_RESTRICTED_BY_RISK'
   } finally {
     if (submitting.value) {
       resetCreateTurnstile()
@@ -1135,19 +1110,6 @@ async function handleSubmit(): Promise<void> {
   }
 }
 
-async function createRiskReviewTicket(): Promise<void> {
-  if (creatingRiskReviewTicket.value) return
-  creatingRiskReviewTicket.value = true
-  try {
-    const response = await api.resourceRisk.createReviewTicket('实例创建被资源风控限制，申请人工审核解除下单限制。')
-    toast.success(`审核工单已创建：#${response.ticket.id}`)
-    router.push(ticketsPath(response.ticket.id))
-  } catch (err: any) {
-    toast.error(err?.message || '创建审核工单失败')
-  } finally {
-    creatingRiskReviewTicket.value = false
-  }
-}
 </script>
 
 <template>
@@ -1255,13 +1217,6 @@ async function createRiskReviewTicket(): Promise<void> {
         <!-- RIGHT: 配置区（独立滚动）-->
         <div class="lg:flex-[2] lg:overflow-y-auto lg:pb-4 scrollbar-hide">
           <div ref="rightPanelScrollRef" class="nimbus-pane space-y-4">
-            <div
-              v-if="flashSaleItemId"
-              class="flex items-start gap-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300"
-            >
-              <svg class="mt-0.5 h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" /></svg>
-              <span>当前通过秒杀活动开通。提交时会校验活动时间、库存、账号限购、人机验证和实时节点资源。</span>
-            </div>
             <PlanSelector
               v-if="isPaidPackage"
               :plans="packagePlans"
@@ -1491,34 +1446,8 @@ async function createRiskReviewTicket(): Promise<void> {
                 @error="onTurnstileError"
               />
             </div>
-            <div
-              v-if="activeOrderRiskRestriction"
-              class="space-y-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-700 dark:text-rose-300"
-            >
-              <div>
-                <p class="font-medium">当前账号因实例资源风控限制下单</p>
-                <p class="mt-1 text-xs opacity-80">{{ activeOrderRiskRestriction.reason || '请提交工单进行人工审核。' }}</p>
-              </div>
-              <button
-                type="button"
-                class="btn-primary"
-                :disabled="creatingRiskReviewTicket"
-                @click="createRiskReviewTicket"
-              >
-                {{ creatingRiskReviewTicket ? '创建审核工单中...' : '提交人工审核工单' }}
-              </button>
-            </div>
             <div v-if="error" class="space-y-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-700 dark:text-rose-300">
               <div>{{ error }}</div>
-              <button
-                v-if="orderRiskReviewAvailable"
-                type="button"
-                class="btn-primary"
-                :disabled="creatingRiskReviewTicket"
-                @click="createRiskReviewTicket"
-              >
-                {{ creatingRiskReviewTicket ? '创建审核工单中...' : '提交人工审核工单' }}
-              </button>
             </div>
             <button
               type="submit"

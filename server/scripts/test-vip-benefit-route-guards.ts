@@ -27,12 +27,11 @@ assert.ok(
 
 assert.ok(
   serviceSource.includes('export function arbitrateVipPrice(') &&
-    serviceSource.includes("source: 'flash_sale'") &&
     serviceSource.includes('candidate.price < best.price') &&
     instanceRouteSource.includes('const priceDecision = arbitrateVipPrice({') &&
-    instanceRouteSource.includes('flashSalePrice: flashSaleCheckout ? flashSaleCheckout.flashPrice / 100 : null') &&
+    instanceRouteSource.includes('vipDiscountPercent: vip.benefit.orderDiscountPercent') &&
     billingSource.includes('const renewalPrice = arbitrateVipPrice({'),
-  'new purchase and renewal pricing must use one backend arbiter, choose one best discount, and never stack VIP onto flash-sale prices'
+  'new purchase and renewal pricing must use one backend arbiter and choose one best AFF/VIP discount'
 )
 
 assert.ok(

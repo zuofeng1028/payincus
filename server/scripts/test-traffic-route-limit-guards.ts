@@ -163,30 +163,22 @@ const arbitrationSection = section(
 assert(
   arbitrationSection.includes('instance.packagePlan?.trafficLimitSpeed') &&
     arbitrationSection.includes("instance.trafficStatus === 'LIMITED' ? overageThrottleSpeed : null") &&
-    arbitrationSection.includes('instance.resourceRiskState?.currentBandwidthLimit ?? null') &&
     arbitrationSection.includes('mostRestrictiveBandwidth') &&
     !arbitrationSection.includes('instance.limitsIngress') &&
     !arbitrationSection.includes('instance.limitsEgress'),
-  'single bandwidth arbitration must choose the strictest traffic/risk constraint from a configured baseline, never a captured live limit'
+  'single bandwidth arbitration must choose the strictest traffic constraint from a configured baseline, never a captured live limit'
 )
 assert(
   trafficBandwidthSource.includes('withLock(`bandwidth:instance:${instanceId}`') &&
     JSON.stringify(computeEffectiveBandwidth({
       trafficStatus: 'NORMAL',
-      packagePlan: { trafficLimitSpeed: '10Mbit' },
-      resourceRiskState: null
+      packagePlan: { trafficLimitSpeed: '10Mbit' }
     })) === JSON.stringify({ ingress: '10Mbit', egress: '10Mbit' }) &&
     JSON.stringify(computeEffectiveBandwidth({
       trafficStatus: 'LIMITED',
-      packagePlan: { trafficLimitSpeed: '10Mbit' },
-      resourceRiskState: { currentBandwidthLimit: '5Mbit' }
-    }, '2Mbit')) === JSON.stringify({ ingress: '2Mbit', egress: '2Mbit' }) &&
-    JSON.stringify(computeEffectiveBandwidth({
-      trafficStatus: 'NORMAL',
-      packagePlan: { trafficLimitSpeed: '10Mbit' },
-      resourceRiskState: { currentBandwidthLimit: '5Mbit' }
-    })) === JSON.stringify({ ingress: '5Mbit', egress: '5Mbit' }),
-  'bandwidth arbitration must serialize writers and retain the remaining strictest constraint when either system releases'
+      packagePlan: { trafficLimitSpeed: '10Mbit' }
+    }, '2Mbit')) === JSON.stringify({ ingress: '2Mbit', egress: '2Mbit' }),
+  'bandwidth arbitration must serialize writers and retain the configured baseline when traffic throttling is released'
 )
 assert(
   trafficBandwidthSource.includes("TRAFFIC_OVERAGE_THROTTLE_CONFIG_KEY = 'traffic_overage_throttle_speed'") &&

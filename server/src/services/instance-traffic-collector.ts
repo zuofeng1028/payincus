@@ -91,50 +91,7 @@ async function applyTrafficCounters(
     const txIncrement = latestSnapshot
       ? calculateIncrement(counters.txBytes, latestSnapshot.txRaw)
       : 0n
-    const rxPacketIncrement = latestSnapshot
-      ? calculateIncrement(counters.rxPackets, latestSnapshot.rxPacketsRaw)
-      : 0n
-    const txPacketIncrement = latestSnapshot
-      ? calculateIncrement(counters.txPackets, latestSnapshot.txPacketsRaw)
-      : 0n
     const totalDelta = rxIncrement + txIncrement
-    const totalPacketDelta = rxPacketIncrement + txPacketIncrement
-
-    const elapsedSeconds = latestSnapshot
-      ? Math.max(1, (counters.sampledAt.getTime() - latestSnapshot.updatedAt.getTime()) / 1000)
-      : 0
-    const cpuUsageDelta = latestSnapshot?.cpuUsageRaw !== null && latestSnapshot?.cpuUsageRaw !== undefined && counters.cpuUsageRaw !== null
-      ? calculateIncrement(counters.cpuUsageRaw, latestSnapshot.cpuUsageRaw)
-      : 0n
-    const cpuPercent = elapsedSeconds > 0 && cpuUsageDelta > 0n
-      ? Math.min(1000, Number(cpuUsageDelta) / (elapsedSeconds * 1_000_000_000) * 100)
-      : null
-
-    if (latestSnapshot && elapsedSeconds > 0) {
-      const rxMbps = Number(rxIncrement) * 8 / elapsedSeconds / 1_000_000
-      const txMbps = Number(txIncrement) * 8 / elapsedSeconds / 1_000_000
-      const pps = Number(totalPacketDelta) / elapsedSeconds
-
-      await tx.instanceResourceSample.create({
-        data: {
-          instanceId,
-          userId,
-          hostId: instance.hostId,
-          sampledAt: counters.sampledAt,
-          rxBytesDelta: rxIncrement,
-          txBytesDelta: txIncrement,
-          totalBytesDelta: totalDelta,
-          rxPacketsDelta: rxPacketIncrement,
-          txPacketsDelta: txPacketIncrement,
-          totalPacketsDelta: totalPacketDelta,
-          rxMbps,
-          txMbps,
-          totalMbps: rxMbps + txMbps,
-          pps,
-          cpuPercent
-        }
-      })
-    }
 
     let currentUsage = instance.monthlyTrafficUsed
 

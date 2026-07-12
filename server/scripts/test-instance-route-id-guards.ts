@@ -121,20 +121,4 @@ assert.ok(
   'boost-processes Incus failures must be logged and returned instead of silently succeeding'
 )
 
-const detailRouteStart = source.indexOf(">('/:id', {")
-assert.ok(detailRouteStart >= 0, 'instance detail route not found')
-const detailRouteEnd = source.indexOf("fastify.get<{ Params: { id: string } }>('/:id/password'", detailRouteStart)
-assert.ok(detailRouteEnd > detailRouteStart, 'instance detail route end marker not found')
-const detailRoute = source.slice(detailRouteStart, detailRouteEnd)
-
-assert.ok(
-  detailRoute.includes("instance.status === 'error'") &&
-    detailRoute.includes('prisma.deliveryAssuranceCase.findFirst({') &&
-    detailRoute.includes('taskId: null') &&
-    detailRoute.includes("issueType: 'task_failed'") &&
-    detailRoute.includes('select: { lastError: true }') &&
-    detailRoute.includes('failureReason: failureCase?.lastError?.trim() || null'),
-  'instance detail must expose the persisted, sanitized initial provisioning failure reason for error instances'
-)
-
 console.log('instance route ID guard tests passed')

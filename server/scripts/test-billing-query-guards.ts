@@ -145,8 +145,7 @@ assert.ok(
     billingOperationsSource.includes("affBinding?.affCode.enabled && pricingSource === 'aff'") &&
     billingOperationsSource.includes('discountedAmount: arbitrateVipPrice({') &&
     instanceRouteSource.includes('const priceDecision = arbitrateVipPrice({') &&
-    instanceRouteSource.includes('vipDiscountPercent: vip.benefit.orderDiscountPercent') &&
-    instanceRouteSource.includes('flashSalePrice: flashSaleCheckout ? flashSaleCheckout.flashPrice / 100 : null'),
+    instanceRouteSource.includes('vipDiscountPercent: vip.benefit.orderDiscountPercent'),
   'new purchase, renewal preview, manual renewal, and auto-renew must enforce one non-stacking backend price arbiter'
 )
 

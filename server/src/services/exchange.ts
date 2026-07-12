@@ -721,8 +721,7 @@ async function loadInstanceForEligibility(instanceId: number, tx: Prisma.Transac
     include: {
       package: { select: { id: true, name: true, active: true, instanceType: true } },
       packagePlan: { select: { id: true, name: true, isActive: true, isSoldOut: true } },
-      host: { select: { id: true, name: true, location: true, countryCode: true, status: true } },
-      resourceRiskState: true
+      host: { select: { id: true, name: true, location: true, countryCode: true, status: true } }
     }
   })
 }
@@ -787,11 +786,6 @@ export async function checkExchangeListingEligibility(userId: number, instanceId
   const pendingTransfer = await hasPendingTransfer(instanceId)
   addCheck(checks, 'no_pending_transfer', '没有待处理普通转移', !pendingTransfer, '实例存在待处理普通转移，不能挂牌交易所', reasons, '实例没有待处理普通转移')
 
-  const activeRestriction = await prisma.userOrderRestriction.findFirst({
-    where: { userId, status: 'active' },
-    select: { id: true }
-  })
-  addCheck(checks, 'account_not_restricted', '账号未被限制下单', !activeRestriction, '账号存在风控下单限制，不能挂牌', reasons, '账号没有 active 下单限制')
   const accountTrafficQuota = await prisma.userQuota.findUnique({
     where: { userId },
     select: {
@@ -802,10 +796,6 @@ export async function checkExchangeListingEligibility(userId: number, instanceId
   })
   const accountTrafficWithinLimit = isAccountTrafficWithinLimit(accountTrafficQuota)
   addCheck(checks, 'account_traffic_not_over_limit', '账号总流量未超限', accountTrafficWithinLimit, accountTrafficLimitMessage(accountTrafficQuota), reasons)
-
-  const riskState = instance.resourceRiskState
-  const riskOk = !riskState || (riskState.status === 'normal' && riskState.level === 'normal' && riskState.score < 70)
-  addCheck(checks, 'risk_normal', '实例风控正常', riskOk, '实例处于风控状态，不能挂牌', reasons, '实例未命中封禁、限速或高风险状态')
 
   addCheck(checks, 'package_snapshot_available', '套餐快照可展示', true, instance.package && !instance.package.active
     ? '实例套餐已停用，但存量实例剩余使用权允许交易'
@@ -945,10 +935,6 @@ export async function createExchangeListing(input: ListingInput) {
     if (instance.expiresAt !== null && instance.expiresAt.getTime() - now < expiringSoonMs) {
       throw new ExchangeError('EXCHANGE_INSTANCE_EXPIRING_SOON', `实例将在 ${policy.expiringSoonDays} 天内到期，不能挂牌`)
     }
-    const riskState = instance.resourceRiskState
-    if (riskState && (riskState.status !== 'normal' || riskState.level !== 'normal' || riskState.score >= 70)) {
-      throw new ExchangeError('EXCHANGE_INSTANCE_RISKY', '实例处于风控状态，不能挂牌')
-    }
     if (instance.host.status !== 'online') {
       throw new ExchangeError('EXCHANGE_HOST_UNAVAILABLE', '实例所在节点不可用，不能挂牌')
     }
@@ -982,14 +968,6 @@ export async function createExchangeListing(input: ListingInput) {
           ? `套餐绑定存储池 ${storagePoolCheck.packagePoolName} 不存在或不是系统盘池，不能挂牌`
           : '套餐未绑定存储池且节点没有可用系统盘池，不能挂牌'
       )
-    }
-
-    const activeRestriction = await tx.userOrderRestriction.findFirst({
-      where: { userId: input.userId, status: 'active' },
-      select: { id: true }
-    })
-    if (activeRestriction) {
-      throw new ExchangeError('EXCHANGE_SELLER_RESTRICTED', '账号存在风控下单限制，不能挂牌')
     }
 
     const [activeTask, activeRestoreTask, activeUploadTask] = await Promise.all([
@@ -1076,14 +1054,6 @@ async function buildEligibilitySnapshot(userId: number, instanceId: number, tx: 
     where: { instanceId, status: { in: ['PENDING', 'PROCESSING'] } },
     select: { id: true, taskType: true, status: true }
   })
-  const riskState = await tx.instanceRiskState.findUnique({
-    where: { instanceId },
-    select: { score: true, level: true, status: true }
-  })
-  const activeRestriction = await tx.userOrderRestriction.findFirst({
-    where: { userId, status: 'active' },
-    select: { id: true }
-  })
   const accountTrafficState = await tx.userQuota.findUnique({
     where: { userId },
     select: {
@@ -1103,8 +1073,6 @@ async function buildEligibilitySnapshot(userId: number, instanceId: number, tx: 
   return {
     requiredStatus: 'stopped',
     activeTask,
-    riskState,
-    activeRestriction,
     accountTraffic: accountTrafficState ? {
       status: accountTrafficState.trafficStatus,
       monthlyTrafficLimit: toBigintString(accountTrafficState.monthlyTrafficLimit),
@@ -1323,10 +1291,6 @@ async function assertListingStillPurchasable(
     throw new ExchangeError('EXCHANGE_INSTANCE_EXPIRING_SOON', `实例将在 ${policy.expiringSoonDays} 天内到期，无法购买`)
   }
 
-  const riskState = instance.resourceRiskState
-  if (riskState && (riskState.status !== 'normal' || riskState.level !== 'normal' || riskState.score >= 70)) {
-    throw new ExchangeError('EXCHANGE_INSTANCE_RISKY', '实例处于风控状态，无法购买')
-  }
   if (instance.host.status !== 'online') {
     throw new ExchangeError('EXCHANGE_HOST_UNAVAILABLE', '实例所在节点不可用，无法购买')
   }
@@ -1334,11 +1298,7 @@ async function assertListingStillPurchasable(
     throw new ExchangeError('EXCHANGE_INSTANCE_TRAFFIC_OVER_LIMIT', instanceTrafficLimitMessage(instance))
   }
 
-  const [sellerRestriction, accountTrafficQuota, storagePoolCheck, activeOrder] = await Promise.all([
-    tx.userOrderRestriction.findFirst({
-      where: { userId: listing.sellerUserId, status: 'active' },
-      select: { id: true }
-    }),
+  const [accountTrafficQuota, storagePoolCheck, activeOrder] = await Promise.all([
     tx.userQuota.findUnique({
       where: { userId: listing.sellerUserId },
       select: {
@@ -1356,9 +1316,6 @@ async function assertListingStillPurchasable(
       select: { id: true, status: true }
     })
   ])
-  if (sellerRestriction) {
-    throw new ExchangeError('EXCHANGE_SELLER_RESTRICTED', '卖家账号存在风控限制，无法购买')
-  }
   if (!isAccountTrafficWithinLimit(accountTrafficQuota)) {
     throw new ExchangeError('EXCHANGE_ACCOUNT_TRAFFIC_OVER_LIMIT', accountTrafficLimitMessage(accountTrafficQuota))
   }
@@ -1417,13 +1374,6 @@ export async function purchaseExchangeListing(input: PurchaseInput) {
     }
     const purchaseInstance = await assertListingStillPurchasable(tx, policy, listing)
 
-    const buyerRestriction = await tx.userOrderRestriction.findFirst({
-      where: { userId: input.userId, status: 'active' },
-      select: { id: true }
-    })
-    if (buyerRestriction) {
-      throw new ExchangeError('EXCHANGE_BUYER_RESTRICTED', '账号存在风控限制，不能购买交易所实例')
-    }
     await assertExchangeBuyerRiskClear(tx, input.userId)
     const todayPurchases = await tx.exchangeOrder.count({
       where: {
@@ -1862,13 +1812,6 @@ export async function transferExchangeBalanceToUserBalance(input: TransferInput)
     if (!account || account.status !== 'active') {
       throw new ExchangeError('EXCHANGE_ACCOUNT_NOT_ACTIVE', '账号状态异常，不能划转交易所余额')
     }
-    const restriction = await tx.userOrderRestriction.findFirst({
-      where: { userId: input.userId, status: 'active' },
-      select: { id: true }
-    })
-    if (restriction) {
-      throw new ExchangeError('EXCHANGE_ACCOUNT_RESTRICTED', '账号处于风控限制中，不能划转交易所余额')
-    }
     await assertExchangeFundsRiskClear(tx, input.userId, '划转交易所余额')
     const openDisputes = await tx.exchangeDispute.count({
       where: {
@@ -2005,13 +1948,6 @@ export async function createExchangeWithdrawal(input: WithdrawalInput) {
     })
     if (!account || account.status !== 'active') {
       throw new ExchangeError('EXCHANGE_ACCOUNT_NOT_ACTIVE', '账号状态异常，不能提现')
-    }
-    const restriction = await tx.userOrderRestriction.findFirst({
-      where: { userId: input.userId, status: 'active' },
-      select: { id: true }
-    })
-    if (restriction) {
-      throw new ExchangeError('EXCHANGE_ACCOUNT_RESTRICTED', '账号处于风控限制中，不能提现')
     }
     await assertExchangeFundsRiskClear(tx, input.userId, '提现')
     const openDisputes = await tx.exchangeDispute.count({

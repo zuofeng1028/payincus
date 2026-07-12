@@ -207,768 +207,118 @@ export interface SystemUpdateTask {
   updatedAt: string
 }
 
-export type UserLifecycleTagKey =
-  | 'new_user'
-  | 'paid_user'
-  | 'high_value'
-  | 'expiring_soon'
-  | 'churn_risk'
-  | 'risk_flag'
-
-export interface UserLifecycleMetric {
-  totalRecharge: number
-  totalConsume: number
-  instanceCount: number
-  runningInstances: number
-  expiringSoonInstances: number
-  earliestExpiry: string | null
-  lastLoginAt: string | null
-}
-
-export interface UserLifecycleTagDefinition {
-  key: UserLifecycleTagKey
-  label: string
-  description: string
-  count?: number
-}
-
-export interface UserLifecycleSegment {
-  id?: number
-  key: string
-  name: string
-  description: string | null
-  enabled?: boolean
-  count?: number
-  matchedAt?: string
-  snapshot?: Record<string, unknown>
-}
-
-export interface UserLifecycleAction {
-  id: number
-  actionType: string
-  status: string
-  targetUserId: number | null
-  actorUserId: number
-  actorUsername: string
-  payload: Record<string, unknown> | null
-  result: Record<string, unknown> | null
-  message: string | null
-  createdAt: string
-}
-
-export interface UserLifecycleEvent {
-  id: number
-  userId: number
-  eventType: string
-  eventKey: string
-  sourceType: string | null
-  sourceId: number | null
-  metadata: Record<string, unknown> | null
-  occurredAt: string
-  createdAt: string
-}
-
-export interface UserLifecycleOffer {
-  id: number
-  code: string
-  codeType: 'c' | 'r' | 'd' | 't'
-  codeValue: number
-  expiresAt: string | null
-  remark: string | null
-  host: { id: number; name: string }
-  used: boolean
-  usedAt: string | null
-}
-
-export interface UserLifecycleListUser {
-  id: number
-  username: string
-  emailMasked: string | null
-  status: string
-  createdAt: string
-  metrics: UserLifecycleMetric
-  tags: Array<{ tagKey: UserLifecycleTagKey; active?: boolean; note: string | null; assignedAt: string }>
-  segments: UserLifecycleSegment[]
-}
-
-export interface UserLifecycleOverview {
-  totalUsers: number
-  activeUsers: number
-  expiringInstances: number
-  tags: UserLifecycleTagDefinition[]
-  segments: UserLifecycleSegment[]
-  recentActions: UserLifecycleAction[]
-}
-
-export interface UserLifecycleUsersResponse {
-  users: UserLifecycleListUser[]
-  total: number
-  page: number
-  pageSize: number
-  totalPages: number
-}
-
-export interface UserLifecycleUserSummary extends UserLifecycleListUser {
-  tickets: { total: number; open: number }
-  events: UserLifecycleEvent[]
-  actions: UserLifecycleAction[]
-  offers: UserLifecycleOffer[]
-}
-
-export type PluginStatus = 'installed' | 'enabled' | 'disabled' | 'failed'
-export type PluginSourceType = 'upload' | 'market'
-export type PluginTaskStatus = 'pending' | 'running' | 'success' | 'failed'
-export type PluginTaskAction = 'upload_install' | 'market_install' | 'enable' | 'disable' | 'uninstall'
-
-export interface PluginPageManifest {
-  slot: string
-  title: string
-  entry: string
-  path?: string | null
-  requiresAuth?: boolean
-}
-
-export interface PluginTemplateManifest {
-  name: string
-  path: string
-}
-
-export interface PluginConfigOptionManifest {
-  label: string
-  value: string
-}
-
-export interface PluginConfigFieldManifest {
-  type: 'text' | 'textarea' | 'markdown' | 'password' | 'email' | 'number' | 'select' | 'tags' | 'checkbox' | 'color' | 'file' | 'placeholder'
-  label: string
-  description?: string
-  placeholder?: string
-  group?: string
-  order?: number
-  required: boolean
-  default?: unknown
-  options?: PluginConfigOptionManifest[]
-  min?: number
-  max?: number
-  step?: number
-  secret?: boolean
-}
-
-export interface PluginActionManifest {
-  name: string
-  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
-  path: string
-  runtime?: 'webhook'
-  url?: string
-  scopes: string[]
-  requestSchema?: Record<string, unknown>
-  responseSchema?: Record<string, unknown>
-  idempotency?: 'none' | 'optional' | 'required'
-  rateLimit?: 'normal' | 'strict'
-}
-
-export interface PluginEventSubscriptionManifest {
-  event: string
-  handler: string
-}
-
-export interface PluginNotificationTemplateManifest {
-  id: string
-  title: string
-  message: string
-  variables?: string[]
-}
-
-export type PluginServiceExtensionHook =
-  | 'checkoutConfig'
-  | 'provision'
-  | 'suspend'
-  | 'unsuspend'
-  | 'terminate'
-  | 'upgrade'
-  | 'servicePanel'
-
-export interface PluginServiceExtensionManifest {
-  key: string
-  name: string
-  productId?: string
-  hooks: Partial<Record<PluginServiceExtensionHook, string>>
-}
-
-export type PluginGatewayExtensionHook =
-  | 'availability'
-  | 'createPayment'
-  | 'verifyPayment'
-  | 'refund'
-  | 'webhook'
-
-export interface PluginGatewayExtensionManifest {
-  key: string
-  name: string
-  providerCode?: string
-  hooks: Partial<Record<PluginGatewayExtensionHook, string>>
-}
-
-export interface PluginTableMigrationManifest {
-  version: string
-  name: string
-}
-
-export interface PluginTableManifest {
-  name: string
-  description?: string
-  scopes?: Array<'user' | 'global' | 'service'>
-  maxRows?: number
-  migrations?: PluginTableMigrationManifest[]
-}
-
-export interface PluginStorageManifest {
-  kind: 'kv'
-  maxKeys?: number
-  scopes?: Array<'user' | 'global' | 'service'>
-  retention?: 'keep' | 'delete_on_uninstall'
-  tables?: PluginTableManifest[]
-}
-
-export interface PluginCapabilitiesManifest {
-  actions?: PluginActionManifest[]
-  events?: PluginEventSubscriptionManifest[]
-  notificationTemplates?: PluginNotificationTemplateManifest[]
-  serviceExtensions?: PluginServiceExtensionManifest[]
-  gatewayExtensions?: PluginGatewayExtensionManifest[]
-  storage?: PluginStorageManifest
-}
-
-export interface PayIncusPluginManifest {
-  id: string
-  name: string
-  version: string
-  payincus: string
-  description?: string
-  author?: string
-  homepage?: string
-  entrypoints: {
-    adminPages?: PluginPageManifest[]
-    userPages?: PluginPageManifest[]
-  }
-  permissions?: string[]
-  configSchema?: Record<string, PluginConfigFieldManifest>
-  templates?: PluginTemplateManifest[]
-  capabilities?: PluginCapabilitiesManifest
-}
-
-export interface PluginVersion {
-  id: number
-  pluginId: string
-  version: string
-  manifest: PayIncusPluginManifest
-  packageSha256: string
-  installPath: string
-  installedAt: string
-}
-
-export interface PluginRecord {
-  id: number
-  pluginId: string
-  name: string
-  status: PluginStatus
-  enabled: boolean
-  currentVersion: string | null
-  sourceType: PluginSourceType
-  sourceRepo: string | null
-  installedByUsername: string | null
-  enabledByUsername: string | null
-  enabledAt: string | null
-  createdAt: string
-  updatedAt: string
-  latestVersion: PluginVersion | null
-  capabilityReviews?: PluginCapabilityReview[]
-}
-
-export type PluginCapabilityReviewStatus = 'pending' | 'approved' | 'rejected' | 'revoked'
-export type PluginCapabilityRiskLevel = 'low' | 'medium' | 'high' | 'critical'
-
-export interface PluginCapabilityReview {
-  id: number
-  pluginId: string
-  pluginName: string | null
-  pluginStatus: PluginStatus | null
-  pluginEnabled: boolean | null
-  pluginCurrentVersion: string | null
-  manifestVersion: string
-  capabilityKey: string
-  capabilityType: string
-  title: string
-  description: string | null
-  riskLevel: PluginCapabilityRiskLevel | string
-  status: PluginCapabilityReviewStatus | string
-  scopes: string[]
-  hooks: string[]
-  reviewNotes: string | null
-  reviewedByUserId: number | null
-  reviewedAt: string | null
-  createdAt: string
-  updatedAt: string
-}
-
-export interface PublicPluginActionRateLimitDefault {
-  rateLimit: 'normal' | 'strict'
-  maxRequests: number
-  windowSeconds: number
-}
-
-export interface PublicPluginActionRateLimitPolicy {
-  id: number
-  pluginId: string
-  actionName: string
-  rateLimit: 'normal' | 'strict'
-  maxRequests: number
-  windowSeconds: number
-  enabled: boolean
-  updatedByUserId: number | null
-  createdAt: string
-  updatedAt: string
-}
-
-export interface PublicPluginActionRateLimitPolicyInput {
-  pluginId?: string
-  actionName?: string
-  rateLimit: 'normal' | 'strict'
-  maxRequests: number
-  windowSeconds?: number
-  enabled?: boolean
-}
-
-export interface PayIncusThemeManifest {
-  id: string
-  name: string
-  version: string
-  payincus: string
-  description?: string
-  author?: string
-  homepage?: string
-  css: string
-  previewImage?: string
-  tokens: Record<string, unknown>
-  layoutSlots: string[]
-  templates: PayIncusThemeTemplate[]
-  configSchema: Record<string, PayIncusThemeConfigField>
-}
-
-export interface PayIncusThemeTemplate {
-  slot: string
-  title: string
-  entry: string
-}
-
-export interface PayIncusThemeConfigOption {
-  label: string
-  value: string
-}
-
-export interface PayIncusThemeConfigField {
-  type: string
-  label: string
-  description?: string
-  placeholder?: string
-  group?: string
-  order?: number
-  required: boolean
-  default?: unknown
-  options?: PayIncusThemeConfigOption[]
-  min?: number
-  max?: number
-  step?: number
-}
-
-export interface ThemePackageRecord {
-  id: number
-  themeId: string
-  name: string
-  version: string
-  description: string | null
-  author: string | null
-  status: string
-  enabled: boolean
-  manifest: PayIncusThemeManifest
-  tokens: Record<string, unknown>
-  configValues: Record<string, unknown>
-  cssPath: string
-  cssUrl: string
-  templateUrls: Record<string, { title: string; url: string }>
-  previewImageUrl: string | null
-  previewUrl: string
-  packageSha256: string
-  installedByUsername: string | null
-  enabledByUsername: string | null
-  enabledAt: string | null
-  createdAt: string
-  updatedAt: string
-}
-
-export interface ThemeMarketEntry {
-  id: string
-  name: string
-  latest: string
-  manifestUrl: string
-  downloadUrl: string
-  sha256: string
-  description?: string
-  author?: string
-  previewImageUrl?: string
-  reviewStatus: 'pending' | 'listed' | 'delisted' | 'rejected'
-  trustLevel: 'official' | 'verified' | 'third_party'
-  developer: {
-    name: string
-    homepage?: string
-    github?: string
-    verified: boolean
-    contact?: string
-  }
-  compatibility: {
-    minPayincus?: string
-    maxPayincus?: string
-  }
-  security: {
-    checksumPinned: boolean
-    signature?: {
-      status: 'unsigned' | 'valid' | 'missing' | 'invalid'
-      algorithm?: string
-      keyId?: string
-    }
-    notes: string[]
-  }
-  tokens: string[]
-  layoutSlots: string[]
-  rating: { average: number; count: number }
-  installCount: number
-  releaseNotes?: string
-  rollbackNotes?: string
-}
-
-export interface ThemeMarketGovernance {
-  totalEntries: number
-  visibleEntries: number
-  hiddenEntries: number
-  indexHost: string | null
-  fingerprint: string
-  defaultReviewStatus: 'pending' | 'listed' | 'delisted' | 'rejected'
-  installPolicy: string[]
-  unavailableReason?: string
-}
-
-export type ThemeMarketSubmissionReviewStatus = 'pending' | 'listed' | 'rejected' | 'delisted'
-export type ThemeMarketSubmissionRiskLevel = 'low' | 'medium' | 'high' | 'critical'
-
-export interface ThemeMarketSubmission {
-  id: number
-  themeId: string
-  version: string
-  name: string
-  repoUrl: string
-  releaseUrl: string
-  manifestUrl: string
-  packageUrl: string
-  sha256: string
-  developerName: string
-  developerHomepage?: string | null
-  developerGithub?: string | null
-  contactEmail: string
-  compatibility?: Record<string, unknown>
-  tokens?: unknown
-  layoutSlots?: unknown
-  notes?: string | null
-  reviewStatus: ThemeMarketSubmissionReviewStatus
-  riskLevel: ThemeMarketSubmissionRiskLevel
-  reviewNotes?: string | null
-  scanStatus: 'pending' | 'passed' | 'warning' | 'failed'
-  scanResult?: unknown
-  scannedAt?: string | null
-  submittedByUserId: number
-  submittedByUsername?: string | null
-  reviewedByUserId?: number | null
-  reviewedByUsername?: string | null
-  reviewedAt?: string | null
-  createdAt: string
-  updatedAt: string
-}
-
-export interface CreateThemeMarketSubmissionRequest {
-  themeId: string
-  version: string
-  name: string
-  repoUrl: string
-  releaseUrl: string
-  manifestUrl: string
-  packageUrl: string
-  sha256: string
-  developerName: string
-  developerHomepage?: string | null
-  developerGithub?: string | null
-  contactEmail: string
-  compatibility?: Record<string, unknown>
-  tokens?: string[]
-  layoutSlots?: string[]
-  pricing: { type: 'free' }
-  notes?: string | null
-}
-
-export interface ThemeMarketSubmissionScanResult {
-  status: 'passed' | 'warning' | 'failed'
-  riskLevel: ThemeMarketSubmissionRiskLevel
-  manifest: {
-    id: string
-    name: string
-    version: string
-    payincus: string
-    tokenCount: number
-    layoutSlotCount: number
-  } | null
-  packageSha256: string | null
-  findings: PluginMarketSubmissionScanFinding[]
-  scannedAt: string
-}
-
-export interface ReviewThemeMarketSubmissionRequest {
-  reviewStatus: ThemeMarketSubmissionReviewStatus
-  riskLevel?: ThemeMarketSubmissionRiskLevel
-  reviewNotes?: string | null
-}
-
-export interface ThemeMarketPublishResult {
-  indexPath: string
-  publishedEntries: number
-  totalEntries: number
-  updatedAt: string
-}
-
-export interface PluginUserData {
-  id: number
-  pluginId: string
-  userId: number
-  key: string
-  value: unknown
-  createdAt: string
-  updatedAt: string
-}
-
-export interface PluginStorageItem {
-  id: number
-  pluginId: string
-  scopeType: string
-  scopeId: string
-  key: string
-  value: unknown
-  createdByUserId: number | null
-  updatedByUserId: number | null
-  createdAt: string
-  updatedAt: string
-}
-
-export type PluginStorageScope = 'user' | 'global' | 'service'
-
-export interface PluginTableRow {
-  id: number
-  pluginId: string
-  tableName: string
-  scopeType: string
-  scopeId: string
-  rowKey: string
-  value: unknown
-  createdByUserId: number | null
-  updatedByUserId: number | null
-  createdAt: string
-  updatedAt: string
-}
-
-export interface PluginTableMigration {
-  id: number
-  pluginId: string
-  tableName: string
-  version: string
-  name: string
-  appliedByUserId: number
-  appliedAt: string
-}
-
-export interface PluginStorageUsage {
-  pluginId: string
-  storageDeclared: boolean
-  retention: 'keep' | 'delete_on_uninstall'
-  legacyUserKeyCount: number
-  kv: Array<{
-    scopeType: string
-    keyCount: number
-    maxKeys: number | null
-    declared: boolean
-  }>
-  tables: Array<{
-    tableName: string
-    scopeType: string
-    rowCount: number
-    maxRows: number | null
-    migrationCount: number
-    declared: boolean
-  }>
-  warnings: Array<{
-    level: 'warning' | 'critical'
-    kind: 'kv' | 'table'
-    label: string
-    count: number
-    limit: number
-    usageRatio: number
-    message: string
-  }>
-  totals: {
-    kvKeys: number
-    tableRows: number
-    tableMigrations: number
-  }
-}
-
-export interface PluginStorageBackup {
-  schemaVersion: 1
-  pluginId: string
-  pluginVersion: string
-  exportedAt: string
-  backupId?: string
-  mode?: 'full'
-  contentSha256?: string
-  legacyUserData: Array<{ userId: number; key: string; value: unknown; createdAt?: string; updatedAt?: string }>
-  scopedStorage: Array<{ scopeType: string; scopeId: string; key: string; value: unknown; createdByUserId: number | null; updatedByUserId: number | null; createdAt?: string; updatedAt?: string }>
-  tableRows: Array<{ tableName: string; scopeType: string; scopeId: string; rowKey: string; value: unknown; createdByUserId: number | null; updatedByUserId: number | null; createdAt?: string; updatedAt?: string }>
-  tableMigrations: Array<{ tableName: string; version: string; name: string; appliedByUserId: number; appliedAt?: string }>
-  counts: {
-    legacyUserData: number
-    scopedStorage: number
-    tableRows: number
-    tableMigrations: number
-    totalItems?: number
-  }
-  restorePolicy?: {
-    dryRunSupported: boolean
-    restoreMode: 'replace_all_plugin_storage'
-    modifiesBusinessData: boolean
-    modifiesPluginPackage: boolean
-  }
-}
-
-export interface PluginStorageRestoreResult {
-  pluginId: string
-  legacyUserData: number
-  scopedStorage: number
-  tableRows: number
-  tableMigrations: number
-  totalItems?: number
-  contentSha256?: string
-  archiveId?: string | null
-}
-
-export interface PluginStorageRestoreDryRunResult {
-  pluginId: string
-  valid: boolean
-  contentSha256: string
-  counts: {
-    legacyUserData: number
-    scopedStorage: number
-    tableRows: number
-    tableMigrations: number
-    totalItems: number
-  }
-  restoreMode: 'replace_all_plugin_storage'
-  modified: false
-  archiveId?: string | null
-}
-
-export interface PluginStorageBackupArchive {
-  backupId: string
-  pluginId: string
-  pluginVersion: string
-  exportedAt: string
-  mode: 'full'
-  contentSha256: string
-  counts: {
-    legacyUserData: number
-    scopedStorage: number
-    tableRows: number
-    tableMigrations: number
-    totalItems: number
-  }
-  restorePolicy: {
-    dryRunSupported: boolean
-    restoreMode: 'replace_all_plugin_storage'
-    modifiesBusinessData: boolean
-    modifiesPluginPackage: boolean
-  }
-  remoteArchives?: PluginStorageBackupRemoteArchive[]
-}
-
-export interface PluginStorageBackupRemoteArchive {
-  id: number
-  pluginId: string
-  backupId: string
-  storageConfigId: number
-  remoteFileName: string
-  remotePath: string | null
-  storageName: string
-  storageType: string
-  contentSha256: string
-  fileSize: string
-  status: string
-  lastRestoredAt: string | null
-  createdAt: string
-  updatedAt: string
-}
-
-export interface PluginServiceExtensionTarget {
-  pluginId: string
-  serviceExtensionKey: string
-  name: string
-  productId: string | null
-  hook: PluginServiceExtensionHook
-}
-
-export interface PluginGatewayExtensionTarget {
-  pluginId: string
-  gatewayExtensionKey: string
-  name: string
-  providerCode: string | null
-  hook: PluginGatewayExtensionHook
-}
-
-export interface PluginExtensionContractResult {
-  accepted: boolean
-  status: 'accepted' | 'pending' | 'completed' | 'failed' | 'unsupported'
-  message: string | null
-  externalReference: string | null
-  metadata: Record<string, unknown>
-}
-
-export interface PluginActionExecutionResult {
-  pluginId: string
-  action: string
-  runtime: 'webhook'
-  status: 'success'
-  statusCode: number
-  requestId: string
-  result: unknown
-}
-
-export interface PluginServiceExtensionDispatchResult {
-  pluginId: string
-  serviceExtensionKey: string
-  hook: PluginServiceExtensionHook
-  action: PluginActionExecutionResult
-  contract: PluginExtensionContractResult
-}
-
-export interface PluginGatewayExtensionDispatchResult {
-  pluginId: string
-  gatewayExtensionKey: string
-  hook: PluginGatewayExtensionHook
-  action: PluginActionExecutionResult
-  contract: PluginExtensionContractResult
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export type PublicApiScope =
   | 'profile:read'
@@ -985,7 +335,6 @@ export type PublicApiScope =
   | 'tickets:write'
   | 'notifications:read'
   | 'notifications:send'
-  | 'plugins:action'
 
 export interface PublicApiScopeMetadata {
   scope: PublicApiScope
@@ -1087,37 +436,6 @@ export interface PublicApiUnreadNotificationCount {
   count: number
 }
 
-export interface PublicApiPluginActionDescriptor {
-  name: string
-  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
-  path: string
-  runtime: 'webhook'
-  scopes: string[]
-  idempotency: 'none' | 'optional' | 'required'
-  rateLimit: 'normal' | 'strict'
-  requestSchema: Record<string, unknown> | null
-  responseSchema: Record<string, unknown> | null
-}
-
-export interface PublicApiPluginActionCatalogItem {
-  pluginId: string
-  name: string
-  version: string
-  description: string | null
-  author: string | null
-  homepage: string | null
-  actionCount: number
-  actions: PublicApiPluginActionDescriptor[]
-}
-
-export interface PublicApiPluginActionCatalog {
-  pluginId: string
-  name: string
-  version: string
-  description: string | null
-  actions: PublicApiPluginActionDescriptor[]
-}
-
 export interface CreatePublicApiTicketRequest {
   subject: string
   content: string
@@ -1161,341 +479,50 @@ export interface CreatePublicApiTokenResponse {
   apiToken: PublicApiToken
 }
 
-export type PluginMarketSubmissionReviewStatus = 'pending' | 'listed' | 'rejected' | 'delisted'
-export type PluginMarketSubmissionRiskLevel = 'low' | 'medium' | 'high' | 'critical'
 
-export interface PluginMarketSubmission {
-  id: number
-  pluginId: string
-  version: string
-  name: string
-  repoUrl: string
-  releaseUrl: string
-  manifestUrl: string
-  packageUrl: string
-  sha256: string
-  developerName: string
-  developerHomepage: string | null
-  developerGithub: string | null
-  contactEmail: string
-  permissions: unknown
-  compatibility: unknown
-  pricing: unknown
-  notes: string | null
-  reviewStatus: PluginMarketSubmissionReviewStatus
-  riskLevel: PluginMarketSubmissionRiskLevel
-  reviewNotes: string | null
-  scanStatus: 'pending' | 'passed' | 'warning' | 'failed'
-  scanResult: unknown
-  scannedAt: string | null
-  submittedByUserId: number
-  submittedByUsername: string | null
-  reviewedByUserId: number | null
-  reviewedByUsername: string | null
-  reviewedAt: string | null
-  createdAt: string
-  updatedAt: string
-}
 
-export interface DeveloperPluginEventHealth {
-  pluginId: string
-  total: number
-  success: number
-  failed: number
-  retryPending: number
-  deadLetter: number
-  deduped: number
-  dueRetry: number
-  lastEventAt: string | null
-  lastSuccessAt: string | null
-  lastFailureAt: string | null
-  lastError: string | null
-  recentWindowHours: number
-  recentTotal: number
-  recentSuccess: number
-  recentFailed: number
-  recentRetryPending: number
-  recentDeadLetter: number
-  recentDeduped: number
-  recentDueRetry: number
-  recentSuccessRate: number | null
-  trendWindowDays: number
-  trend: DeveloperPluginEventHealthTrendPoint[]
-  alerts: DeveloperPluginEventHealthAlert[]
-  breakdown: DeveloperPluginEventHealthBreakdown[]
-}
 
-export interface DeveloperPluginEventHealthAlert {
-  level: 'warning' | 'critical'
-  code: string
-  message: string
-  count: number
-}
 
-export interface DeveloperPluginEventHealthTrendPoint {
-  date: string
-  total: number
-  success: number
-  failed: number
-  retryPending: number
-  deadLetter: number
-  deduped: number
-}
 
-export interface DeveloperPluginEventHealthBreakdown {
-  eventName: string
-  handler: string
-  total: number
-  success: number
-  failed: number
-  retryPending: number
-  deadLetter: number
-  deduped: number
-  dueRetry: number
-  lastEventAt: string | null
-  lastSuccessAt: string | null
-  lastFailureAt: string | null
-  lastError: string | null
-  recentWindowHours: number
-  recentTotal: number
-  recentSuccess: number
-  recentFailed: number
-  recentRetryPending: number
-  recentDeadLetter: number
-  recentDeduped: number
-  recentDueRetry: number
-  recentSuccessRate: number | null
-  alerts: DeveloperPluginEventHealthAlert[]
-}
 
-export interface PluginEventAlertPreference {
-  pluginId: string
-  enabled: boolean
-  minimumLevel: 'warning' | 'critical'
-  cooldownMinutes: number
-  notifyOnDeadLetter: boolean
-  notifyOnDueRetry: boolean
-  notifyOnSuccessRateBelow: boolean
-  successRateThreshold: number
-  recentWindowHours: number
-  updatedAt: string | null
-}
 
-export interface UpdatePluginEventAlertPreferenceRequest {
-  enabled?: boolean
-  minimumLevel?: 'warning' | 'critical'
-  cooldownMinutes?: number
-  notifyOnDeadLetter?: boolean
-  notifyOnDueRetry?: boolean
-  notifyOnSuccessRateBelow?: boolean
-  successRateThreshold?: number
-  recentWindowHours?: number
-}
 
-export interface CreatePluginMarketSubmissionRequest {
-  pluginId: string
-  version: string
-  name: string
-  repoUrl: string
-  releaseUrl: string
-  manifestUrl: string
-  packageUrl: string
-  sha256: string
-  developerName: string
-  developerHomepage?: string | null
-  developerGithub?: string | null
-  contactEmail: string
-  permissions?: Record<string, unknown>
-  compatibility?: Record<string, unknown>
-  pricing?: Record<string, unknown>
-  notes?: string | null
-}
 
-export interface PluginMarketSubmissionUploadResult {
-  pluginId: string
-  version: string
-  name: string
-  packageUrl: string
-  manifestUrl: string
-  sha256: string
-  permissions: Record<string, unknown>
-  compatibility: Record<string, unknown>
-  sourceName: string
-}
 
-export interface ReviewPluginMarketSubmissionRequest {
-  reviewStatus: PluginMarketSubmissionReviewStatus
-  riskLevel?: PluginMarketSubmissionRiskLevel
-  reviewNotes?: string | null
-}
 
-export interface PluginMarketSubmissionScanFinding {
-  severity: 'info' | 'warning' | 'error'
-  code: string
-  message: string
-}
 
-export interface PluginMarketSubmissionScanResult {
-  status: 'passed' | 'warning' | 'failed'
-  riskLevel: PluginMarketSubmissionRiskLevel
-  manifest: {
-    id: string
-    name: string
-    version: string
-    permissions: string[]
-  } | null
-  packageSha256: string | null
-  findings: PluginMarketSubmissionScanFinding[]
-  scannedAt: string
-}
 
-export interface PluginMarketPublishResult {
-  indexPath: string
-  publishedEntries: number
-  totalEntries: number
-  updatedAt: string
-}
 
-export interface PluginTask {
-  id: number
-  pluginId: string | null
-  action: PluginTaskAction
-  status: PluginTaskStatus
-  sourceType: PluginSourceType
-  sourceUrl: string | null
-  logPath: string | null
-  errorMessage: string | null
-  startedByUserId: number
-  startedByUsername: string | null
-  startedAt: string | null
-  finishedAt: string | null
-  createdAt: string
-  updatedAt: string
-}
 
-export interface PluginEventLog {
-  id: number
-  pluginId: string
-  userId: number | null
-  action: string
-  result: string
-  message: string | null
-  eventName: string | null
-  handler: string | null
-  payload: unknown
-  actor: unknown
-  retryCount: number
-  maxRetries: number
-  nextRetryAt: string | null
-  deadLetterAt: string | null
-  dedupeKey: string | null
-  lastAttemptAt: string | null
-  lastError: string | null
-  createdAt: string
-}
 
-export interface PluginEventSummary {
-  total: number
-  success: number
-  failed: number
-  retryPending: number
-  deadLetter: number
-  deduped: number
-  dueRetry: number
-  updatedAt: string
-}
 
-export interface PluginEventReplayResult {
-  id: number
-  pluginId: string
-  eventName: string
-  handler: string
-  result: 'success' | 'retry_pending' | 'dead_letter'
-  retryCount: number
-}
 
-export interface PluginConfigValue {
-  id: number
-  pluginId: string
-  key: string
-  value: unknown
-  isSecret: boolean
-  createdAt: string
-  updatedAt: string
-}
 
-export interface PluginMarketEntry {
-  id: string
-  name: string
-  latest: string
-  repo: string
-  manifestUrl: string
-  downloadUrl: string
-  sha256: string
-  description?: string
-  author?: string
-  reviewStatus: 'pending' | 'listed' | 'delisted' | 'rejected'
-  trustLevel: 'official' | 'verified' | 'third_party'
-  developer: {
-    name: string
-    homepage?: string
-    github?: string
-    verified: boolean
-    contact?: string
-  }
-  permissions: {
-    adminPages: string[]
-    userPages: string[]
-    api: string[]
-    storage: string[]
-  }
-  compatibility: {
-    minPayincus?: string
-    maxPayincus?: string
-  }
-  security: {
-    checksumPinned: boolean
-    signature?: {
-      status: 'unsigned' | 'valid' | 'missing' | 'invalid'
-      algorithm?: string
-      keyId?: string
-    }
-    notes: string[]
-  }
-  pricing: {
-    type: 'free' | 'paid'
-    price?: string
-    currency?: string
-    revenueSharePercent?: number | null
-  }
-  rating: { average: number; count: number }
-  installCount: number
-  releaseNotes?: string
-  upgradeNotes?: string
-  rollbackNotes?: string
-}
 
-export interface PluginMarketGovernance {
-  totalEntries: number
-  visibleEntries: number
-  hiddenEntries: number
-  indexHost: string | null
-  fingerprint: string
-  defaultReviewStatus: 'pending' | 'listed' | 'delisted' | 'rejected'
-  installPolicy: string[]
-  unavailableReason?: string
-}
 
-export interface PluginClientExtension {
-  pluginId: string
-  pluginName: string
-  version: string | null
-  slot: string
-  title: string
-  path: string | null
-  requiresAuth: boolean
-  url: string
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ==================== 用户相关 ====================
 
@@ -1833,7 +860,6 @@ export interface Instance {
     vipLevel: number
     vipBadgeStyle?: VipBadgeStyle | null
   } | null
-  servicePanelExtensions?: Array<PluginServiceExtensionTarget & { hook: 'servicePanel' }>
   created_at: string
   createdAt?: string  // camelCase 别名
   updated_at: string
@@ -1875,7 +901,6 @@ export interface CreateInstanceRequest {
   backupLimit?: number
   customInitCommandIds?: number[]  // 用户自定义初始化命令 ID 列表
   promoCode?: string
-  flashSaleItemId?: number
   idempotencyKey?: string
   turnstileToken?: string
 }
@@ -2072,95 +1097,6 @@ export interface ExchangeDispute {
   resolution: string | null
   createdAt: string
   resolvedAt: string | null
-}
-
-export type FlashSaleCampaignStatus = 'draft' | 'scheduled' | 'active' | 'paused' | 'ended' | 'cancelled'
-export type FlashSaleReservationStatus = 'paid' | 'delivering' | 'delivered' | 'failed' | 'refunded' | 'cancelled'
-
-export interface FlashSalePlanSummary {
-  id: number
-  name: string
-  description: string | null
-  cpu: number
-  memory: number
-  disk: number
-  trafficLimit: string
-  trafficLimitSpeed: string
-  price: number
-  billingCycle: number
-  isActive: boolean
-  isSoldOut: boolean
-  package: {
-    id: number
-    name: string
-    networkMode: string
-    instanceType: string
-    sourceType: 'official' | 'market'
-    monthlyTrafficLimit: string | null
-    hostCount: number
-  }
-}
-
-export interface FlashSaleItem {
-  id: number
-  campaignId: number
-  packagePlanId: number
-  flashPrice: number
-  originalPriceSnapshot: number
-  totalStock: number
-  soldCount: number
-  reservedCount: number
-  deliveredCount: number
-  failedCount: number
-  remainingStock: number
-  perUserLimit: number
-  allowCoupon: boolean
-  allowAff: boolean
-  sortOrder: number
-  createdAt: string
-  updatedAt: string
-  plan: FlashSalePlanSummary
-}
-
-export interface FlashSaleCampaign {
-  id: number
-  name: string
-  description: string | null
-  status: FlashSaleCampaignStatus
-  effectiveStatus: FlashSaleCampaignStatus
-  startAt: string
-  endAt: string
-  requireTurnstile: boolean
-  minAccountAgeHours: number
-  requireEmail: boolean
-  blockRiskRestricted: boolean
-  maxPerUser: number
-  notes: string | null
-  createdByUserId: number
-  createdAt: string
-  updatedAt: string
-  items: FlashSaleItem[]
-}
-
-export interface FlashSaleReservation {
-  id: number
-  campaignId: number
-  campaignName?: string
-  itemId: number
-  userId?: number
-  user?: { id: number; username: string; email?: string | null; avatarStyle?: string | null; avatarBadgeId?: string | null } | null
-  packageName: string
-  planName: string
-  instanceId?: number | null
-  instance?: { id: number; name: string; status: string } | null
-  status: FlashSaleReservationStatus
-  amount: number
-  failureReason: string | null
-  paidAt: string | null
-  deliveredAt: string | null
-  refundedAt: string | null
-  createdAt: string
-  updatedAt?: string
 }
 
 export interface UpdateInstanceRequest {
@@ -2914,164 +1850,6 @@ export interface InstanceTaskResponse {
   status: InstanceTaskStatus
 }
 
-export type DeliveryAssuranceCaseStatus = 'pending_manual' | 'auto_retryable' | 'in_progress' | 'recovered' | 'closed'
-export type DeliveryAssuranceIssueType = 'task_failed' | 'task_stale' | 'host_offline' | 'agent_offline' | 'resource_pressure' | 'plan_upgrade_sync_failed'
-
-export interface DeliveryAssuranceCase {
-  id: number
-  taskId: number | null
-  instanceId: number
-  hostId: number
-  userId: number
-  status: DeliveryAssuranceCaseStatus
-  issueType: DeliveryAssuranceIssueType
-  severity: string
-  retryable: boolean
-  retryTaskId: number | null
-  title: string
-  lastError: string | null
-  detail: Record<string, unknown> | null
-  note: string | null
-  handledByUserId: number | null
-  handledByUsername: string | null
-  handledAt: string | null
-  createdAt: string | null
-  updatedAt: string | null
-}
-
-export interface DeliveryTaskContext {
-  id: number
-  instanceId: number
-  hostId: number
-  userId: number
-  taskType: InstanceTaskType
-  status: InstanceTaskStatus
-  progress?: string | null
-  error?: string | null
-  createdAt: string
-  startedAt?: string | null
-  finishedAt?: string | null
-  newInstanceId?: number | null
-  instance: {
-    id: number
-    name: string
-    status: string
-    incusId: string
-    image: string
-  } | null
-  user: {
-    id: number
-    username: string
-    email: string | null
-    status: string
-  } | null
-  host: {
-    id: number
-    name: string
-    status: string
-    location: string | null
-    countryCode: string
-    cpuUsed?: number
-    cpuAllowanceMax?: number
-    memoryUsed?: number
-    memoryMax?: number
-    diskUsed?: number
-    natPortsUsedCount?: number
-    agent?: {
-      status: string
-      version: string | null
-      lastSeenAt: string | null
-    } | null
-  } | null
-  assuranceCase: DeliveryAssuranceCase | null
-  billing: {
-    id: number
-    type: string
-    amount: number
-    createdAt: string
-    balanceLogId: number | null
-  } | null
-}
-
-export interface DeliveryCaseContext {
-  id: number
-  instanceId: number
-  hostId: number
-  userId: number
-  instance: {
-    id: number
-    name: string
-    status: string
-    incusId: string
-    image: string
-    cpu: number
-    memory: number
-    disk: number
-    limitsIngress: string | null
-    limitsEgress: string | null
-  } | null
-  user: {
-    id: number
-    username: string
-    email: string | null
-    status: string
-  } | null
-  host: {
-    id: number
-    name: string
-    status: string
-    location: string | null
-    countryCode: string
-  } | null
-  assuranceCase: DeliveryAssuranceCase
-  billing: {
-    id: number
-    type: string
-    amount: number
-    createdAt: string
-    balanceLogId: number | null
-  } | null
-}
-
-export interface DeliveryOverview {
-  summary: {
-    pending: number
-    processing: number
-    completed: number
-    failed: number
-    completedLast24h: number
-    failedLast24h: number
-    staleProcessing: number
-    notificationSentLast24h: number
-    notificationFailedLast24h: number
-    notificationPendingLast24h: number
-    enabledUserChannels: number
-    enabledGlobalChannels: number
-    casesPendingManual: number
-    casesAutoRetryable: number
-    casesInProgress: number
-    casesRecovered: number
-    casesClosed: number
-  }
-  recentFailures: DeliveryTaskContext[]
-}
-
-export interface DeliveryTasksResponse {
-  tasks: DeliveryTaskContext[]
-  total: number
-  page: number
-  pageSize: number
-  totalPages: number
-}
-
-export interface DeliveryCasesResponse {
-  cases: DeliveryCaseContext[]
-  total: number
-  page: number
-  pageSize: number
-  totalPages: number
-}
-
 // ==================== SLA 告警相关 ====================
 
 export type SlaAlertSeverity = 'info' | 'warning' | 'critical'
@@ -3468,7 +2246,7 @@ export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed'
 export type TicketPriority = 'low' | 'normal' | 'high' | 'urgent'
 export type TicketCategory = 'general' | 'billing' | 'technical' | 'abuse'
 export type TicketSlaStatus = 'waiting_first_response' | 'waiting_user' | 'waiting_internal' | 'due_soon' | 'overdue' | 'met' | 'closed'
-export type TicketObjectLinkType = 'recharge_record' | 'order_operation_case' | 'instance' | 'host' | 'delivery_case' | 'sla_alert' | 'plugin_task'
+export type TicketObjectLinkType = 'recharge_record' | 'order_operation_case' | 'instance' | 'host' | 'sla_alert'
 
 export interface Ticket {
   id: number
@@ -3608,7 +2386,6 @@ export interface TicketSupportContext {
   recentOrders: Array<Record<string, unknown>>
   recentOrderCases: Array<Record<string, unknown>>
   recentInstances: Array<Record<string, unknown>>
-  recentDeliveryCases: Array<Record<string, unknown>>
   recentAlerts: Array<Record<string, unknown>>
   links: TicketObjectLink[]
   internalNotes: TicketInternalNote[]
@@ -3617,61 +2394,17 @@ export interface TicketSupportContext {
   quickActions: {
     notifyUser: boolean
     balanceAdjustmentPath: string
-    deliveryCenterPath: string
     userPath: string
     instancePath: string | null
     hostPath: string | null
   }
 }
 
-export interface TicketAiDraftResponse {
-  draft: string
-  model: string
-  safety: {
-    passed: boolean
-    blockedReasons: string[]
-  }
-}
 
-export interface TicketAiReplyResponse {
-  message: string
-  data: TicketMessage
-  model: string
-  confidence: number
-  confidenceThreshold: number
-  safety: {
-    passed: boolean
-    blockedReasons: string[]
-  }
-  sendBlockedReasons?: string[]
-}
 
-export interface TicketAiStatusResponse {
-  pluginId: string
-  permissions: {
-    readContext: boolean
-    generateDraft: boolean
-    reply: boolean
-  }
-  config: {
-    enabled: boolean
-    mode: 'draft' | 'semi_auto' | 'auto'
-    modelConfigured: boolean
-    autoReplyCategories: string[]
-    confidenceThreshold: number
-    dailyAutoReplyLimit: number
-    ticketAutoReplyLimit: number
-    cooldownSeconds: number
-    showAiIdentity: boolean
-  }
-  automation: {
-    autoReplyActive: boolean
-    scanIntervalSeconds: number
-    scope: string
-    requiresLatestCustomerMessage: boolean
-    safeguards: string[]
-  }
-}
+
+
+
 
 export interface CreateTicketRequest {
   instanceId?: number | null  // 可选：不选实例时工单直接发给管理员

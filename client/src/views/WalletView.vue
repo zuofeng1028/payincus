@@ -5,7 +5,6 @@ import { useRouter, useRoute } from 'vue-router'
 import api from '@/api'
 import { useToast } from '@/stores/toast'
 import { useConfigStore } from '@/stores/config'
-import ThemeTemplateSlot from '@/components/theme/ThemeTemplateSlot.vue'
 import TermsOfServiceModal from '@/components/TermsOfServiceModal.vue'
 import { freeSiteCopy } from '@/utils/freeSiteFun'
 import { instanceDetailPath, walletPath } from '@/utils/app-paths'
@@ -986,8 +985,6 @@ function formatAmount() {
         {{ $t('wallet.recharge') }}
       </button>
     </div>
-
-    <ThemeTemplateSlot slot-name="user.wallet.banner" container-class="mb-5 overflow-hidden rounded-lg border border-themed bg-themed-surface" />
 
     <!-- Nimbus 下划线 Tabs -->
     <div data-reveal class="nimbus-tabs border-b border-themed">

@@ -8,7 +8,6 @@ const __dirname = dirname(__filename)
 
 const ticketsDbSource = readFileSync(resolve(__dirname, '../src/db/tickets.ts'), 'utf8')
 const ticketsRouteSource = readFileSync(resolve(__dirname, '../src/routes/tickets.ts'), 'utf8')
-const aiTicketSchedulerSource = readFileSync(resolve(__dirname, '../src/services/ai-ticket-auto-reply-scheduler.ts'), 'utf8')
 const systemConfigRouteSource = readFileSync(resolve(__dirname, '../src/routes/system-config.ts'), 'utf8')
 const userRouterSource = readFileSync(resolve(__dirname, '../../client/src/router/user.ts'), 'utf8')
 
@@ -81,30 +80,6 @@ for (const [helperName, endMarker] of [
     `${helperName} must filter and stably sort the complete queue before pagination, with total based on the filtered queue`
   )
 }
-
-const aiCandidateSection = sectionBetween(
-  aiTicketSchedulerSource,
-  'async function loadAutoReplyCandidates(',
-  'async function loadTicketForAutoReply('
-)
-assert.ok(
-  !aiCandidateSection.includes('take: AUTO_REPLY_CANDIDATE_LOOKAHEAD') &&
-    aiCandidateSection.includes('const needsHumanTicketIds = await loadNeedsHumanTicketIds()') &&
-    aiCandidateSection.includes('id: { notIn: needsHumanTicketIds }') &&
-    aiCandidateSection.includes(".filter(ticket => ticket.messages[0]?.isFromOwner === false)") &&
-    aiCandidateSection.indexOf('.filter(') < aiCandidateSection.indexOf('.slice(0, AUTO_REPLY_SCAN_BATCH_SIZE)') &&
-    aiCandidateSection.includes("orderBy: [\n      { updatedAt: 'asc' },\n      { id: 'asc' }") &&
-    aiCandidateSection.includes("status: { in: ['open', 'in_progress'] }"),
-  'AI ticket queue must exclude needs-human tickets and filter the complete ordered candidate set by needsReply before taking a batch'
-)
-
-assert.ok(
-  aiTicketSchedulerSource.includes("where: { action: 'ai_ticket.needs_human' }") &&
-    aiTicketSchedulerSource.includes('/\\[ticketId=([1-9]\\d*)\\]/') &&
-    aiTicketSchedulerSource.includes("'ai_ticket.needs_human'") &&
-    (aiTicketSchedulerSource.match(/await markTicketNeedsHuman\(actor\.id, ticketId, reason\)/g) ?? []).length === 2,
-  'blocked AI tickets must receive a durable needs-human marker that removes them from later scheduler scans'
-)
 
 for (const helperName of ['getUserTickets', 'getHostTickets', 'getOwnerAllTickets'] as const) {
   const helperSection = sectionBetween(

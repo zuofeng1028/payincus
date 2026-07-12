@@ -6,7 +6,6 @@ import api from '@/api'
 import { usePageSeo } from '@/composables/usePageSeo'
 import { useBrand } from '@/composables/useBrand'
 import FlagIcon from '@/components/FlagIcon.vue'
-import ThemeTemplateSlot from '@/components/theme/ThemeTemplateSlot.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useConfigStore } from '@/stores/config'
 import { getLocalizedCountryName } from '@/utils/countryDisplay'
@@ -599,11 +598,6 @@ onUnmounted(() => {
       </div>
     </section>
 
-    <ThemeTemplateSlot
-      slot-name="public.market.banner"
-      container-class="mx-auto max-w-7xl px-4 pb-6 sm:px-6 lg:px-8"
-    />
-
     <section class="relative px-4 pb-20 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-7xl">
         <div class="market-toolbar" data-reveal>
@@ -940,25 +934,6 @@ onUnmounted(() => {
                       <span class="rounded-lg border border-current px-2 py-0.5 font-semibold opacity-90">{{ t('publicSite.market.labels.hosts') }} {{ selectedPackage.host_ids.length }}</span>
                       <span class="rounded-lg border border-current px-2 py-0.5 font-semibold opacity-90">{{ t('publicSite.market.labels.nesting') }} {{ selectedPackage.nested ? t('common.yes') : t('common.no') }}</span>
                     </div>
-                  </div>
-                </div>
-
-                <div v-if="selectedPackage.checkoutExtensions?.length" class="mt-5 rounded-lg p-4 text-sm leading-6" :class="ui.infoCard">
-                  <div class="font-semibold" :class="ui.title">
-                    {{ t('publicSite.market.checkoutExtensionTitle') }}
-                  </div>
-                  <p class="mt-2">
-                    {{ t('publicSite.market.checkoutExtensionDescription') }}
-                  </p>
-                  <div class="mt-3 flex flex-wrap gap-1.5 text-[11px]">
-                    <span
-                      v-for="extension in selectedPackage.checkoutExtensions"
-                      :key="`${extension.pluginId}:${extension.serviceExtensionKey}`"
-                      class="rounded-lg border px-2 py-0.5 font-semibold"
-                      :class="ui.statChip"
-                    >
-                      {{ extension.name }}
-                    </span>
                   </div>
                 </div>
 

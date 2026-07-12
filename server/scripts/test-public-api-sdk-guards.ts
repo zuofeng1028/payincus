@@ -40,13 +40,7 @@ const forbiddenSdkMethods = [
   'updatePassword(',
   'updateTwoFactor(',
   'updateUserRole(',
-  'updateUserStatus(',
-  'installPlugin(',
-  'enablePlugin(',
-  'disablePlugin(',
-  'uninstallPlugin(',
-  'publishPlugin(',
-  'enableTheme('
+  'updateUserStatus('
 ]
 
 for (const method of forbiddenSdkMethods) {
@@ -69,12 +63,7 @@ const forbiddenSdkPaths = [
   '/services/${id}/unsuspend',
   '/services/${id}/reinstall',
   '/services/${id}/delete',
-  '/services/${id}/migrate',
-  '/plugins/${pluginId}/install',
-  '/plugins/${pluginId}/enable',
-  '/plugins/${pluginId}/disable',
-  '/plugins/${pluginId}/uninstall',
-  '/themes/${themeId}/enable'
+  '/services/${id}/migrate'
 ]
 
 for (const path of forbiddenSdkPaths) {
@@ -106,8 +95,7 @@ assert.ok(
     sdk.includes("'tickets:read'") &&
     sdk.includes("'tickets:write'") &&
     sdk.includes("'notifications:read'") &&
-    sdk.includes("'notifications:send'") &&
-    sdk.includes("'plugins:action'"),
+    sdk.includes("'notifications:send'"),
   'public API SDK must export a typed client, typed errors, and the current public scope allowlist'
 )
 
@@ -162,16 +150,10 @@ assert.ok(
     sdk.includes('listNotifications(options: PayIncusNotificationListOptions = {})') &&
     sdk.includes('getUnreadNotificationCount()') &&
     sdk.includes('PayIncusNotificationTemplateId') &&
-    sdk.includes("type PayIncusNotificationTemplateId = 'flash_sale_reminder' | 'service_action_update' | 'billing_notice' | `plugin:${string}:${string}`") &&
+    sdk.includes("type PayIncusNotificationTemplateId = 'flash_sale_reminder' | 'service_action_update' | 'billing_notice'") &&
     sdk.includes('variables?: Record<string, string | number | boolean>') &&
     sdk.includes('template: PayIncusNotificationTemplateId | null') &&
     sdk.includes('sendNotification(input: PayIncusNotificationInput)') &&
-    sdk.includes('PayIncusPluginActionDescriptor') &&
-    sdk.includes('PayIncusPluginActionCatalogItem') &&
-    sdk.includes('PayIncusPluginActionCatalog') &&
-    sdk.includes('listPluginActions(options: PayIncusListOptions = {})') &&
-    sdk.includes('getPluginActions(pluginId: string)') &&
-    sdk.includes('dispatchPluginAction(') &&
     sdk.includes('private parsePayload(text: string)') &&
     sdk.includes('return { error: text }') &&
     sdk.includes('private errorBody(payload: unknown): PayIncusPublicApiErrorBody | null') &&
@@ -179,7 +161,7 @@ assert.ok(
     !sdk.includes('balanceLogId') &&
     !sdk.includes("sourceType: 'public_api' | null") &&
     !sdk.includes('sourceId: number | null'),
-  'public API SDK must cover the current profile, product, service, order, ticket, notification, and plugin action APIs'
+  'public API SDK must cover the current profile, product, service, order, ticket and notification APIs'
 )
 
 assert.ok(
@@ -208,8 +190,6 @@ assert.ok(
     sdk.includes("options.body === undefined || isFormData ? {} : { 'Content-Type': 'application/json' }") &&
     sdk.includes("this.request(`/tickets/${id}/status`, { method: 'PATCH'") &&
     sdk.includes("this.request('/notifications', { method: 'POST'") &&
-    sdk.includes('this.request(`/plugins${this.query(options)}`)') &&
-    sdk.includes('this.request(`/plugins/${encodeURIComponent(pluginId)}/actions`)') &&
     !sdk.includes('/api/admin/') &&
     !sdk.includes('/api/api-tokens'),
   'public API SDK must use Bearer tokens against /api/v1 and avoid admin/session token-management APIs'
@@ -232,8 +212,6 @@ assert.ok(
     serviceRenewExample.includes('PayIncusPublicApiError') &&
     flashSaleExample.includes('PayIncusPublicApiClient') &&
     flashSaleExample.includes('getProfile()') &&
-    flashSaleExample.includes('dispatchPluginAction(pluginId, \'reserveStock\'') &&
-    flashSaleExample.includes('idempotencyKey') &&
     flashSaleExample.includes('sendNotification({') &&
     flashSaleExample.includes('createTicket({') &&
     flashSaleExample.includes('PayIncusPublicApiError') &&
@@ -270,7 +248,7 @@ assert.ok(
     !balanceAdjustmentExample.includes('/api/api-tokens') &&
     !billingRecordsExample.includes('/api/api-tokens') &&
     !oauthAuthorizationCodeExample.includes('/api/api-tokens'),
-  'public API SDK examples must demonstrate service task polling, service renewal, flash-sale plugin action usage, balance adjustment review requests, billing record reads, and OAuth authorization code exchange without admin or session APIs'
+  'public API SDK examples must demonstrate service task polling, service renewal, flash-sale notifications, balance adjustment review requests, billing record reads, and OAuth authorization code exchange without admin or session APIs'
 )
 
 assert.ok(
@@ -312,7 +290,6 @@ assert.ok(
     sdkDocs.includes('所有列表方法都支持统一 `page`、`pageSize` 和白名单 `sort`') &&
     sdkDocs.includes('响应的 `meta.sort` 会返回实际采用的排序') &&
     sdkDocs.includes('服务列表额外支持 `displayOrder` / `-displayOrder`') &&
-    sdkDocs.includes('扩展 action 目录额外支持 `pluginId` / `-pluginId`') &&
     sdkDocs.includes('listNotifications()') &&
     sdkDocs.includes('getUnreadNotificationCount()') &&
     sdkDocs.includes('queueServiceAction(id, action)') &&
@@ -326,22 +303,13 @@ assert.ok(
     sdkDocs.includes('只取消仍处于 `PENDING` 的公开电源任务') &&
     sdkDocs.includes('响应不返回余额流水 ID、支付回调或 provider payload') &&
     sdkDocs.includes('当前 token 用户自己的站内信展示字段和未读数量') &&
-    sdkDocs.includes('listPluginActions()') &&
-    sdkDocs.includes('getPluginActions(pluginId)') &&
-    sdkDocs.includes('只返回已启用扩展的公开 webhook action 契约') &&
-    sdkDocs.includes('不会返回 webhook URL、secret、配置值') &&
     sdkDocs.includes('写入型 SDK 方法会受到平台 Public API 独立限流保护') &&
     sdkDocs.includes('`status = 429`') &&
-    sdkDocs.includes('扩展 action dispatch 还会按 token + 扩展 + action 套用数据库持久化动态配额') &&
-    sdkDocs.includes('后台可按全局、扩展或 action 覆盖策略') &&
-    sdkDocs.includes('同一数据库下多实例共享计数窗口') &&
-    sdkDocs.includes('错误码为 `PUBLIC_PLUGIN_ACTION_RATE_LIMITED`') &&
     sdkDocs.includes('error.details') &&
     sdkDocs.includes('createTicket(input)') &&
     sdkDocs.includes('updateTicketStatus(id, action)') &&
     sdkDocs.includes("updateTicketStatus(ticket.data.id, 'close')") &&
     sdkDocs.includes('只允许当前 token 用户关闭自己的工单或重新打开自己的已关闭工单') &&
-    sdkDocs.includes('dispatchPluginAction(pluginId, action, input)') &&
     sdkDocs.includes('service-power-task.ts') &&
     sdkDocs.includes('service-renew.ts') &&
     sdkDocs.includes('flash-sale-action.ts') &&
@@ -355,7 +323,6 @@ assert.ok(
     sdkDocs.includes('SDK 不会调用 `/api/admin/*`') &&
     sdkDocs.includes('这些不是 SDK 的遗漏，而是 Public API 的高风险准入边界') &&
     sdkDocs.includes('新增前必须先有公开资源设计、独立 scope、OpenAPI 契约、审计日志、限流、幂等、防跨用户校验、状态机回滚和生产 proof') &&
-    sdkDocs.includes('扩展安装、启用、停用、卸载、市场发布或主题启用') &&
     vitepressConfig.includes("{ text: 'Public API SDK', link: '/plugins/sdk' }"),
   'docs site must expose the Public API SDK download, usage, token sources, method list, and sidebar entry'
 )

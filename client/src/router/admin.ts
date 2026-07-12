@@ -111,12 +111,6 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, requiresAdmin: true, titleKey: 'nav.giftCards', title: '礼品卡' }
   },
   {
-    path: '/admin/flash-sales',
-    name: 'admin-flash-sales',
-    component: () => import('@/views/admin/FlashSalesView.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true, titleKey: 'nav.flashSaleManage', title: '秒杀管理' }
-  },
-  {
     path: '/admin/help',
     name: 'admin-help',
     component: () => import('@/views/admin/HelpManageView.vue'),
@@ -193,52 +187,10 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, requiresAdmin: true, titleKey: 'nav.systemUpdate', title: '版本更新' }
   },
   {
-    path: '/admin/plugins',
-    name: 'admin-plugins',
-    component: () => import('@/views/admin/PluginCenterView.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true, titleKey: 'nav.plugins', title: '扩展中心' }
-  },
-  {
-    path: '/admin/themes',
-    name: 'admin-themes',
-    redirect: { path: '/admin/plugins', query: { tab: 'themes' } },
-    meta: { requiresAuth: true, requiresAdmin: true, titleKey: 'nav.themes', title: '主题中心' }
-  },
-  {
-    path: '/admin/integrations',
-    name: 'admin-integrations',
-    component: () => import('@/views/admin/IntegrationsView.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true, titleKey: 'nav.integrations', title: '集成中心' }
-  },
-  {
-    path: '/admin/plugins/:pluginId/settings',
-    name: 'admin-plugin-settings',
-    component: () => import('@/views/admin/PluginSettingsView.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true, titleKey: 'nav.pluginSettings', title: '扩展设置' }
-  },
-  {
-    path: '/admin/plugins/:pluginId/pages/:pathMatch(.*)*',
-    name: 'admin-plugin-page',
-    component: () => import('@/views/admin/AdminPluginPageView.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true, titleKey: 'nav.pluginPage', title: '扩展页面' }
-  },
-  {
-    path: '/admin/delivery',
-    name: 'admin-delivery',
-    component: () => import('@/views/admin/DeliveryCenterView.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true, titleKey: 'nav.delivery', title: '交付保障' }
-  },
-  {
     path: '/admin/sla-alerts',
     name: 'admin-sla-alerts',
     component: () => import('@/views/admin/SlaAlertsView.vue'),
     meta: { requiresAuth: true, requiresAdmin: true, titleKey: 'nav.slaAlerts', title: 'SLA 与告警' }
-  },
-  {
-    path: '/admin/resource-risk',
-    name: 'admin-resource-risk',
-    component: () => import('@/views/admin/ResourceRiskView.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true, titleKey: 'nav.resourceRisk', title: '资源风控' }
   },
   {
     path: '/admin/exchange',
@@ -247,22 +199,10 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, requiresAdmin: true, titleKey: 'nav.exchangeManage', title: '交易所管理' }
   },
   {
-    path: '/admin/production-proof',
-    name: 'admin-production-proof',
-    component: () => import('@/views/admin/ProductionProofView.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true, titleKey: 'nav.productionProof', title: '生产验收' }
-  },
-  {
     path: '/admin/capacity-cost',
     name: 'admin-capacity-cost',
     component: () => import('@/views/admin/CapacityCostView.vue'),
     meta: { requiresAuth: true, requiresAdmin: true, titleKey: 'nav.capacityCost', title: '容量与成本' }
-  },
-  {
-    path: '/admin/user-lifecycle',
-    name: 'admin-user-lifecycle',
-    component: () => import('@/views/admin/UserLifecycleView.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true, titleKey: 'nav.userLifecycle', title: '用户生命周期' }
   },
   {
     path: '/admin/images',

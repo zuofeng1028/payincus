@@ -106,11 +106,7 @@ async function assertWithdrawalStillPayable(tx: Prisma.TransactionClient, userId
     throw new Error('用户账号状态异常，不能提现')
   }
 
-  const [restriction, openDisputes, unsettledSales] = await Promise.all([
-    tx.userOrderRestriction.findFirst({
-      where: { userId, status: 'active' },
-      select: { id: true }
-    }),
+  const [openDisputes, unsettledSales] = await Promise.all([
     tx.exchangeDispute.count({
       where: {
         status: { in: [...activeDisputeStatuses] },
@@ -130,9 +126,6 @@ async function assertWithdrawalStillPayable(tx: Prisma.TransactionClient, userId
     })
   ])
 
-  if (restriction) {
-    throw new Error('用户账号处于风控限制中，不能审核或完成提现')
-  }
   if (openDisputes > 0) {
     throw new Error('用户存在未完结交易所争议，不能审核或完成提现')
   }
@@ -1919,33 +1912,6 @@ export default async function adminExchangeRoutes(fastify: FastifyInstance) {
     } catch (error: any) {
       return reply.code(400).send({ error: error?.message || '调整交易所余额失败' })
     }
-  })
-
-  fastify.get('/risk-records', {
-    onRequest: [fastify.authenticateAdmin]
-  }, async (request) => {
-    const query = request.query as { page?: string; pageSize?: string; status?: string }
-    const page = parsePage(query.page)
-    const pageSize = parsePageSize(query.pageSize)
-    const where = query.status ? { status: query.status } : {}
-    const [items, total] = await Promise.all([
-      prisma.instanceRiskState.findMany({
-        where,
-        orderBy: [
-          { updatedAt: 'desc' },
-          { id: 'desc' }
-        ],
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-        include: {
-          instance: { select: { id: true, name: true, status: true } },
-          user: { select: { id: true, username: true } },
-          host: { select: { id: true, name: true, status: true } }
-        }
-      }),
-      prisma.instanceRiskState.count({ where })
-    ])
-    return pageResult(items, total, page, pageSize)
   })
 
   fastify.get('/disputes', {

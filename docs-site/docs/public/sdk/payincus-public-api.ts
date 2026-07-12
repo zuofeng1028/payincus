@@ -1,4 +1,4 @@
-export type PayIncusPublicApiSort = 'createdAt' | '-createdAt' | 'updatedAt' | '-updatedAt' | 'displayOrder' | '-displayOrder' | 'pluginId' | '-pluginId'
+export type PayIncusPublicApiSort = 'createdAt' | '-createdAt' | 'updatedAt' | '-updatedAt' | 'displayOrder' | '-displayOrder'
 export type PayIncusPublicApiScope =
   | 'profile:read'
   | 'profile:write'
@@ -14,7 +14,6 @@ export type PayIncusPublicApiScope =
   | 'tickets:write'
   | 'notifications:read'
   | 'notifications:send'
-  | 'plugins:action'
 
 export interface PayIncusPublicApiErrorBody {
   code?: string
@@ -246,7 +245,7 @@ export interface PayIncusNotificationListOptions extends PayIncusListOptions {
   isRead?: boolean
 }
 
-export type PayIncusNotificationTemplateId = 'flash_sale_reminder' | 'service_action_update' | 'billing_notice' | `plugin:${string}:${string}`
+export type PayIncusNotificationTemplateId = 'flash_sale_reminder' | 'service_action_update' | 'billing_notice'
 
 export interface PayIncusNotificationInput {
   title?: string
@@ -255,25 +254,6 @@ export interface PayIncusNotificationInput {
   variables?: Record<string, string | number | boolean>
   source?: string
 }
-
-export interface PayIncusPluginActionDescriptor {
-  name: string
-  method: string
-  path: string
-  scopes: string[]
-  idempotency?: string
-  rateLimit?: string
-  requestSchema?: unknown
-  responseSchema?: unknown
-}
-
-export interface PayIncusPluginActionCatalogItem {
-  pluginId: string
-  name: string
-  actions: PayIncusPluginActionDescriptor[]
-}
-
-export type PayIncusPluginActionCatalog = PayIncusListResponse<PayIncusPluginActionCatalogItem>
 
 export interface PayIncusPublicApiClientOptions {
   baseUrl: string
@@ -473,15 +453,4 @@ export class PayIncusPublicApiClient {
     return this.request('/notifications', { method: 'POST', body: input }) as Promise<PayIncusResponse<unknown>>
   }
 
-  listPluginActions(options: PayIncusListOptions = {}) {
-    return this.request(`/plugins${this.query(options)}`) as Promise<PayIncusPluginActionCatalog>
-  }
-
-  getPluginActions(pluginId: string) {
-    return this.request(`/plugins/${encodeURIComponent(pluginId)}/actions`) as Promise<PayIncusResponse<PayIncusPluginActionDescriptor[]>>
-  }
-
-  dispatchPluginAction(pluginId: string, action: string, input: { payload?: unknown; idempotencyKey?: string } = {}) {
-    return this.request<PayIncusResponse<unknown>>(`/plugins/${encodeURIComponent(pluginId)}/actions/${encodeURIComponent(action)}`, { method: 'POST', body: input })
-  }
 }

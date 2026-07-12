@@ -2,9 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import api from '@/api/admin'
-import PluginFrameSlot from '@/components/plugins/PluginFrameSlot.vue'
 import SkeletonLoader from '@/components/SkeletonLoader.vue'
-import ThemeTemplateSlot from '@/components/theme/ThemeTemplateSlot.vue'
 import { useToast } from '@/stores/toast'
 
 type StatisticsOverview = Awaited<ReturnType<typeof api.admin.getStatisticsOverview>>
@@ -435,7 +433,6 @@ function riskToneClass(severity: string): string {
     </div>
 
     <div v-else-if="stats" class="space-y-6">
-      <ThemeTemplateSlot slot-name="admin.dashboard.banner" container-class="overflow-hidden rounded-lg border border-themed bg-themed-surface" />
 
       <section class="space-y-5">
         <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-3">
@@ -463,10 +460,6 @@ function riskToneClass(severity: string): string {
             <p v-if="card.detail" class="mt-1 text-xs text-themed-faint">{{ card.detail }}</p>
           </div>
         </div>
-
-        <PluginFrameSlot slot-name="admin.dashboard.widgets" surface="admin" frame-class="min-h-[240px]" />
-
-        <ThemeTemplateSlot slot-name="admin.dashboard.widgets" container-class="overflow-hidden rounded-lg border border-themed bg-themed-surface" />
 
         <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_420px] gap-5">
           <div class="card p-5">

@@ -7,7 +7,6 @@ import { useToast } from '@/stores/toast'
 import { useAuthStore } from '@/stores/auth'
 import { useConfigStore } from '@/stores/config'
 import SkeletonLoader from '@/components/SkeletonLoader.vue'
-import ThemeTemplateSlot from '@/components/theme/ThemeTemplateSlot.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import InstanceDisplayIcon from '@/components/InstanceDisplayIcon.vue'
 import InstanceSelector from '@/components/InstanceSelector.vue'
@@ -15,7 +14,6 @@ import TicketImageLightbox from '@/components/tickets/TicketImageLightbox.vue'
 import TicketImageUploader from '@/components/tickets/TicketImageUploader.vue'
 import TicketInstanceOwnerCard from '@/components/tickets/TicketInstanceOwnerCard.vue'
 import { ticketsPath } from '@/utils/app-paths'
-import { buildApiUrl } from '@/utils/api-url'
 import { useReveal } from '@/composables/useReveal'
 import type {
   Ticket,
@@ -25,10 +23,7 @@ import type {
   TicketPriority,
   TicketCategory,
   TicketObjectLinkType,
-  TicketSupportContext,
-  TicketAiDraftResponse,
-  TicketAiReplyResponse,
-  InstanceWithDetails
+  TicketSupportContext,  InstanceWithDetails
 } from '@/types/api'
 
 const { t } = useI18n()
@@ -87,8 +82,6 @@ const internalNoteContent = ref('')
 const internalNoteSubmitting = ref(false)
 const notifyContent = ref('')
 const notifySubmitting = ref(false)
-const aiDraftLoading = ref(false)
-const aiReplyLoading = ref(false)
 const linkForm = ref({
   objectType: 'instance' as TicketObjectLinkType,
   objectId: ''
@@ -170,7 +163,7 @@ const slaStatusColors = {
   closed: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
 }
 
-const ticketLinkTypes: TicketObjectLinkType[] = ['recharge_record', 'order_operation_case', 'instance', 'host', 'delivery_case', 'sla_alert', 'plugin_task']
+const ticketLinkTypes: TicketObjectLinkType[] = ['recharge_record', 'order_operation_case', 'instance', 'host', 'sla_alert']
 
 const lightboxImages = computed(() => {
   return messages.value.flatMap(message =>
@@ -238,36 +231,6 @@ onBeforeUnmount(() => {
 
 // 管理员或拥有节点的用户可以查看收到的工单
 const isHostOwner = computed(() => authStore.isAdmin || pendingCount.value.isHostOwner)
-
-type TicketAiAction = 'draft' | 'reply'
-
-async function postTicketAiAction<T>(ticketId: number, action: TicketAiAction, body: Record<string, unknown> = {}): Promise<T> {
-  const response = await fetch(buildApiUrl(`/tickets/${ticketId}/ai/${action}`), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(authStore.token ? { Authorization: `Bearer ${authStore.token}` } : {})
-    },
-    body: JSON.stringify(body)
-  })
-  const payload = await response.json().catch(() => ({}))
-
-  if (!response.ok) {
-    const error = new Error(payload?.error || payload?.message || response.statusText) as Error & { code?: string }
-    error.code = payload?.code
-    throw error
-  }
-
-  return payload as T
-}
-
-async function requestAiDraft(ticketId: number): Promise<TicketAiDraftResponse> {
-  return postTicketAiAction<TicketAiDraftResponse>(ticketId, 'draft')
-}
-
-async function requestAiReply(ticketId: number, reviewedBody: string): Promise<TicketAiReplyResponse> {
-  return postTicketAiAction<TicketAiReplyResponse>(ticketId, 'reply', { reviewedBody })
-}
 
 const hostEmptyState = computed(() => {
   if (activeTab.value !== 'host') {
@@ -354,8 +317,6 @@ function resetDetailState() {
   supportContextLoading.value = false
   internalNoteContent.value = ''
   notifyContent.value = ''
-  aiDraftLoading.value = false
-  aiReplyLoading.value = false
   linkForm.value = {
     objectType: 'instance',
     objectId: ''
@@ -429,72 +390,6 @@ async function loadSupportContext(ticketId = selectedTicket.value?.id): Promise<
     toast.error(error?.message || t('common.error'))
   } finally {
     supportContextLoading.value = false
-  }
-}
-
-async function generateAiDraft(): Promise<void> {
-  if (!authStore.isAdmin || !selectedTicket.value) return
-  aiDraftLoading.value = true
-  try {
-    const result = await requestAiDraft(selectedTicket.value.id)
-    replyContent.value = result.draft
-    toast.success(t('tickets.support.aiDraftReady'))
-    await nextTick()
-    const textarea = document.getElementById('ticket-reply-textarea')
-    if (textarea instanceof HTMLTextAreaElement) {
-      textarea.focus()
-    }
-  } catch (error: any) {
-    const code = error?.code
-    if (code === 'AI_TICKET_PLUGIN_DISABLED') {
-      toast.error(t('tickets.support.aiPluginDisabled'))
-    } else if (code === 'AI_TICKET_AGENT_MODEL_NOT_CONFIGURED') {
-      toast.error(t('tickets.support.aiModelNotConfigured'))
-    } else if (code === 'AI_TICKET_DRAFT_BLOCKED') {
-      toast.error(t('tickets.support.aiDraftBlocked'))
-    } else {
-      toast.error(error?.message || t('common.error'))
-    }
-  } finally {
-    aiDraftLoading.value = false
-  }
-}
-
-async function sendAiReply(): Promise<void> {
-  if (!authStore.isAdmin || !selectedTicket.value || aiReplyLoading.value) return
-  const reviewedBody = replyContent.value.trim()
-  if (!reviewedBody) return
-  if (!window.confirm(t('tickets.support.aiReplyConfirm'))) return
-
-  aiReplyLoading.value = true
-  try {
-    const result = await requestAiReply(selectedTicket.value.id, reviewedBody)
-    messages.value.push(result.data)
-    messagesTotal.value++
-    await ensureMessageAttachmentUrls([result.data])
-    replyContent.value = ''
-    toast.success(t('tickets.support.aiReplySent'))
-    await loadSupportContext()
-    await nextTick()
-    const container = document.getElementById('messages-container')
-    if (container) container.scrollTop = container.scrollHeight
-  } catch (error: any) {
-    const code = error?.code
-    if (code === 'AI_TICKET_PLUGIN_DISABLED' || code === 'AI_TICKET_PLUGIN_PERMISSION_MISSING') {
-      toast.error(t('tickets.support.aiPluginDisabled'))
-    } else if (code === 'AI_TICKET_AGENT_MODEL_NOT_CONFIGURED') {
-      toast.error(t('tickets.support.aiModelNotConfigured'))
-    } else if (code === 'AI_TICKET_AGENT_REPLY_MODE_DISABLED') {
-      toast.error(t('tickets.support.aiReplyModeDisabled'))
-    } else if (code === 'AI_TICKET_REPLY_HANDOFF_REQUIRED') {
-      toast.error(t('tickets.support.aiReplyHandoffRequired'))
-    } else if (code === 'AI_TICKET_REPLY_BLOCKED') {
-      toast.error(t('tickets.support.aiReplyBlocked'))
-    } else {
-      toast.error(error?.message || t('common.error'))
-    }
-  } finally {
-    aiReplyLoading.value = false
   }
 }
 
@@ -956,8 +851,6 @@ function formatDateShort(dateString: string) {
           {{ t('tickets.createTicket') }}
         </button>
       </div>
-
-      <ThemeTemplateSlot slot-name="user.tickets.banner" container-class="overflow-hidden rounded-lg border border-themed bg-themed-surface" />
       
       <!-- List View -->
       <template v-if="viewMode === 'list'">
@@ -1387,17 +1280,8 @@ function formatDateShort(dateString: string) {
                 <div class="card p-4">
                   <h3 class="font-semibold text-themed mb-3">{{ t('tickets.support.quickActions') }}</h3>
                   <div class="grid grid-cols-2 gap-2">
-                    <button class="btn btn-secondary btn-sm" :disabled="aiDraftLoading || aiReplyLoading || !selectedTicket" @click="generateAiDraft">
-                      {{ aiDraftLoading ? t('tickets.support.aiDraftGenerating') : t('tickets.support.generateAiDraft') }}
-                    </button>
-                    <button class="btn btn-secondary btn-sm" :disabled="aiDraftLoading || aiReplyLoading || !selectedTicket || !replyContent.trim()" @click="sendAiReply">
-                      {{ aiReplyLoading ? t('tickets.support.aiReplySending') : t('tickets.support.sendAiReply') }}
-                    </button>
                     <button class="btn btn-secondary btn-sm" @click="openAdminPath(supportContext.quickActions.balanceAdjustmentPath)">
                       {{ t('tickets.support.adjustment') }}
-                    </button>
-                    <button class="btn btn-secondary btn-sm" @click="openAdminPath(supportContext.quickActions.deliveryCenterPath)">
-                      {{ t('tickets.support.delivery') }}
                     </button>
                     <button :disabled="!supportContext.quickActions.instancePath" class="btn btn-secondary btn-sm" @click="openAdminPath(supportContext.quickActions.instancePath)">
                       {{ t('tickets.support.openInstance') }}

@@ -1,13 +1,5 @@
 import { getSystemConfig, getSystemConfigNumber } from '../db/system-config.js'
 
-const DEFAULT_PLUGIN_MARKET_TRUSTED_HOSTS = [
-  'github.com',
-  'objects.githubusercontent.com',
-  'raw.githubusercontent.com',
-  'payincus.com',
-  'payincus.github.io'
-]
-
 function envFirst(keys: string | string[]): string {
   const envKeys = Array.isArray(keys) ? keys : [keys]
   for (const key of envKeys) {
@@ -81,46 +73,4 @@ export async function getCombinedAdminIdAllowlist(
   }
 
   return { ids, configured: rawValues.length > 0 }
-}
-
-export async function getPluginMarketIndexUrl(): Promise<string> {
-  return getRuntimeConfigString(
-    'plugin_market_index_url',
-    'PLUGIN_MARKET_INDEX_URL',
-    'https://payincus.com/plugin-market/index.json'
-  )
-}
-
-export async function getThemeMarketIndexUrl(): Promise<string> {
-  return getRuntimeConfigString(
-    'theme_market_index_url',
-    'THEME_MARKET_INDEX_URL',
-    'https://payincus.com/theme-market/index.json'
-  )
-}
-
-export async function getPluginMarketTrustedHosts(): Promise<Set<string>> {
-  const configured = [
-    ...splitCsv(await getSystemConfig('plugin_market_trusted_hosts')),
-    ...splitCsv(envFirst('PLUGIN_MARKET_TRUSTED_HOSTS'))
-  ].map(host => host.toLowerCase())
-  return new Set([...DEFAULT_PLUGIN_MARKET_TRUSTED_HOSTS, ...configured])
-}
-
-export async function getThemeMarketTrustedHosts(): Promise<Set<string>> {
-  const configured = [
-    ...splitCsv(await getSystemConfig('theme_market_trusted_hosts')),
-    ...splitCsv(envFirst('THEME_MARKET_TRUSTED_HOSTS')),
-    ...splitCsv(await getSystemConfig('plugin_market_trusted_hosts')),
-    ...splitCsv(envFirst('PLUGIN_MARKET_TRUSTED_HOSTS'))
-  ].map(host => host.toLowerCase())
-  return new Set([...DEFAULT_PLUGIN_MARKET_TRUSTED_HOSTS, ...configured])
-}
-
-export async function getPluginSubmissionPublicBaseUrl(requestFallback: string): Promise<string> {
-  return (await getRuntimeConfigString(
-    'plugin_submission_public_base_url',
-    ['PLUGIN_SUBMISSION_PUBLIC_BASE_URL', 'SITE_URL', 'FRONTEND_URL'],
-    requestFallback
-  )).replace(/\/+$/, '')
 }

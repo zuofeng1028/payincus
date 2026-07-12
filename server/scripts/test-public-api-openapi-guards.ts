@@ -53,8 +53,6 @@ assert.ok(
     openapiSource.includes("'/oauth-provider/scopes'") &&
     openapiSource.includes('listOAuthProviderScopes') &&
     openapiSource.includes('OAuthScopeMetadata') &&
-    openapiSource.includes("'/plugins'") &&
-    openapiSource.includes("'/plugins/{pluginId}/actions'") &&
     openapiSource.includes("'/services/{id}/renew'") &&
     openapiSource.includes("'/balance/adjustment-requests'") &&
     openapiSource.includes("'/billing-records'") &&
@@ -111,12 +109,6 @@ assert.ok(
     serialized.includes('getPublicServiceTask') &&
     serialized.includes('cancelPublicServiceTask') &&
     serialized.includes('stricter public API rate limit') &&
-    serialized.includes('database-backed token/plugin/action dynamic quota') &&
-    serialized.includes('token/plugin/action dynamic quota') &&
-    serialized.includes('normal actions allow 30 dispatches per minute') &&
-    serialized.includes('strict actions allow 10 dispatches per minute') &&
-    serialized.includes('across backend instances') &&
-    serialized.includes('Administrators can override the quota globally, per plugin, or per plugin action') &&
     serialized.includes('Polling has its own public API rate limit') &&
     serialized.includes('TooManyRequests') &&
     serialized.includes('listPublicOrders') &&
@@ -139,15 +131,7 @@ assert.ok(
     serialized.includes('flash_sale_reminder') &&
     serialized.includes('service_action_update') &&
     serialized.includes('billing_notice') &&
-    serialized.includes('plugin:<pluginId>:<templateId>') &&
-    serialized.includes('enabled plugin-declared template') &&
     serialized.includes('maxProperties') &&
-    serialized.includes('listPublicPluginActions') &&
-    serialized.includes('getPublicPluginActions') &&
-    serialized.includes('PublicPluginActionDescriptor') &&
-    serialized.includes('PublicPluginActionCatalogItem') &&
-    serialized.includes('PublicPluginActionCatalog') &&
-    serialized.includes('Webhook URLs, secrets, configuration values, service-extension hooks, and gateway-extension hooks are not exposed.') &&
     serialized.includes('profile:write') &&
     serialized.includes('balance:read') &&
     serialized.includes('balance:write') &&
@@ -160,12 +144,11 @@ assert.ok(
     serialized.includes('tickets:read') &&
     serialized.includes('tickets:write') &&
     serialized.includes('notifications:read') &&
-    serialized.includes('notifications:send') &&
-    serialized.includes('plugins:action'),
+    serialized.includes('notifications:send'),
   'OpenAPI document must include operation IDs and the current public API scope allowlist'
 )
 
-for (const path of ['/balance/logs', '/balance/adjustment-requests', '/products', '/orders', '/billing-records', '/services', '/tickets', '/notifications', '/plugins']) {
+for (const path of ['/balance/logs', '/balance/adjustment-requests', '/products', '/orders', '/billing-records', '/services', '/tickets', '/notifications']) {
   assert.ok(queryParamNames(path).includes('sort'), `${path} must expose a whitelisted sort query parameter`)
 }
 
@@ -177,8 +160,6 @@ assert.ok(
   ['status', 'category', 'priority'].every(name => queryParamNames('/tickets').includes(name)),
   'ticket list OpenAPI must document status, category, and priority filters'
 )
-assert.deepEqual(queryParamEnum('/plugins', 'sort'), ['pluginId', '-pluginId', 'createdAt', '-createdAt'], 'plugin action catalog sort must be pluginId/createdAt only')
-
 assert.ok(
     developmentDocs.includes('GET /api/v1/openapi.json') &&
     developmentDocs.includes('GET /api/oauth-provider/scopes') &&
@@ -206,9 +187,6 @@ assert.ok(
     developmentDocs.includes('PATCH /api/v1/tickets/:id/status') &&
     developmentDocs.includes('GET /api/v1/notifications') &&
     developmentDocs.includes('GET /api/v1/notifications/unread-count') &&
-    developmentDocs.includes('GET /api/v1/plugins') &&
-    developmentDocs.includes('GET /api/v1/plugins/:pluginId/actions') &&
-    developmentDocs.includes('只返回已启用扩展的公开 webhook action 契约') &&
     developmentDocs.includes('API Token 管理接口实际路径是 `/api/api-tokens`') &&
     platformPlan.includes('GET /api/v1/openapi.yaml') &&
     platformPlan.includes('scope 元数据目录') &&

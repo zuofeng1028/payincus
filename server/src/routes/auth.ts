@@ -53,7 +53,6 @@ import { getUserLoginRecords } from '../db/login-records.js'
 import { closeSessionTerminalSessions, closeUserSessions } from '../lib/terminal-proxy.js'
 import { revokeActionTicketsForSession } from '../lib/action-ticket.js'
 import { getUserHostingFeatureStatus } from '../lib/hosting-access.js'
-import { emitUserPluginEvent } from '../lib/plugin-business-events.js'
 import {
   DEMO_REDACTED_IP,
   redactDemoLoginRecord,
@@ -351,14 +350,6 @@ export default async function authRoutes(fastify: FastifyInstance) {
       username
     })
 
-    emitUserPluginEvent({
-      event: 'user.login',
-      userId: user.id,
-      username: user.username,
-      role: user.role,
-      status: user.status,
-      source: 'auth.login'
-    })
 
     // 异步记录登录信息（后台执行，不阻塞登录流程）
     if (protectDemoAccount) {
@@ -648,18 +639,6 @@ export default async function authRoutes(fastify: FastifyInstance) {
       return reply.code(500).send(apiError(ErrorCode.USER_NOT_FOUND))
     }
 
-    emitUserPluginEvent({
-      event: 'user.registered',
-      userId: newUser.id,
-      username: newUser.username,
-      role: newUser.role,
-      status: newUser.status,
-      source: 'auth.register',
-      metadata: {
-        inviteUsed: Boolean(invite && inviteCode),
-        registerGiftGranted: Boolean(registerGift)
-      }
-    })
 
     if (registerGift) {
       const giftTime = new Date()

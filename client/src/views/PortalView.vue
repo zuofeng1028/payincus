@@ -3,7 +3,6 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import api from '@/api'
-import ThemeTemplateSlot from '@/components/theme/ThemeTemplateSlot.vue'
 import { usePageSeo } from '@/composables/usePageSeo'
 import { useAuthStore } from '@/stores/auth'
 import { useBrand } from '@/composables/useBrand'
@@ -226,10 +225,6 @@ onMounted(() => {
 
 <template>
   <div ref="portalRoot" class="kawaii-page kawaii-home-page nimbus-home relative">
-    <ThemeTemplateSlot
-      slot-name="public.home.hero"
-      container-class="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8"
-    />
 
     <!-- 1. HERO -->
     <section class="nimbus-hero relative overflow-hidden">
@@ -270,11 +265,6 @@ onMounted(() => {
         </div>
       </div>
     </section>
-
-    <ThemeTemplateSlot
-      slot-name="public.home.sections"
-      container-class="mx-auto max-w-7xl px-4 pb-6 sm:px-6 lg:px-8"
-    />
 
     <!-- 2. STAT STRIP -->
     <section class="nimbus-section nimbus-stat-section">

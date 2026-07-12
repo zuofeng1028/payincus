@@ -182,10 +182,6 @@ async function main(): Promise<void> {
     }
     await mkdir(join(installDir, '.npm'), { recursive: true })
     await mkdir(join(installDir, '.cache'), { recursive: true })
-    await mkdir(join(installDir, 'plugins'), { recursive: true })
-    await mkdir(join(installDir, 'plugin-data'), { recursive: true })
-    await mkdir(join(installDir, 'plugin-logs'), { recursive: true })
-    await mkdir(join(installDir, 'plugin-staging'), { recursive: true })
     await mkdir(join(installDir, 'server/certs'), { recursive: true })
     await chownInstallDir()
     await run('systemctl', ['restart', serviceName], { timeoutMs: 120000 })

@@ -58,7 +58,6 @@ assert.ok(
     auth.includes("'tickets:write'") &&
     auth.includes("'notifications:read'") &&
     auth.includes("'notifications:send'") &&
-    auth.includes("'plugins:action'") &&
     auth.includes('PUBLIC_API_SCOPE_REQUIRED') &&
     auth.includes('lastUsedAt: new Date()') &&
     auth.includes('public_api.token_scope_denied'),

@@ -14,9 +14,7 @@ const TICKET_LINK_TYPES = new Set<TicketObjectLinkType>([
   'order_operation_case',
   'instance',
   'host',
-  'delivery_case',
-  'sla_alert',
-  'plugin_task'
+  'sla_alert'
 ])
 
 export type TicketSlaStatus = 'waiting_first_response' | 'waiting_user' | 'waiting_internal' | 'due_soon' | 'overdue' | 'met' | 'closed'
@@ -1565,13 +1563,6 @@ async function validateTicketObjectLink(ticket: { userId: number; hostId: number
       })
       return host ? `节点 ${host.name} · ${host.status}` : null
     }
-    case 'delivery_case': {
-      const item = await prisma.deliveryAssuranceCase.findFirst({
-        where: { id: objectId, userId: ticket.userId },
-        select: { title: true, status: true }
-      })
-      return item ? `交付保障 ${item.title} · ${item.status}` : null
-    }
     case 'sla_alert': {
       const alertOr: Array<Record<string, unknown>> = []
       if (ticket.hostId) {
@@ -1590,13 +1581,6 @@ async function validateTicketObjectLink(ticket: { userId: number; hostId: number
       })
       return event ? `告警 ${event.title} · ${event.severity}/${event.status}` : null
     }
-    case 'plugin_task': {
-      const task = await prisma.pluginInstallTask.findUnique({
-        where: { id: objectId },
-        select: { pluginId: true, action: true, status: true }
-      })
-      return task ? `插件任务 ${task.pluginId ?? `#${objectId}`} · ${task.action}/${task.status}` : null
-    }
     default:
       return null
   }
@@ -1606,7 +1590,7 @@ export async function getAdminTicketSuccessContext(ticketId: number): Promise<an
   const ticket = await getTicketById(ticketId)
   if (!ticket) return null
 
-  const [user, recentOrders, recentOrderCases, recentInstances, recentDeliveryCases, links, notes, messages] = await Promise.all([
+  const [user, recentOrders, recentOrderCases, recentInstances, links, notes, messages] = await Promise.all([
     prisma.user.findUnique({
       where: { id: ticket.userId },
       select: {
@@ -1678,23 +1662,6 @@ export async function getAdminTicketSuccessContext(ticketId: number): Promise<an
         expiresAt: true,
         host: { select: { id: true, name: true, status: true } },
         package: { select: { id: true, name: true } }
-      }
-    }),
-    prisma.deliveryAssuranceCase.findMany({
-      where: { userId: ticket.userId },
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-      select: {
-        id: true,
-        title: true,
-        status: true,
-        issueType: true,
-        severity: true,
-        instanceId: true,
-        hostId: true,
-        lastError: true,
-        createdAt: true,
-        updatedAt: true
       }
     }),
     prisma.ticketObjectLink.findMany({
@@ -1808,11 +1775,6 @@ export async function getAdminTicketSuccessContext(ticketId: number): Promise<an
       createdAt: instance.createdAt.toISOString(),
       expiresAt: toIso(instance.expiresAt)
     })),
-    recentDeliveryCases: recentDeliveryCases.map(item => ({
-      ...item,
-      createdAt: item.createdAt.toISOString(),
-      updatedAt: item.updatedAt.toISOString()
-    })),
     recentAlerts: recentAlerts.map(alert => ({
       ...alert,
       lastTriggeredAt: alert.lastTriggeredAt.toISOString()
@@ -1840,7 +1802,6 @@ export async function getAdminTicketSuccessContext(ticketId: number): Promise<an
     quickActions: {
       notifyUser: true,
       balanceAdjustmentPath: `/admin/billing?userId=${ticket.userId}&source=ticket&ticketId=${ticket.id}`,
-      deliveryCenterPath: ticket.instanceId ? `/admin/delivery?instanceId=${ticket.instanceId}&ticketId=${ticket.id}` : '/admin/delivery',
       userPath: `/admin/users/${ticket.userId}`,
       instancePath: ticket.instanceId ? `/admin/instances/${ticket.instanceId}` : null,
       hostPath: ticket.hostId ? `/admin/resources/hosts/${ticket.hostId}` : null

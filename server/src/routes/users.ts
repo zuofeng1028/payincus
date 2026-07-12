@@ -21,7 +21,6 @@ import { closeUserSessions } from '../lib/terminal-proxy.js'
 import { createVerificationCode, verifyCode } from '../db/email-verification.js'
 import { validateEmailDomain } from '../lib/email-domain.js'
 import { HOSTING_BALANCE_LOG_LOCK_NAMESPACE, USER_ADMIN_ROLE_LOCK_NAMESPACE, tryAdvisoryTransactionLock } from '../db/advisory-locks.js'
-import { emitUserPluginEvent } from '../lib/plugin-business-events.js'
 import {
   DEMO_ACCOUNT_PROTECTED_MESSAGE,
   redactDemoLoginRecord,
@@ -705,16 +704,6 @@ export default async function userRoutes(fastify: FastifyInstance) {
         })
       }
 
-      emitUserPluginEvent({
-        event: 'user.profile.updated',
-        userId,
-        username: user.username,
-        role: user.role,
-        status: user.status,
-        source: request.user.role === 'admin' && request.user.id !== userId ? 'admin.users.profile.update' : 'user.profile.update',
-        actor: { id: request.user.id, role: request.user.role, username: request.user.username },
-        metadata: { fields: updateActions }
-      })
 
       if (request.user.id === userId) {
         if (password) {
@@ -1114,19 +1103,6 @@ export default async function userRoutes(fastify: FastifyInstance) {
       'success'
     )
 
-    emitUserPluginEvent({
-      event: 'user.status.changed',
-      userId,
-      username: user.username,
-      role: user.role,
-      status,
-      source: status === 'banned' ? 'admin.users.ban' : 'admin.users.unban',
-      actor: { id: request.user.id, role: request.user.role, username: request.user.username },
-      metadata: {
-        status,
-        reasonProvided: Boolean(reason)
-      }
-    })
 
     // AUTH003: 管理员操作审计日志
     await logAdminAction(request.user.id, status === 'banned' ? 'user.ban' : 'user.unban', {

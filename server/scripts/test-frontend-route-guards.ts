@@ -38,8 +38,6 @@ const turnstileWidgetSource = readRepoFile('client/src/components/TurnstileWidge
 const publicHeaderSource = readRepoFile('client/src/components/public/PublicSiteHeader.vue')
 const publicFooterSource = readRepoFile('client/src/components/public/PublicSiteFooter.vue')
 const sideNavSource = readRepoFile('client/src/components/layout/SideNav.vue')
-const pluginSlotSource = readRepoFile('client/src/components/plugins/PluginSlot.vue')
-const pluginFrameSource = readRepoFile('client/src/components/plugins/PluginFrame.vue')
 const sideNavUserItemsSource = readRepoFile('client/src/config/side-nav-items-user.ts')
 const sideNavAdminItemsSource = readRepoFile('client/src/config/side-nav-items-admin.ts')
 const passwordSectionSource = readRepoFile('client/src/components/profile/PasswordSection.vue')
@@ -48,7 +46,6 @@ const adminBillingViewSource = readRepoFile('client/src/views/admin/BillingView.
 const adminHelpManageViewSource = readRepoFile('client/src/views/admin/HelpManageView.vue')
 const adminMailViewSource = readRepoFile('client/src/views/admin/AdminMailView.vue')
 const adminImagesViewSource = readRepoFile('client/src/views/admin/ImagesView.vue')
-const adminPluginCenterViewSource = readRepoFile('client/src/views/admin/PluginCenterView.vue')
 const extensionsViewSource = readRepoFile('client/src/views/ExtensionsView.vue')
 const instancesViewSource = readRepoFile('client/src/views/InstancesView.vue')
 const instanceCreateViewSource = readRepoFile('client/src/views/InstanceCreateView.vue')
@@ -91,18 +88,6 @@ assert.ok(
 )
 
 assert.ok(
-  extensionsViewSource.includes("activeTab === 'theme-submissions'") &&
-    extensionsViewSource.includes('@click="openThemeSubmissions"') &&
-    extensionsViewSource.includes('@submit.prevent="submitThemeReview"') &&
-    extensionsViewSource.includes('api.themeMarketSubmissions.create') &&
-    extensionsViewSource.includes("pricing: { type: 'free' }") &&
-    extensionsViewSource.includes('api.themeMarketSubmissions.mine') &&
-    !extensionsViewSource.includes('overflow-x-auto') &&
-    !extensionsViewSource.includes('min-w-['),
-  'user extensions page must expose a free-only reviewed theme submission flow without adding a wide table'
-)
-
-assert.ok(
   trafficStatsSource.includes("trafficHistory.length === 1 ? 50 : (label.index / (trafficHistory.length - 1)) * 100"),
   'TrafficStats must center the single-day X-axis label instead of dividing by zero'
 )
@@ -111,7 +96,6 @@ const registerViewSource = readRepoFile('client/src/views/RegisterView.vue')
 const forgotPasswordViewSource = readRepoFile('client/src/views/ForgotPasswordView.vue')
 const helpViewSource = readRepoFile('client/src/views/HelpView.vue')
 const oauthAuthorizeViewSource = readRepoFile('client/src/views/OAuthAuthorizeView.vue')
-const pluginPageViewSource = readRepoFile('client/src/views/PluginPageView.vue')
 const mailViewSource = readRepoFile('client/src/views/MailView.vue')
 const mailDomainViewSource = readRepoFile('client/src/views/MailDomainView.vue')
 const walletViewSource = readRepoFile('client/src/views/WalletView.vue')
@@ -119,7 +103,6 @@ const transfersViewSource = readRepoFile('client/src/views/TransfersView.vue')
 const logsViewSource = readRepoFile('client/src/views/LogsView.vue')
 const ordersViewSource = readRepoFile('client/src/views/OrdersView.vue')
 const invitesViewSource = readRepoFile('client/src/views/InvitesView.vue')
-const flashSalesViewSource = readRepoFile('client/src/views/FlashSalesView.vue')
 const entertainmentViewSource = readRepoFile('client/src/views/EntertainmentView.vue')
 const hostingWalletViewSource = readRepoFile('client/src/views/HostingWalletView.vue')
 const userApiSource = readRepoFile('client/src/api/index.ts')
@@ -299,27 +282,6 @@ assert.ok(!userRouterSource.includes("path: '/admin"), 'customer router must not
 assert.ok(!userRouterSource.includes('@/views/admin/'), 'customer router must not import admin views')
 assert.ok(!userRouterSource.includes('requiresAdmin'), 'customer router must not carry admin-only route metadata')
 assert.ok(
-  userRouterSource.includes("path: '/plugins/:pathMatch(.*)*'") &&
-    userRouterSource.includes('@/views/PluginPageView.vue') &&
-    userRouterSource.includes('requiresUser: true') &&
-    adminRouterSource.includes("path: '/admin/plugins'") &&
-    adminRouterSource.includes('@/views/admin/PluginCenterView.vue') &&
-    adminRouterSource.includes("path: '/admin/themes'") &&
-    adminRouterSource.includes("redirect: { path: '/admin/plugins', query: { tab: 'themes' } }") &&
-    adminRouterSource.includes("titleKey: 'nav.themes'") &&
-    adminRouterSource.includes("path: '/admin/integrations'") &&
-    adminRouterSource.includes('@/views/admin/IntegrationsView.vue') &&
-    adminRouterSource.includes("titleKey: 'nav.integrations'") &&
-    sideNavAdminItemsSource.includes("name: 'admin-themes'") &&
-    sideNavAdminItemsSource.includes("path: '/admin/themes'") &&
-    sideNavAdminItemsSource.includes("label: 'nav.themes'") &&
-    sideNavAdminItemsSource.includes("name: 'admin-integrations'") &&
-    sideNavAdminItemsSource.includes("path: '/admin/integrations'") &&
-    sideNavAdminItemsSource.includes("label: 'nav.integrations'") &&
-    !userRouterSource.includes('@/views/admin/PluginCenterView.vue'),
-  'plugin center must keep admin management under /admin/plugins, expose formal admin theme/integration entries, and expose only user plugin pages in the customer router'
-)
-assert.ok(
   userRouterSource.includes("path: '/forgot-password'") &&
     userRouterSource.includes("name: 'forgot-password'") &&
     userRouterSource.includes('@/views/ForgotPasswordView.vue') &&
@@ -450,11 +412,8 @@ assert.ok(
 assert.ok(
   oauthAuthorizeViewSource.includes("import { dashboardPath } from '@/utils/app-paths'") &&
     oauthAuthorizeViewSource.includes('router.push(dashboardPath())') &&
-    !oauthAuthorizeViewSource.includes("router.push('/dashboard')") &&
-    pluginPageViewSource.includes("import { dashboardPath } from '@/utils/app-paths'") &&
-    pluginPageViewSource.includes(':to="dashboardPath()"') &&
-    !pluginPageViewSource.includes('to="/dashboard"'),
-  'OAuth authorize and plugin fallback pages must return to the customer console through app path helpers'
+    !oauthAuthorizeViewSource.includes("router.push('/dashboard')"),
+  'OAuth authorize page must return to the customer console through app path helpers'
 )
 assert.ok(
   !userRouterSource.includes('openAdminLogin') &&
@@ -499,16 +458,6 @@ assert.deepEqual(
   adminEndpointMarkers.filter(marker => userApiAdminBoundarySource.includes(marker)),
   [],
   'customer API client must not contain admin endpoint strings or admin API namespaces'
-)
-assert.ok(
-  userApiSource.includes('/plugins/enabled-client-extensions') &&
-    userApiSource.includes('/plugins/${pluginId}/config/public') &&
-    userApiSource.includes('/plugins/${pluginId}/actions/${action}') &&
-    !userApiSource.includes('/admin/plugins') &&
-    adminApiSource.includes('/admin/plugins') &&
-    adminApiSource.includes('/admin/plugins/upload') &&
-    adminApiSource.includes('/admin/plugins/market/install'),
-  'plugin API clients must keep user extension APIs separate from admin plugin management APIs'
 )
 assert.deepEqual(
   customerApiForbiddenAdminMarkers.filter(marker => userApiSource.includes(marker)),
@@ -734,11 +683,6 @@ assert.ok(
     !sideNavSource.includes("return route.path === '/dashboard'") &&
     !sideNavSource.includes('RouterLink to="/"') &&
     sideNavSource.includes('let baseItems = [...navMenuItems]') &&
-    sideNavSource.includes('PluginSlot') &&
-    sideNavSource.includes('v-if="!isAdminEntry"') &&
-    sideNavSource.includes('slot-name="user.sidebar.extra"') &&
-    pluginSlotSource.includes('getEnabledClientExtensions') &&
-    pluginFrameSource.includes('sandbox=') &&
     sideNavUserItemsSource.includes("path: '/resources/hosts'") &&
     sideNavUserItemsSource.includes("path: '/resources/packages'") &&
     !sideNavUserItemsSource.includes('/admin/') &&
@@ -843,7 +787,7 @@ assert.ok(
 )
 assert.ok(
   countOccurrences(adminBillingViewSource, 'class="space-y-3 p-4 lg:hidden"') >= 2 &&
-    countOccurrences(adminBillingViewSource, 'table class="w-full table-fixed text-sm"') >= 4 &&
+    countOccurrences(adminBillingViewSource, 'table class="w-full table-fixed text-sm"') >= 3 &&
     adminBillingViewSource.includes('table class="hidden w-full table-fixed text-sm lg:table"') &&
     adminBillingViewSource.includes('@change="toggleSelectAllCurrentPage"') &&
     adminBillingViewSource.includes('@click="openBatchPriceModal"') &&
@@ -854,16 +798,14 @@ assert.ok(
     adminBillingViewSource.includes("@click=\"openActionModal('applyDiscount', inst)\"") &&
     adminBillingViewSource.includes("@click=\"openActionModal('deleteRefund', inst)\"") &&
     adminBillingViewSource.includes('@click="submitBatchUpdatePrice"') &&
-    adminBillingViewSource.includes('@click="openCreateOriginalRefund(rec)"') &&
     adminBillingViewSource.includes('@click="syncRechargeRecord(rec)"') &&
-    adminBillingViewSource.includes('@click="retryRechargeRefund(refund)"') &&
     adminBillingViewSource.includes('batchPricePreviewHasVersionSnapshot') &&
     !adminBillingViewSource.includes('<div class="overflow-x-auto">') &&
     !adminBillingViewSource.includes('class="hidden overflow-x-auto md:block"') &&
     !adminBillingViewSource.includes('table class="w-full min-w-[720px] text-sm"') &&
     !adminBillingViewSource.includes('table class="w-full text-sm"') &&
     !adminBillingViewSource.includes('class="grid min-w-[520px]'),
-  'admin billing instance, record, recharge, refund, and batch price preview lists must use responsive cards/fixed tables while preserving selection, payment sync, original refund, refund retry, price, upgrade, and guarded submit actions'
+  'admin billing instance, record, recharge, and batch price preview lists must use responsive cards/fixed tables while preserving selection, payment sync, price, upgrade, and guarded submit actions'
 )
 assert.ok(
   instancesViewSource.includes('walletPath()') &&
@@ -990,20 +932,6 @@ assert.ok(
     !invitesViewSource.includes('min-w-[220px]'),
   'InvitesView must use path helpers, mobile invite cards, and a fixed-layout desktop table without PC horizontal overflow while preserving copy actions'
 )
-assert.ok(
-  flashSalesViewSource.includes("import { instanceCreatePath } from '@/utils/app-paths'") &&
-    flashSalesViewSource.includes('path: instanceCreatePath()') &&
-    !flashSalesViewSource.includes("path: '/instances/create'") &&
-    flashSalesViewSource.includes('class="space-y-3 p-4 lg:hidden"') &&
-    flashSalesViewSource.includes('class="hidden overflow-hidden lg:block"') &&
-    flashSalesViewSource.includes('class="w-full table-fixed divide-y divide-themed"') &&
-    flashSalesViewSource.includes('class="rounded-lg border border-themed bg-themed-surface p-4 shadow-sm"') &&
-    flashSalesViewSource.includes('flashSaleItem: String(item.id)') &&
-    !flashSalesViewSource.includes('<div class="overflow-x-auto">') &&
-    !flashSalesViewSource.includes('class="w-full min-w-[880px] table-fixed divide-y divide-themed"') &&
-    !flashSalesViewSource.includes('<table class="min-w-full divide-y divide-themed"'),
-  'FlashSalesView must route purchases through app path helpers and render mobile reservation cards plus a fixed desktop table without PC horizontal overflow'
-)
 const entertainmentRecordsSection = sectionBetween(
   entertainmentViewSource,
   '<!-- 抽奖记录 TAB -->',
@@ -1091,11 +1019,9 @@ assert.ok(
   'admin-reachable instance detail must guard customer transfer, redeem, subscription, billing-destroy, and badge self-service features'
 )
 assert.ok(
-  instanceDetailViewSource.includes('const failureReason = computed<string | null>') &&
-    instanceDetailViewSource.includes('v-if="failureReason"') &&
-    instanceDetailViewSource.includes("$t('instance.errorBanner.reasonLabel')") &&
-    instanceDetailViewSource.includes('{{ failureReason }}'),
-  'InstanceDetailView error banner must render the persisted failure reason as plain text'
+  !instanceDetailViewSource.includes('failureReason') &&
+    !instanceDetailViewSource.includes('instance.errorBanner.reasonLabel'),
+  'InstanceDetailView must not render an unavailable instance failure reason'
 )
 assert.ok(
   instancesViewSource.includes("import { exchangePath, instanceCreatePath, instanceDetailPath, isAdminEntry, transfersPath, walletPath } from '@/utils/app-paths'") &&
@@ -1169,11 +1095,10 @@ assert.ok(
     marketViewSource.includes("query: { redirect }") &&
     !marketViewSource.includes("path: '/instances/create'") &&
     !marketViewSource.includes("path: '/login'") &&
-    dashboardViewSource.includes("import { entertainmentPath, instanceCreatePath, instanceDetailPath, instancesPath } from '@/utils/app-paths'") &&
+    dashboardViewSource.includes("import { instanceCreatePath, instanceDetailPath, instancesPath } from '@/utils/app-paths'") &&
     dashboardViewSource.includes(':to="instanceCreatePath()"') &&
     dashboardViewSource.includes(':to="instancesPath()"') &&
     dashboardViewSource.includes(':to="instanceDetailPath(instance.id)"') &&
-    dashboardViewSource.includes(':to="{ path: entertainmentPath(), query: { tab: \'checkin\' } }"') &&
     !dashboardViewSource.includes('to="/instances/create"') &&
     !dashboardViewSource.includes('to="/instances"') &&
     !dashboardViewSource.includes('to="/checkin"') &&
@@ -1221,20 +1146,4 @@ assert.ok(
     !adminImagesViewSource.includes('table-auto w-full min-w-[640px]'),
   'admin image list must render mobile cards and a fixed desktop table while preserving visibility/edit/delete actions'
 )
-assert.ok(
-  countOccurrences(adminPluginCenterViewSource, 'table class="w-full table-fixed text-sm"') >= 5 &&
-    adminPluginCenterViewSource.includes('@click="uploadPlugin"') &&
-    adminPluginCenterViewSource.includes('@click="togglePlugin(plugin)"') &&
-    adminPluginCenterViewSource.includes('@click="scanThemeSubmission(submission)"') &&
-    adminPluginCenterViewSource.includes("@click=\"reviewThemeSubmission(submission, 'listed')\"") &&
-    adminPluginCenterViewSource.includes("@click=\"reviewCapability(review, 'approved')\"") &&
-    adminPluginCenterViewSource.includes('@click="saveActionRateLimits"') &&
-    adminPluginCenterViewSource.includes('@click="retryDueEvents"') &&
-    adminPluginCenterViewSource.includes('@click="replayPluginEvent(event)"') &&
-    !adminPluginCenterViewSource.includes('class="overflow-x-auto"') &&
-    !adminPluginCenterViewSource.includes('class="mt-4 overflow-x-auto"') &&
-    !adminPluginCenterViewSource.includes('class="min-w-full'),
-  'admin plugin center tables must use fixed layouts without horizontal overflow while preserving upload, review, capability, rate-limit, retry, and replay actions'
-)
-
 console.log('frontend route guard tests passed')

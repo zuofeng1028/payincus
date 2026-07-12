@@ -7,7 +7,6 @@ import { Prisma, type BalanceLog, type PaymentProvider, type RechargeRecord, typ
 import { nanoid } from 'nanoid'
 import { getTodayRange } from '../lib/timezone.js'
 import { USER_BALANCE_LOCK_NAMESPACE, advisoryTransactionLock } from './advisory-locks.js'
-import { emitPluginEvent } from '../lib/plugin-event-emitter.js'
 
 // ==================== 类型定义 ====================
 
@@ -330,21 +329,6 @@ export async function createRechargeOrder(input: CreateRechargeOrderInput): Prom
     }
   })
 
-  emitPluginEvent('order.created', {
-    dedupeKey: `order.created:recharge:${record.orderNo}`,
-    resource: 'recharge',
-    orderNo: record.orderNo,
-    rechargeId: record.id,
-    userId: record.userId,
-    providerId: record.providerId,
-    amount: Number(record.amount),
-    actualAmount: Number(record.actualAmount),
-    fee: Number(record.fee),
-    paymentMethod: record.paymentMethod,
-    status: record.status,
-    createdAt: record.createdAt.toISOString(),
-    expiredAt: record.expiredAt?.toISOString() ?? null
-  }, { id: record.userId, role: 'user' }, { dedupeKey: `order.created:recharge:${record.orderNo}` })
 
   return record
 }
@@ -513,21 +497,6 @@ export async function completeRecharge(
   })
 
   if (result.completedNow) {
-    emitPluginEvent('order.paid', {
-      dedupeKey: `order.paid:recharge:${result.orderNo}`,
-      resource: 'recharge',
-      orderNo: result.orderNo,
-      rechargeId: result.id,
-      userId: result.userId,
-      providerId: result.providerId,
-      amount: Number(result.amount),
-      actualAmount: Number(result.actualAmount),
-      fee: Number(result.fee),
-      tradeNo: result.tradeNo,
-      paymentMethod: result.paymentMethod,
-      status: result.status,
-      completedAt: result.completedAt?.toISOString() ?? null
-    }, { id: result.userId, role: 'user' }, { dedupeKey: `order.paid:recharge:${result.orderNo}` })
   }
 
   return result
@@ -565,20 +534,6 @@ export async function failRecharge(
   }
 
   if (updateResult.count > 0) {
-    emitPluginEvent('payment.failed', {
-      dedupeKey: `payment.failed:recharge:${record.orderNo}`,
-      resource: 'recharge',
-      orderNo: record.orderNo,
-      rechargeId: record.id,
-      userId: record.userId,
-      providerId: record.providerId,
-      amount: Number(record.amount),
-      actualAmount: Number(record.actualAmount),
-      paymentMethod: record.paymentMethod,
-      status: record.status,
-      failReason: record.failReason,
-      callbackAt: record.callbackAt?.toISOString() ?? null
-    }, { id: record.userId, role: 'user' }, { dedupeKey: `payment.failed:recharge:${record.orderNo}` })
   }
 
   return record

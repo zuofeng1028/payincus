@@ -100,10 +100,8 @@ assert.ok(
 assert.ok(
   appSource.includes('const { getStuckCreatingInstances, getHostById, compensateFailedInstancePurchase, releasePublicIpv4ForInstance } = await import') &&
     appSource.includes("status: 'creating' // 原子条件：只有状态仍为 creating 时才更新") &&
-    appSource.includes('const compensation = await compensateFailedInstancePurchase(instance.id, instance.user_id, instance.host_id)') &&
-    appSource.includes("await markFlashSaleFailed(instance.id, '实例创建超时', compensation.refunded)") &&
-    appSource.includes("await markFlashSaleFailed(instance.id, '实例创建超时', false)"),
-  'create-timeout cleanup must run paid purchase and idempotent flash-sale compensation after winning creating->error transition'
+    appSource.includes('const compensation = await compensateFailedInstancePurchase(instance.id, instance.user_id, instance.host_id)'),
+  'create-timeout cleanup must run paid purchase compensation after winning creating->error transition'
 )
 
 assert.ok(
@@ -154,10 +152,8 @@ assert.ok(
 
 assert.ok(
   instancesSource.includes('宿主机 ${host.name} 没有可用独立 IPv4 地址') &&
-    postTransactionPreparationSection.includes('throw new Error(`宿主机 ${host.name} 没有可用独立 IPv4 地址`)') &&
-    compensationHelperSection.includes('await markFlashSaleFailed(instanceId, errorMessage, compensation.refunded)') &&
-    compensationHelperSection.includes('await markFlashSaleFailed(instanceId, errorMessage, false)'),
-  'public IPv4 allocation races must enter the same resource, billing, and flash-sale compensation path'
+    postTransactionPreparationSection.includes('throw new Error(`宿主机 ${host.name} 没有可用独立 IPv4 地址`)'),
+  'public IPv4 allocation races must enter the same resource and billing compensation path'
 )
 
 assert.ok(

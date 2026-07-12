@@ -40,13 +40,6 @@ static_files() {
     ! -path './.cache/*' \
     ! -path './.incudal-update-downloads/*' \
     ! -path './update-logs/*' \
-    ! -path './plugins/*' \
-    ! -path './plugin-data/*' \
-    ! -path './plugin-logs/*' \
-    ! -path './plugin-staging/*' \
-    ! -path './themes/*' \
-    ! -path './theme-data/*' \
-    ! -path './theme-staging/*' \
     ! -path './agent-release/*' \
     ! -path './.trusted-release-manifests/*' \
     -print0 | sort -z
@@ -59,13 +52,6 @@ static_links() {
     ! -path './.cache/*' \
     ! -path './.incudal-update-downloads/*' \
     ! -path './update-logs/*' \
-    ! -path './plugins/*' \
-    ! -path './plugin-data/*' \
-    ! -path './plugin-logs/*' \
-    ! -path './plugin-staging/*' \
-    ! -path './themes/*' \
-    ! -path './theme-data/*' \
-    ! -path './theme-staging/*' \
     ! -path './agent-release/*' \
     -print0
 }
@@ -106,8 +92,7 @@ apply_secure_ownership() {
   local mutable
   for mutable in \
     .npm .cache .incudal-update-downloads update-logs \
-    plugins plugin-data plugin-logs plugin-staging \
-    themes theme-data theme-staging agent-release; do
+    agent-release; do
     if [[ -e "${INSTALL_DIR}/${mutable}" ]]; then
       /usr/bin/chown -R "${RUN_USER}:${RUN_GROUP}" "${INSTALL_DIR}/${mutable}"
       find "${INSTALL_DIR}/${mutable}" -xdev -type d -exec /usr/bin/chmod u=rwx,go= {} +

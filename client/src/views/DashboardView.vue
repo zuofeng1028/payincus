@@ -8,16 +8,14 @@ import { useThemeStore } from '@/stores/theme'
 import api, { type VipLevelProgress, type VipProgressCondition, type VipProgressMetric } from '@/api'
 import Skeleton from '@/components/Skeleton.vue'
 import { formatMemory, formatDisk, getStatusInfo } from '@/utils/formatters'
-import type { Instance, UserBalance, UserLifecycleOffer } from '@/types/api'
+import type { Instance, UserBalance } from '@/types/api'
 import DistroIcon from '@/components/icons/DistroIcon.vue'
 import FlagIcon from '@/components/FlagIcon.vue'
 import InstanceDisplayIcon from '@/components/InstanceDisplayIcon.vue'
-import PluginFrameSlot from '@/components/plugins/PluginFrameSlot.vue'
-import ThemeTemplateSlot from '@/components/theme/ThemeTemplateSlot.vue'
 import { getRandomFunnyQuote } from '@/data/funnyQuotes'
 import { freeSiteCopy } from '@/utils/freeSiteFun'
 import { getVipBadgeInlineStyle, normalizeVipBadgeStyle, type VipBadgeStyle } from '@/utils/vipBadge'
-import { entertainmentPath, instanceCreatePath, instanceDetailPath, instancesPath } from '@/utils/app-paths'
+import { instanceCreatePath, instanceDetailPath, instancesPath } from '@/utils/app-paths'
 import { useReveal } from '@/composables/useReveal'
 
 // 为 KeepAlive include 匹配定义组件名称（必须在所有 import 之后）
@@ -141,8 +139,8 @@ const userVipLevel = ref(0)
 const userVipBadgeStyle = ref<VipBadgeStyle | null>(null)
 const userVipProgress = ref<VipLevelProgress | null>(null)
 const userPoints = ref(0)
-const lifecycleOffers = ref<UserLifecycleOffer[]>([])
 const loading = ref(true)
+const loadError = ref('')
 
 let refreshInterval: ReturnType<typeof setInterval> | null = null
 
@@ -186,16 +184,16 @@ async function loadData(): Promise<void> {
       return
     }
     
-    const [instancesRes, meRes, balanceRes, vipRes, pointsRes, offersRes] = await Promise.all([
+    const [instancesRes, meRes, balanceRes, vipRes, pointsRes] = await Promise.all([
       api.instances.list({ pageSize: 1000 }),  // 获取所有实例以确保统计准确
       api.auth.me(),
       api.billing.getUserBalance().catch(() => null),
       api.vipLevels.getMyOverview().catch(() => null),
-      api.entertainment.getPoints().catch(() => null),
-      api.userLifecycle.myOffers().catch(() => null)
+      api.entertainment.getPoints().catch(() => null)
     ])
     const res = instancesRes as { instances?: Instance[] }
     instances.value = res.instances || []
+    loadError.value = ''
     if ((meRes as { user?: any }).user) {
       authStore.user = (meRes as { user: any }).user
     }
@@ -208,7 +206,6 @@ async function loadData(): Promise<void> {
       : null
     userVipProgress.value = vipRes?.userVipProgress || null
     userPoints.value = Number(pointsRes?.points || 0)
-    lifecycleOffers.value = offersRes?.offers || []
   } catch (error: any) {
     console.error('Failed to load dashboard:', error)
     // 如果是认证错误（401），停止定时刷新
@@ -217,6 +214,8 @@ async function loadData(): Promise<void> {
         clearInterval(refreshInterval)
         refreshInterval = null
       }
+    } else {
+      loadError.value = error?.message || t('common.loadFailed')
     }
   } finally {
     loading.value = false
@@ -236,8 +235,6 @@ const stats = computed(() => {
 })
 
 const recentInstances = computed(() => instances.value.slice(0, 5))
-const availableLifecycleOffers = computed(() => lifecycleOffers.value.filter(offer => !offer.used).slice(0, 3))
-
 const statusOverviewItems = computed(() => [
   {
     key: 'running',
@@ -348,10 +345,6 @@ function formatCurrency(amount: number): string {
   return `¥${amount.toFixed(2)}`
 }
 
-function getLifecycleOfferUnit(type: string): string {
-  return type === 'c' ? '%' : type === 'r' || type === 'd' ? 'MB' : 'GB'
-}
-
 function formatPoints(points: number): string {
   const normalized = Number.isFinite(points) ? Math.max(points, 0) : 0
   return Math.floor(normalized).toLocaleString()
@@ -450,9 +443,6 @@ function getInstanceRowClass(): string {
         </RouterLink>
       </div>
     </header>
-
-    <ThemeTemplateSlot slot-name="user.dashboard.banner" container-class="overflow-hidden rounded-lg border border-themed bg-themed-surface" />
-    <ThemeTemplateSlot slot-name="user.dashboard.cards" container-class="overflow-hidden rounded-lg border border-themed bg-themed-surface" />
 
     <!-- 指标卡：总实例 / 运行中 / 账户余额 / 积分 -->
     <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -662,36 +652,6 @@ function getInstanceRowClass(): string {
           </div>
         </div>
 
-        <div v-if="availableLifecycleOffers.length > 0" class="nimbus-inner mt-4 rounded-xl border p-4" :class="subtlePanelClass">
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <div class="text-sm font-semibold text-themed">可用运营优惠</div>
-              <div class="mt-1 text-xs text-themed-muted">管理员为您定向发放的资源兑换码。</div>
-            </div>
-            <RouterLink
-              :to="{ path: entertainmentPath(), query: { tab: 'checkin' } }"
-              class="nimbus-ghost-btn inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-semibold"
-            >
-              去兑换
-            </RouterLink>
-          </div>
-          <div class="mt-3 grid gap-2">
-            <div
-              v-for="offer in availableLifecycleOffers"
-              :key="offer.id"
-              class="nimbus-inner rounded-xl border px-3 py-2"
-              :class="subtlePanelClass"
-            >
-              <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                <div class="min-w-0">
-                  <div class="truncate text-sm font-semibold text-themed font-mono">{{ offer.code }}</div>
-                  <div class="text-xs text-themed-muted">{{ offer.host.name }} · {{ offer.codeType }} +{{ offer.codeValue }}{{ getLifecycleOfferUnit(offer.codeType) }}</div>
-                </div>
-                <div class="text-xs text-themed-muted">{{ offer.expiresAt ? new Date(offer.expiresAt).toLocaleDateString() : '长期有效' }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- 右：实例状态分布 -->
@@ -749,8 +709,6 @@ function getInstanceRowClass(): string {
       </div>
     </section>
 
-    <PluginFrameSlot slot-name="user.dashboard.cards" surface="user" frame-class="min-h-[220px]" />
-
     <!-- 最近实例 -->
     <section data-reveal class="nimbus-card overflow-hidden" :class="overviewShellClass">
       <div class="nimbus-panel-head flex flex-col gap-3 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
@@ -791,7 +749,7 @@ function getInstanceRowClass(): string {
         </div>
       </div>
 
-      <div v-else-if="instances.length === 0" class="p-10 text-center">
+      <div v-else-if="instances.length === 0 && !loadError" class="p-10 text-center">
         <div class="nimbus-empty-icon mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl">
           <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2" />
@@ -799,6 +757,17 @@ function getInstanceRowClass(): string {
         </div>
         <p class="mb-4 text-sm text-themed-muted">{{ $t('dashboard.noInstances') }}</p>
         <RouterLink :to="instanceCreatePath()" class="btn-primary btn-sm">{{ configStore.freeSiteMode ? freeSiteCopy.dashboardCreateFirst : $t('dashboard.createFirst') }}</RouterLink>
+      </div>
+
+      <div v-else-if="loadError" class="p-10 text-center">
+        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-red-500/20 bg-red-500/10 text-red-500">
+          <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+          </svg>
+        </div>
+        <h3 class="mb-2 text-lg font-medium text-themed">{{ $t('common.loadFailed') }}</h3>
+        <p class="mb-4 break-words text-sm text-themed-muted">{{ loadError }}</p>
+        <button class="btn-primary btn-sm" @click="loadData()">{{ $t('common.retry') }}</button>
       </div>
 
       <div v-else class="space-y-2.5 p-4 sm:p-5">

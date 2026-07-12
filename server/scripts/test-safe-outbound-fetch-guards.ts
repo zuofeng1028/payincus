@@ -40,8 +40,6 @@ for (const [label, relativePath] of [
   ['Heleket API client', '../src/lib/heleket.ts'],
   ['notification webhooks', '../src/lib/notifier.ts'],
   ['Lsky client', '../src/lib/lsky.ts'],
-  ['plugin submission scanner', '../src/lib/plugin-market-submission-scan.ts'],
-  ['theme submission scanner', '../src/lib/theme-market-submission-scan.ts'],
   ['ticket image proxy', '../src/routes/tickets.ts'],
   ['CraneMail client', '../src/services/cranemail.ts'],
   ['SmarterMail client', '../src/services/smartermail.ts'],

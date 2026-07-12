@@ -81,8 +81,6 @@ import rechargeRoutes from './routes/recharge.js'
 import adminBillingRoutes from './routes/admin-billing.js'
 import adminStatisticsRoutes from './routes/admin-statistics.js'
 import adminHostingRoutes from './routes/admin-hosting.js'
-import adminDeliveryRoutes from './routes/admin-delivery.js'
-import adminIntegrationsRoutes from './routes/admin-integrations.js'
 import adminSlaAlertsRoutes from './routes/admin-sla-alerts.js'
 import adminCapacityCostRoutes from './routes/admin-capacity-cost.js'
 import affRoutes from './routes/aff.js'
@@ -96,22 +94,12 @@ import userInviteRoutes from './routes/user-invites.js'
 import vipLevelRoutes from './routes/vip-levels.js'
 import vipBenefitRoutes from './routes/vip-benefits.js'
 import systemUpdateRoutes from './routes/system-update.js'
-import adminPluginRoutes from './routes/admin-plugins.js'
-import pluginRoutes from './routes/plugins.js'
-import adminThemeRoutes from './routes/admin-themes.js'
-import themeRoutes from './routes/themes.js'
-import pluginMarketSubmissionRoutes from './routes/plugin-market-submissions.js'
-import pluginTradeRoutes from './routes/plugin-trade.js'
-import themeMarketSubmissionRoutes from './routes/theme-market-submissions.js'
 import apiTokenRoutes from './routes/api-tokens.js'
 import publicApiRoutes from './routes/public-api.js'
 import adminOAuthAppRoutes from './routes/admin-oauth-apps.js'
 import oauthProviderRoutes from './routes/oauth-provider.js'
 import orderRoutes from './routes/orders.js'
-import userLifecycleRoutes from './routes/user-lifecycle.js'
 import giftCardsRoutes from './routes/gift-cards.js'
-import resourceRiskRoutes from './routes/resource-risk.js'
-import flashSaleRoutes from './routes/flash-sales.js'
 import exchangeRoutes from './routes/exchange.js'
 import adminExchangeRoutes from './routes/admin-exchange.js'
 
@@ -552,8 +540,6 @@ await fastify.register(rechargeRoutes)
 await fastify.register(adminBillingRoutes)
 await fastify.register(adminStatisticsRoutes)
 await fastify.register(adminHostingRoutes)
-await fastify.register(adminDeliveryRoutes, { prefix: '/api/admin/delivery' })
-await fastify.register(adminIntegrationsRoutes, { prefix: '/api/admin/integrations' })
 await fastify.register(adminSlaAlertsRoutes, { prefix: '/api/admin/sla-alerts' })
 await fastify.register(adminCapacityCostRoutes, { prefix: '/api/admin/capacity-cost' })
 await fastify.register(affRoutes, { prefix: '/api/aff' })
@@ -567,22 +553,12 @@ await fastify.register(userInviteRoutes, { prefix: '/api/user-invites' })
 await fastify.register(vipLevelRoutes)
 await fastify.register(vipBenefitRoutes)
 await fastify.register(systemUpdateRoutes, { prefix: '/api/admin/system-update' })
-await fastify.register(adminPluginRoutes, { prefix: '/api/admin/plugins' })
-await fastify.register(pluginRoutes, { prefix: '/api/plugins' })
-await fastify.register(adminThemeRoutes, { prefix: '/api/admin/themes' })
-await fastify.register(themeRoutes, { prefix: '/api/themes' })
-await fastify.register(pluginMarketSubmissionRoutes, { prefix: '/api/plugin-market-submissions' })
-await fastify.register(pluginTradeRoutes, { prefix: '/api/plugin-trade' })
-await fastify.register(themeMarketSubmissionRoutes, { prefix: '/api/theme-market-submissions' })
 await fastify.register(apiTokenRoutes, { prefix: '/api/api-tokens' })
 await fastify.register(publicApiRoutes, { prefix: '/api/v1' })
 await fastify.register(adminOAuthAppRoutes, { prefix: '/api/admin/oauth-apps' })
 await fastify.register(oauthProviderRoutes, { prefix: '/api/oauth-provider' })
 await fastify.register(orderRoutes)
-await fastify.register(userLifecycleRoutes)
 await fastify.register(giftCardsRoutes, { prefix: '/api/gift-cards' })
-await fastify.register(resourceRiskRoutes, { prefix: '/api' })
-await fastify.register(flashSaleRoutes, { prefix: '/api' })
 await fastify.register(exchangeRoutes, { prefix: '/api/exchange' })
 await fastify.register(adminExchangeRoutes, { prefix: '/api/admin/exchange' })
 
@@ -770,10 +746,6 @@ const start = async (): Promise<void> => {
     const { startTrafficScheduler } = await import('./services/traffic-scheduler.js')
     startTrafficScheduler()
 
-    // 启动实例级资源风控调度器
-    const { startResourceRiskScheduler } = await import('./services/resource-risk.js')
-    startResourceRiskScheduler()
-
     // 启动自动快照/备份调度器
     const { startAutoPolicyScheduler } = await import('./services/auto-policy-scheduler.js')
     startAutoPolicyScheduler()
@@ -803,14 +775,8 @@ const start = async (): Promise<void> => {
     startStatusScheduler()
 
     // 启动扩展事件重试调度器
-    const { startPluginEventRetryScheduler } = await import('./services/plugin-event-retry-scheduler.js')
-    startPluginEventRetryScheduler()
-
-    // 启动扩展存储定时归档调度器（默认关闭）
-    const { startPluginStorageBackupScheduler } = await import('./services/plugin-storage-backup-scheduler.js')
-    startPluginStorageBackupScheduler()
-
-    // 启动实例操作任务调度器
+            // 启动扩展存储定时归档调度器（默认关闭）
+            // 启动实例操作任务调度器
     const { cleanupStaleTasks: cleanupStaleInstanceTasks, startInstanceTaskWorker } = await import('./workers/instanceTaskWorker.js')
     await cleanupStaleInstanceTasks()
     startInstanceTaskWorker()
@@ -912,7 +878,6 @@ const start = async (): Promise<void> => {
     const { getStuckCreatingInstances, getHostById, compensateFailedInstancePurchase, releasePublicIpv4ForInstance } = await import('./db/index.js')
     const { getIncusClient, deleteInstance } = await import('./lib/incus/index.js')
     const { createLog } = await import('./db/logs.js')
-    const { markFlashSaleFailed } = await import('./services/flash-sales.js')
     const CREATE_TIMEOUT_MS = 10 * 60 * 1000 // 10分钟
     const CREATE_TIMEOUT_CHECK_INTERVAL = 2 * 60 * 1000 // 每2分钟检查一次
     
@@ -971,9 +936,6 @@ const start = async (): Promise<void> => {
 
           try {
             const compensation = await compensateFailedInstancePurchase(instance.id, instance.user_id, instance.host_id)
-            await markFlashSaleFailed(instance.id, '实例创建超时', compensation.refunded).catch((err) => {
-              console.error(`[CreateTimeout] 实例 ${instance.name} 秒杀失败状态回写失败:`, err)
-            })
             if (compensation.refunded) {
               console.log(`[CreateTimeout] 实例 ${instance.name} 创建超时已自动退款 ¥${compensation.refundAmount.toFixed(2)}`)
             } else if (compensation.reason !== 'not_paid_purchase') {
@@ -981,9 +943,6 @@ const start = async (): Promise<void> => {
             }
           } catch (compensationErr) {
             console.error(`[CreateTimeout] 实例 ${instance.name} 创建超时后的账务补偿失败:`, compensationErr)
-            await markFlashSaleFailed(instance.id, '实例创建超时', false).catch((err) => {
-              console.error(`[CreateTimeout] 实例 ${instance.name} 秒杀失败状态回写失败:`, err)
-            })
           }
           
           // 3. 尝试清理 Incus 残留
@@ -1078,10 +1037,7 @@ const start = async (): Promise<void> => {
     startTicketAutoCloseScheduler()
 
     // 启动 AI 工单自动接管调度器（仅插件 auto 模式实际处理）
-    const { startAiTicketAutoReplyScheduler } = await import('./services/ai-ticket-auto-reply-scheduler.js')
-    startAiTicketAutoReplyScheduler()
-
-    // 启动节点连接地址监控（启动即回填，之后每 30 分钟轮训域名型地址）
+            // 启动节点连接地址监控（启动即回填，之后每 30 分钟轮训域名型地址）
     const { startHostAddressMonitor } = await import('./services/host-address-monitor.js')
     startHostAddressMonitor()
 

@@ -12,7 +12,6 @@ import { apiError, ErrorCode } from '../lib/errors.js'
 import { sendHostManagedInstanceNotification, sendNotification } from '../lib/notifier.js'
 import { sendInstanceDestroyRefundEmail } from '../lib/mailer.js'
 import { sendReleaseNotification } from '../lib/release-notifier.js'
-import { sanitizeTokensInString } from '../lib/log-sanitizer.js'
 import { collectTrafficForRunningInstance } from '../services/instance-traffic-collector.js'
 import {
   INSTANCE_OPERATION_LOCK_NAMESPACE,
@@ -444,83 +443,6 @@ async function settleUserDestroyBilling(params: {
   })
 }
 
-async function recordDestroyBillingCompensation(params: {
-  requestUserId: number
-  instance: {
-    id: number
-    userId: number
-    hostId: number
-    name: string
-  }
-  refundableValue: number
-  feeWaiver: boolean
-  error: unknown
-}): Promise<void> {
-  const { requestUserId, instance, refundableValue, feeWaiver, error } = params
-  const lastError = sanitizeTokensInString(error instanceof Error ? error.message : String(error)).slice(0, 1000)
-  const detail = {
-    source: 'instance_destroy_billing',
-    requestUserId,
-    refundableValue,
-    feeWaiver,
-    failedAt: new Date().toISOString()
-  } satisfies Prisma.InputJsonObject
-
-  await prisma.$transaction(async (tx) => {
-    const deliveryCase = await tx.deliveryAssuranceCase.create({
-      data: {
-        taskId: null,
-        instanceId: instance.id,
-        hostId: instance.hostId,
-        userId: instance.userId,
-        status: 'pending_manual',
-        issueType: 'task_failed',
-        severity: 'critical',
-        retryable: false,
-        title: `实例销毁退款结算失败：${instance.name}`,
-        lastError,
-        detail
-      }
-    })
-
-    await tx.deliveryAssuranceAction.create({
-      data: {
-        caseId: deliveryCase.id,
-        actionType: 'detected',
-        actorUserId: requestUserId,
-        actorUsername: null,
-        note: 'Incus 实例已销毁，但退款结算失败，等待人工补偿。',
-        detail
-      }
-    })
-  })
-}
-
-async function settleUserDestroyBillingWithCompensation(params: {
-  requestUserId: number
-  instance: {
-    id: number
-    userId: number
-    hostId: number
-    name: string
-  }
-  refundableValue: number
-  feeWaiver: boolean
-  logger: { error: (...args: any[]) => void }
-}): Promise<{ refundAmount: number; feeAmount: number; isFirstTime: boolean }> {
-  const { logger, ...billingParams } = params
-  try {
-    return await settleUserDestroyBilling(billingParams)
-  } catch (error) {
-    try {
-      await recordDestroyBillingCompensation({ ...billingParams, error })
-    } catch (compensationError) {
-      logger.error({ compensationError, instanceId: params.instance.id }, '销毁退款结算失败且补偿工单落库失败')
-    }
-    throw error
-  }
-}
-
 async function buildBatchDestroyPreviewItem(userId: number, instanceId: number): Promise<BatchDestroyPreviewItem> {
   const instance = await prisma.instance.findUnique({
     where: { id: instanceId },
@@ -848,12 +770,11 @@ async function executeDestroyForUser(
     }
 
     if (!isFreeInstance) {
-      const billingResult = await settleUserDestroyBillingWithCompensation({
+      const billingResult = await settleUserDestroyBilling({
         requestUserId: user.id,
         instance,
         refundableValue,
-        feeWaiver,
-        logger
+        feeWaiver
       })
       refundAmount = billingResult.refundAmount
       feeAmount = billingResult.feeAmount
@@ -1362,12 +1283,11 @@ export default async function instanceDestroyRoutes(fastify: FastifyInstance) {
       }
 
       if (!isFreeInstance) {
-        const billingResult = await settleUserDestroyBillingWithCompensation({
+        const billingResult = await settleUserDestroyBilling({
           requestUserId: user.id,
           instance,
           refundableValue,
-          feeWaiver,
-          logger: request.log
+          feeWaiver
         })
         refundAmount = billingResult.refundAmount
         feeAmount = billingResult.feeAmount

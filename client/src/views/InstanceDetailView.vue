@@ -36,7 +36,6 @@ import TerminalModal from '@/components/instance/TerminalModal.vue'
 import InstanceDisplayIcon from '@/components/InstanceDisplayIcon.vue'
 import InstanceBadgeModal from '@/components/instance/InstanceBadgeModal.vue'
 import AnnouncementIcon from '@/components/icons/AnnouncementIcon.vue'
-import ThemeTemplateSlot from '@/components/theme/ThemeTemplateSlot.vue'
 import { getStatusInfo } from '@/utils/formatters'
 import { translateError } from '@/utils/errorHandler'
 import { freeSiteCopy, getFreeSiteBillingCycleLabel, getFreeSiteBillingCycleShort } from '@/utils/freeSiteFun'
@@ -129,6 +128,7 @@ function isInstanceDetailRouteName(name: unknown): boolean {
 // 实例数据
 const instance = ref<InstanceWithDetails | null>(null)
 const loading = ref<boolean>(true)
+const loadError = ref<string>('')
 const actionLoading = ref<string>('')
 const copied = ref<string>('')
 const showPassword = ref<Record<string, boolean>>({})  // 用于控制密码显示/隐藏
@@ -488,11 +488,6 @@ const showPaidSubscriptionCard = computed<boolean>(() =>
 const isError = computed<boolean>(() => {
   const s = instance.value?.status?.toLowerCase()
   return s === 'error'
-})
-
-const failureReason = computed<string | null>(() => {
-  const reason = (instance.value as (InstanceWithDetails & { failureReason?: string | null }) | null)?.failureReason
-  return typeof reason === 'string' && reason.trim() ? reason.trim() : null
 })
 
 // AUTH004: 节点所有者权限控制
@@ -861,6 +856,8 @@ async function loadInstance(): Promise<void> {
 
   if (actionLoading.value) return
 
+  loadError.value = ''
+
   try {
     // 检查当前路由是否仍然是实例详情页面
     if (!route.params.id || !isInstanceDetailRouteName(route.name)) {
@@ -888,6 +885,8 @@ async function loadInstance(): Promise<void> {
       }
       return
     }
+
+    if (!instance.value) loading.value = true
 
     const response = await api.instances.get(instanceId)
     instance.value = (response as { instance?: Instance }).instance || null
@@ -952,6 +951,8 @@ async function loadInstance(): Promise<void> {
     if (errorMsg.includes('不存在') || errorMsg.includes('404') || errorMsg.includes('无权')) {
       toast.error(errorMsg)
       router.replace(getReturnPath())
+    } else {
+      loadError.value = errorMsg
     }
   } finally {
     loading.value = false
@@ -2903,14 +2904,6 @@ function formatShortDate(dateStr: string | null | undefined): string {
             >
               {{ $t('instance.errorBanner.description') }}
             </p>
-            <p
-              v-if="failureReason"
-              class="text-xs mt-2 break-words whitespace-pre-wrap"
-              :class="themeStore.isDark ? 'text-red-200' : 'text-red-800'"
-            >
-              <span class="font-semibold">{{ $t('instance.errorBanner.reasonLabel') }}:</span>
-              {{ failureReason }}
-            </p>
           </div>
         </div>
         <button
@@ -2993,43 +2986,6 @@ function formatShortDate(dateStr: string | null | undefined): string {
                 </p>
               </div>
             </div>
-
-            <div
-              v-if="instance.servicePanelExtensions?.length"
-              class="card p-4 sm:p-5"
-            >
-              <div class="flex flex-col gap-3">
-                <div>
-                  <h3
-                    class="text-sm font-semibold"
-                    :class="themeStore.isDark ? 'text-gray-100' : 'text-gray-900'"
-                  >
-                    {{ $t('instance.servicePanelExtensionTitle') }}
-                  </h3>
-                  <p
-                    class="mt-1 text-sm leading-6"
-                    :class="themeStore.isDark ? 'text-gray-400' : 'text-gray-600'"
-                  >
-                    {{ $t('instance.servicePanelExtensionDescription') }}
-                  </p>
-                </div>
-                <div class="flex flex-wrap gap-1.5 text-[11px]">
-                  <span
-                    v-for="extension in instance.servicePanelExtensions"
-                    :key="`${extension.pluginId}:${extension.serviceExtensionKey}`"
-                    class="rounded-lg border px-2 py-0.5 font-medium"
-                    :class="themeStore.isDark ? 'border-gray-800 bg-gray-900 text-gray-300' : 'border-gray-200 bg-gray-50 text-gray-600'"
-                  >
-                    {{ extension.name }}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <ThemeTemplateSlot
-              slot-name="user.instance.detail.extra"
-              container-class="overflow-hidden rounded-lg border border-themed bg-themed-surface"
-            />
 
             <div
               v-if="!isAdminEntry && !isHostOwnerOnly"
@@ -3419,6 +3375,26 @@ function formatShortDate(dateStr: string | null | undefined): string {
         </div>
       </Transition>
     </template>
+
+    <div v-else class="card p-12 text-center">
+      <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-red-500/20 bg-red-500/10">
+        <svg
+          class="h-8 w-8"
+          :class="themeStore.isDark ? 'text-red-400' : 'text-red-500'"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+        </svg>
+      </div>
+      <h3 class="mb-2 text-lg font-medium text-themed">{{ $t('common.loadFailed') }}</h3>
+      <p class="mb-4 break-words text-themed-muted">{{ loadError || $t('instance.detail.loadFailed') }}</p>
+      <div class="flex flex-wrap justify-center gap-3">
+        <button class="btn-primary" @click="loadInstance()">{{ $t('common.retry') }}</button>
+        <RouterLink :to="getReturnPath()" class="btn-secondary">{{ $t('common.back') }}</RouterLink>
+      </div>
+    </div>
 
     <!-- Modals -->
     <AddPortModal

@@ -270,7 +270,6 @@ assert(
     exchangeServiceSource.includes('未发现创建、重启、重装、迁移、恢复或上传中的任务') &&
     exchangeServiceSource.includes('实例当前未挂牌，也未被交易锁定') &&
     exchangeServiceSource.includes('实例没有交割中、争议中或未结算交易') &&
-    exchangeServiceSource.includes('实例未命中封禁、限速或高风险状态') &&
     exchangeServiceSource.includes('当前套餐在交易所允许列表内') &&
     exchangeServiceSource.includes('当前节点在交易所允许列表内') &&
     exchangeServiceSource.includes('交易所允许独立 IP 随实例剩余使用权转让'),
@@ -287,11 +286,8 @@ assert(
 )
 
 assert(
-  exchangeServiceSource.includes('resourceRiskState') &&
-    exchangeServiceSource.includes('risk_normal') &&
-    exchangeServiceSource.includes('account_active') &&
-    exchangeServiceSource.includes('账号存在风控下单限制，不能挂牌'),
-  'exchange eligibility must block risk, inactive, or order-restricted instances/accounts'
+  exchangeServiceSource.includes('account_active'),
+  'exchange eligibility must block inactive accounts'
 )
 
 assert(
@@ -394,12 +390,10 @@ assert(
     purchaseRecheckSection.includes('assertPolicyAllowlist(policy, instance)') &&
     purchaseRecheckSection.includes('EXCHANGE_INSTANCE_OVERDUE') &&
 	    purchaseRecheckSection.includes('EXCHANGE_INSTANCE_EXPIRING_SOON') &&
-	    purchaseRecheckSection.includes('EXCHANGE_INSTANCE_RISKY') &&
 	    !purchaseRecheckSection.includes('EXCHANGE_PACKAGE_INACTIVE') &&
 	    !purchaseRecheckSection.includes('EXCHANGE_PLAN_INACTIVE') &&
 	    purchaseRecheckSection.includes('EXCHANGE_HOST_UNAVAILABLE') &&
     purchaseRecheckSection.includes('EXCHANGE_INSTANCE_TRAFFIC_OVER_LIMIT') &&
-    purchaseRecheckSection.includes('EXCHANGE_SELLER_RESTRICTED') &&
     purchaseRecheckSection.includes('EXCHANGE_ACCOUNT_TRAFFIC_OVER_LIMIT') &&
     purchaseRecheckSection.includes('validateListingStoragePools(tx, instance)') &&
     purchaseRecheckSection.includes('EXCHANGE_INSTANCE_STORAGE_POOL_UNAVAILABLE') &&
@@ -408,7 +402,7 @@ assert(
     purchaseRecheckSection.includes("'autoDelistAt'") &&
     purchaseRecheckSection.includes('EXCHANGE_LISTING_EXPIRED') &&
     purchaseRecheckSection.includes('挂牌已到自动下架时间，无法购买'),
-  'exchange purchase must recheck seller/account/instance risk, expiry, auto-delist, allowlist, traffic, storage pool, host, and active-order state immediately before locking and charging the buyer; inactive packages and sold-out or inactive plans can trade as existing instance rights'
+  'exchange purchase must recheck seller/account state, expiry, auto-delist, allowlist, traffic, storage pool, host, and active-order state immediately before locking and charging the buyer; inactive packages and sold-out or inactive plans can trade as existing instance rights'
 )
 
 const createExchangeListingSection = sourceBetween(
@@ -530,10 +524,6 @@ assert(
 	    instanceTaskWorkerSource.includes('where: { instanceTaskId: task.id }') &&
 	    instanceTaskWorkerSource.includes('if (!exchangeDeliveryTask)') &&
 	    instanceTaskWorkerSource.includes('await prisma.trafficSnapshot.deleteMany({ where: { instanceId: task.instanceId } })') &&
-	    exchangeDeliveryWorkerSource.includes('instanceRiskState.deleteMany') &&
-	    exchangeDeliveryWorkerSource.includes('instanceRiskEvent.deleteMany') &&
-	    exchangeDeliveryWorkerSource.includes('instanceResourceSample.deleteMany') &&
-    exchangeDeliveryWorkerSource.includes('resourceRiskStateRemoved') &&
 	    exchangeDeliveryWorkerSource.includes('portMappingDeviceCleanupFailures') &&
 	    exchangeDeliveryWorkerSource.includes('proxySiteRemoteCleanupFailures') &&
 	    exchangeDeliveryWorkerSource.includes('cleanupWarningSamples') &&
@@ -1009,7 +999,6 @@ assert(
 		    adminExchangeRouteSource.includes('withdrawal.complete') &&
 		    adminExchangeRouteSource.includes('withdrawal.reject') &&
 		    adminExchangeRouteSource.includes('async function assertWithdrawalStillPayable') &&
-		    adminExchangeRouteSource.includes('用户账号处于风控限制中，不能审核或完成提现') &&
 		    adminExchangeRouteSource.includes('用户存在未完结交易所争议，不能审核或完成提现') &&
 		    adminExchangeRouteSource.includes('用户存在未结算交易或确认期未结束，不能审核或完成提现') &&
 		    adminExchangeRouteSource.includes("const proofUrl = normalizeText(body?.proofUrl, '', 500)") &&
@@ -1026,13 +1015,12 @@ assert(
 		    adminExchangeRouteSource.includes('releaseExchangeOrderManually') &&
 		    adminExchangeRouteSource.includes("action: 'order.manual_release'") &&
 		    adminExchangeRouteSource.includes('订单存在未完结争议，请在争议管理中放款结案') &&
-	    adminExchangeRouteSource.includes('/risk-records') &&
 	    adminExchangeRouteSource.includes('releaseExchangeOrderEscrow') &&
     adminExchangeRouteSource.includes('resolveDispute: {') &&
     adminExchangeRouteSource.includes('releaseRemark: `交易所争议 ${id} 人工放款，争议冻结标记解除：${resolution}`') &&
     !adminExchangeRouteSource.includes("action: 'dispute.release', 'exchange_dispute'") &&
     adminExchangeRouteSource.includes("!['active', 'delivery_failed'].includes(listing.status)"),
-	  'admin exchange routes must support refunds, order freeze/cancel, dispute release, wallet freeze/unfreeze/adjust, risk records, and must not force-delist locked orders'
+	  'admin exchange routes must support refunds, order freeze/cancel, dispute release, wallet freeze/unfreeze/adjust, and must not force-delist locked orders'
 )
 
 const refundOrderSection = sourceBetween(adminExchangeRouteSource, 'async function refundExchangeOrder', 'async function freezeExchangeOrder')
@@ -1272,10 +1260,10 @@ assert(
 					userExchangeViewSource.includes('查看并购买') &&
 					userExchangeViewSource.includes('{{ statusLabel(listing.status) }}') &&
 					userExchangeViewSource.includes('剩余有效期') &&
-					userExchangeViewSource.includes('<dt class="font-medium text-themed">交割方式</dt>') &&
+					userExchangeViewSource.includes('<dt class="font-medium text-themed-muted">交割方式</dt>') &&
 					userExchangeViewSource.includes('暂停锁定后强制重装') &&
 					userExchangeViewSource.includes('开始：{{ formatDate(order.deliveryTask.startedAt) }}') &&
-					userExchangeViewSource.includes('平台手续费 {{ money(selectedListing.feeAmount) }}') &&
+					userExchangeViewSource.includes('平台手续费 <span class="font-mono tabular-nums">{{ money(selectedListing.feeAmount) }}</span>') &&
 					!userExchangeViewSource.includes('卖家预计到账 {{ money(selectedListing.sellerReceivesAmount) }}') &&
 					userExchangeViewSource.includes('购买后获得的是实例剩余使用权') &&
 					userExchangeViewSource.includes('不包含卖家原系统、原数据、账号信息或历史订单') &&
@@ -1438,7 +1426,7 @@ assert(
 	!adminExchangeViewSource.includes("title: '关闭并维持放款'") &&
 	!adminExchangeViewSource.includes('window.prompt') &&
 	!adminExchangeViewSource.includes('window.confirm') &&
-	adminExchangeViewSource.includes('loadRiskRecords') &&
+	true /* risk records 子页随资源风控功能删除 */ &&
 	adminExchangeViewSource.includes('rollbackDelivery') &&
 		adminExchangeViewSource.includes('manualTakeoverDelivery') &&
 		adminExchangeViewSource.includes('completeDelivery') &&

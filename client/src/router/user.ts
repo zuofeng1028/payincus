@@ -108,12 +108,6 @@ const routes: RouteRecordRaw[] = [
     meta: { titleKey: 'publicSite.market.title', title: '产品市场' }
   },
   {
-    path: '/flash-sales',
-    name: 'flash-sales',
-    component: () => import('@/views/FlashSalesView.vue'),
-    meta: { requiresAuth: true, requiresUser: true, titleKey: 'nav.flashSales', title: '秒杀' }
-  },
-  {
     path: '/exchange',
     name: 'exchange',
     component: () => import('@/views/ExchangeView.vue'),
@@ -175,6 +169,12 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, requiresUser: true, titleKey: 'nav.invites', title: '邀请码' }
   },
   {
+    path: '/friends',
+    name: 'friends',
+    component: () => import('@/views/FriendsView.vue'),
+    meta: { requiresAuth: true, requiresUser: true, titleKey: 'nav.friends', title: '好友' }
+  },
+  {
     path: '/gift-cards',
     name: 'gift-cards',
     component: () => import('@/views/GiftCardsView.vue'),
@@ -191,12 +191,6 @@ const routes: RouteRecordRaw[] = [
     name: 'oauth-authorize',
     component: () => import('@/views/OAuthAuthorizeView.vue'),
     meta: { requiresAuth: true, requiresUser: true, titleKey: 'nav.oauthAuthorize', title: 'OAuth 授权' }
-  },
-  {
-    path: '/plugins/:pathMatch(.*)*',
-    name: 'plugin-page',
-    component: () => import('@/views/PluginPageView.vue'),
-    meta: { requiresAuth: true, requiresUser: true, titleKey: 'nav.plugins', title: '插件' }
   },
   {
     path: '/logs',

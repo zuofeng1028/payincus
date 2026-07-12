@@ -32,7 +32,6 @@ import type { Host } from '../types/database.js'
 import { validateName, validateUrl, validateIpAddress, validateIdentifier, validateIpOrDomain, encryptSensitiveData, getJwtSigningSecret } from '../lib/security.js'
 import { sendNotification } from '../lib/notifier.js'
 import { sendReleaseNotification } from '../lib/release-notifier.js'
-import { emitServicePluginEvent } from '../lib/plugin-business-events.js'
 import { createCaddyClient } from '../lib/caddy-client.js'
 import { normalizeArchitecture } from '../lib/architecture.js'
 import { generateIncusConfig } from '../lib/incus-config-generator.js'
@@ -5039,18 +5038,6 @@ export default async function hostRoutes(fastify: FastifyInstance) {
             suspendReason: reason || ''
           })
         }
-        emitServicePluginEvent({
-          event: 'service.suspended',
-          instanceId: instance.id,
-          userId: instance.userId,
-          hostId,
-          instanceName: instance.name,
-          status: 'suspended',
-          incusId: instance.incusId,
-          reason: reason || '',
-          source: 'host.batch_suspend',
-          actor: { id: user.id, role: user.role, username: user.username }
-        })
 
         results.push({ id: instance.id, name: instance.name, success: true })
       } catch (err) {
@@ -5148,18 +5135,6 @@ export default async function hostRoutes(fastify: FastifyInstance) {
             hostName: host.name || ''
           })
         }
-        emitServicePluginEvent({
-          event: 'service.unsuspended',
-          instanceId: instance.id,
-          userId: instance.userId,
-          hostId,
-          instanceName: instance.name,
-          status: 'stopped',
-          incusId: instance.incusId,
-          reason: null,
-          source: 'host.batch_unsuspend',
-          actor: { id: user.id, role: user.role, username: user.username }
-        })
 
         results.push({ id: instance.id, name: instance.name, success: true })
       } catch (err) {

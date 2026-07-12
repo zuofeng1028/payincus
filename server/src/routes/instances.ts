@@ -34,26 +34,9 @@ import {
   getCachedCloudInitStatus,
   persistCloudInitStatus
 } from '../lib/cloud-init-status.js'
-import {
-  emitServicePluginEvent,
-  emitServiceResourceRollbackPluginEvent,
-  emitServiceTaskPluginEvent
-} from '../lib/plugin-business-events.js'
 import { parseNullablePostgresBigIntInput } from '../lib/bigint-input.js'
 import { normalizePlanTrafficLimitSpeed } from '../services/traffic-bandwidth.js'
 import { getExchangeOperationLock, getExchangeSensitiveAccessLock } from '../services/exchange-operation-lock.js'
-import {
-  assertUserCanCreateInstance,
-  OrderRestrictedError,
-  orderRestrictionApiError
-} from '../services/user-order-restrictions.js'
-import {
-  FlashSaleError,
-  assertFlashSaleCheckoutEligibility,
-  claimFlashSalePurchaseInTransaction,
-  markFlashSaleDelivered,
-  markFlashSaleFailed
-} from '../services/flash-sales.js'
 import { turnstileVerifier } from '../lib/turnstile.js'
 import { customAlphabet } from 'nanoid'
 
@@ -87,11 +70,9 @@ import { validateCommandsOwnership, mergeCommandContents, getImageDistroFromAlia
 import { getPlanById, isPaidPackage } from '../db/package-plans.js'
 import { calculateCreateBilling } from '../db/billing-operations.js'
 import { getUserBalance } from '../db/balance.js'
-import { recordInitialProvisioningFailureCase } from './admin-delivery.js'
 import type { PublicIpv4Assignment } from '../db/public-ipv4.js'
 import { selectBindableIpv4ListenAddress } from '../lib/network-address.js'
 import { applyTrafficMultiplier, normalizeTrafficMultiplier, resolveInstanceTrafficLimitForHost } from '../lib/traffic-multiplier.js'
-import { listEnabledServiceExtensionTargets } from '../lib/plugin-extension-dispatch.js'
 import { arbitrateVipPrice, getUserContinuousVipBenefit } from '../services/vip-benefits.js'
 import {
   networkModeAllowsPortMapping,
@@ -340,28 +321,6 @@ async function createInstanceTaskOrConflict(
 ): Promise<InstanceTaskWithDetails | null> {
   try {
     const task = await createInstanceTask(data)
-    const instance = await prisma.instance.findUnique({
-      where: { id: data.instanceId },
-      select: { name: true }
-    })
-    emitServiceTaskPluginEvent({
-      event: 'service.task.queued',
-      instanceId: task.instanceId,
-      userId: task.userId,
-      hostId: task.hostId,
-      instanceName: instance?.name || `instance-${task.instanceId}`,
-      taskId: task.id,
-      taskType: task.taskType,
-      taskStatus: task.status,
-      source: 'instances.route',
-      dedupeKey: `service.task.queued:instances:${task.id}`,
-      metadata: {
-        imageAlias: task.imageAlias,
-        targetName: task.targetName,
-        targetHostId: task.targetHostId,
-        snapshotName: task.snapshotName
-      }
-    })
     return task
   } catch (error) {
     if (error instanceof InstanceTaskConflictError) {
@@ -1222,7 +1181,6 @@ export default async function instanceRoutes(fastify: FastifyInstance) {
       password?: string
       customInitCommandIds?: number[]  // 用户自定义初始化命令 ID 列表
       promoCode?: string  // AFF 优惠码
-      flashSaleItemId?: number
       idempotencyKey?: string
       turnstileToken?: string
     }
@@ -1244,7 +1202,6 @@ export default async function instanceRoutes(fastify: FastifyInstance) {
           sshKey: { type: 'string' },
           password: { type: 'string' },
           planId: { type: 'integer', minimum: 1 },
-          flashSaleItemId: { type: 'integer', minimum: 1 },
           idempotencyKey: { type: 'string', maxLength: 128 },
           turnstileToken: { type: 'string', maxLength: 2048 },
           customInitCommandIds: { type: 'array', items: { type: 'integer' }, maxItems: 20 },
@@ -1267,35 +1224,20 @@ export default async function instanceRoutes(fastify: FastifyInstance) {
       password?: string
       customInitCommandIds?: number[]
       promoCode?: string  // AFF 优惠码
-      flashSaleItemId?: number
       idempotencyKey?: string
       turnstileToken?: string
     }
   }>, reply: FastifyReply) => {
-    const { packageId, planId, image, cpu, memory, disk, hostId, sshKeyId, customInitCommandIds, promoCode, flashSaleItemId, idempotencyKey, turnstileToken } = request.body
+    const { packageId, planId, image, cpu, memory, disk, hostId, sshKeyId, customInitCommandIds, promoCode, idempotencyKey } = request.body
     let { name, sshKey } = request.body
     const { user } = request
-    const normalPaidIdempotencyKey = flashSaleItemId === undefined
-      ? idempotencyKey?.trim() || null
-      : null
+    const normalPaidIdempotencyKey = idempotencyKey?.trim() || null
 
     // ==================== 阶段一: 验证与校验 ====================
     name = typeof name === 'string' ? name.trim() : ''
 
-    // 普通实例创建受全局 Turnstile 保护；秒杀下单由秒杀活动配置在业务层单独校验，避免同一 token 被重复消费。
-    if (flashSaleItemId === undefined) {
-      await turnstileVerifier(request, reply)
-      if (reply.sent) return
-    }
-
-    try {
-      await assertUserCanCreateInstance(user.id)
-    } catch (error) {
-      if (error instanceof OrderRestrictedError) {
-        return reply.code(403).send(orderRestrictionApiError(error))
-      }
-      throw error
-    }
+    await turnstileVerifier(request, reply)
+    if (reply.sent) return
 
     // 0. 处理 SSH 密钥：支持 sshKeyId 或直接传 sshKey
     if (sshKeyId && !sshKey) {
@@ -1414,29 +1356,6 @@ export default async function instanceRoutes(fastify: FastifyInstance) {
       return reply.code(400).send(apiError(ErrorCode.CANNOT_CREATE_OWN_PAID_PACKAGE, '不能使用自己的付费套餐创建实例'))
     }
 
-    let flashSaleCheckout: Awaited<ReturnType<typeof assertFlashSaleCheckoutEligibility>> | null = null
-    if (flashSaleItemId !== undefined) {
-      if (!selectedPlan) {
-        return reply.code(400).send(apiError(ErrorCode.PLAN_REQUIRED, '秒杀商品必须绑定付费方案'))
-      }
-      try {
-        flashSaleCheckout = await assertFlashSaleCheckoutEligibility({
-          itemId: flashSaleItemId,
-          userId: user.id,
-          packageId,
-          planId: selectedPlan.id,
-          promoCode,
-          turnstileToken,
-          remoteIp: request.ip
-        })
-      } catch (error) {
-        if (error instanceof FlashSaleError) {
-          return reply.code(error.httpStatus).send({ error: error.message, code: error.code })
-        }
-        throw error
-      }
-    }
-
     if (selectedPlan && normalPaidIdempotencyKey) {
       const replay = await findNormalPaidCreateReplay(user.id, normalPaidIdempotencyKey)
       if (replay) {
@@ -1454,9 +1373,6 @@ export default async function instanceRoutes(fastify: FastifyInstance) {
       billing = calculateCreateBilling(selectedPlan)
       // 1.4.1 如果提供了优惠码，验证并计算折扣
       if (promoCode && promoCode.trim()) {
-        if (flashSaleCheckout && !flashSaleCheckout.allowAff) {
-          return reply.code(400).send(apiError(ErrorCode.INVALID_PARAMS, '秒杀商品不支持 AFF 优惠码'))
-        }
         const validation = await db.validateAffCode(promoCode.trim(), selectedPlan.id, user.id)
         if (!validation.valid) {
           return reply.code(400).send(apiError(ErrorCode.INVALID_PARAMS, validation.error || '优惠码无效'))
@@ -1473,11 +1389,10 @@ export default async function instanceRoutes(fastify: FastifyInstance) {
       const priceDecision = arbitrateVipPrice({
         basePrice: billing.totalPrice,
         affDiscountRate: validatedAffCode?.discountRate,
-        vipDiscountPercent: vip.benefit.orderDiscountPercent,
-        flashSalePrice: flashSaleCheckout ? flashSaleCheckout.flashPrice / 100 : null
+        vipDiscountPercent: vip.benefit.orderDiscountPercent
       })
       actualPrice = priceDecision.finalPrice
-      discountAmount = priceDecision.source === 'flash_sale' ? 0 : priceDecision.discountAmount
+      discountAmount = priceDecision.discountAmount
 
       const userBalance = await getUserBalance(user.id)
       if (userBalance < actualPrice) {
@@ -1825,7 +1740,7 @@ export default async function instanceRoutes(fastify: FastifyInstance) {
         const instance = await tx.instance.create({
           data: {
             incusId,
-            idempotencyKey: selectedPlan && !flashSaleCheckout ? normalPaidIdempotencyKey : null,
+            idempotencyKey: selectedPlan ? normalPaidIdempotencyKey : null,
             name,
             userId: user.id,
             hostId: lockedHost.id,
@@ -1902,13 +1817,9 @@ export default async function instanceRoutes(fastify: FastifyInstance) {
           }
           const balanceAfter = Number(updatedUserRecord.balance)
 
-          const remarkText = flashSaleCheckout
-            ? (discountAmount > 0
-                ? `秒杀开通实例（${billing.billingCycle}个月）：${pkg.name} - ${selectedPlan.name}，优惠码折扣 -¥${discountAmount.toFixed(2)}`
-                : `秒杀开通实例（${billing.billingCycle}个月）：${pkg.name} - ${selectedPlan.name}`)
-            : (discountAmount > 0
-                ? `开通实例（${billing.billingCycle}个月）：${pkg.name} - ${selectedPlan.name}，优惠码折扣 -¥${discountAmount.toFixed(2)}`
-                : `开通实例（${billing.billingCycle}个月）：${pkg.name} - ${selectedPlan.name}`)
+          const remarkText = discountAmount > 0
+            ? `开通实例（${billing.billingCycle}个月）：${pkg.name} - ${selectedPlan.name}，优惠码折扣 -¥${discountAmount.toFixed(2)}`
+            : `开通实例（${billing.billingCycle}个月）：${pkg.name} - ${selectedPlan.name}`
 
           const balanceLog = await tx.balanceLog.create({
             data: {
@@ -1934,7 +1845,7 @@ export default async function instanceRoutes(fastify: FastifyInstance) {
         // 如果是付费方案，创建计费记录
         if (selectedPlan && billing) {
           // 创建计费记录
-          const billingRecord = await tx.instanceBillingRecord.create({
+          await tx.instanceBillingRecord.create({
             data: {
               instanceId: instance.id,
               userId: user.id,
@@ -1944,52 +1855,22 @@ export default async function instanceRoutes(fastify: FastifyInstance) {
               periodStart: new Date(),
               periodEnd: billing.expiresAt,
               balanceLogId,
-              remark: flashSaleCheckout
-                ? (discountAmount > 0
-                    ? `秒杀新开通 ${billing.billingCycle} 个月，优惠码折扣 -¥${discountAmount.toFixed(2)}`
-                    : `秒杀新开通 ${billing.billingCycle} 个月`)
-                : (discountAmount > 0
-                    ? `新开通 ${billing.billingCycle} 个月，优惠码折扣 -¥${discountAmount.toFixed(2)}`
-                    : `新开通 ${billing.billingCycle} 个月`)
+              remark: discountAmount > 0
+                ? `新开通 ${billing.billingCycle} 个月，优惠码折扣 -¥${discountAmount.toFixed(2)}`
+                : `新开通 ${billing.billingCycle} 个月`
             }
           })
-
-          if (flashSaleCheckout) {
-            await claimFlashSalePurchaseInTransaction(tx, {
-              itemId: flashSaleCheckout.itemId,
-              userId: user.id,
-              packageId,
-              planId: selectedPlan.id,
-              instanceId: instance.id,
-              amount: actualPrice,
-              balanceLogId,
-              billingRecordId: billingRecord.id,
-              idempotencyKey: idempotencyKey?.trim() || `flash-sale:${flashSaleCheckout.itemId}:${user.id}:${nanoid()}`,
-              metadata: {
-                packageName: flashSaleCheckout.packageName,
-                planName: flashSaleCheckout.planName,
-                campaignName: flashSaleCheckout.campaignName,
-                originalPriceCents: flashSaleCheckout.originalPriceSnapshot,
-                flashPriceCents: flashSaleCheckout.flashPrice,
-                discountAmount
-              }
-            })
-          }
 
           // 如果使用了优惠码，创建 AFF 绑定并处理返利
           if (validatedAffCode) {
             // 创建实例与优惠码的永久绑定
             await db.createAffBinding(instance.id, validatedAffCode.id, tx as any)
 
-            const affCommissionBasePrice = flashSaleCheckout
-              ? Number((flashSaleCheckout.flashPrice / 100).toFixed(2))
-              : billing.price
-
             // 给优惠码创建者返利（基于可参与返利的下单价，不是优惠码折扣后价格）
             await db.processAffCommission(
               validatedAffCode.id,
               instance.id,
-              affCommissionBasePrice,
+              billing.price,
               'new_purchase',
               tx as any
             )
@@ -2067,22 +1948,15 @@ export default async function instanceRoutes(fastify: FastifyInstance) {
     } catch (err: any) {
       const errorMessage = err?.message || String(err)
 
-      if (err instanceof FlashSaleError) {
-        return reply.code(err.httpStatus).send({ error: err.message, code: err.code })
-      }
-
-      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
-        if (normalPaidIdempotencyKey) {
-          const replay = await findNormalPaidCreateReplay(user.id, normalPaidIdempotencyKey)
-          if (replay) {
-            return reply.code(200).send(replay)
-          }
-          return reply.code(409).send({
-            error: '开通请求已提交，请勿重复操作',
-            code: 'INSTANCE_CREATE_DUPLICATE_REQUEST'
-          })
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002' && normalPaidIdempotencyKey) {
+        const replay = await findNormalPaidCreateReplay(user.id, normalPaidIdempotencyKey)
+        if (replay) {
+          return reply.code(200).send(replay)
         }
-        return reply.code(409).send({ error: '秒杀请求已提交，请勿重复操作', code: 'FLASH_SALE_DUPLICATE_REQUEST' })
+        return reply.code(409).send({
+          error: '开通请求已提交，请勿重复操作',
+          code: 'INSTANCE_CREATE_DUPLICATE_REQUEST'
+        })
       }
 
       // 处理宿主机资源不足错误
@@ -2413,19 +2287,6 @@ export default async function instanceRoutes(fastify: FastifyInstance) {
     }
 
     const portMappings = await db.getPortMappings(instanceId)
-    const failureCase = instance.status === 'error'
-      ? await prisma.deliveryAssuranceCase.findFirst({
-          where: {
-            instanceId,
-            taskId: null,
-            issueType: 'task_failed',
-            lastError: { not: null }
-          },
-          orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
-          select: { lastError: true }
-        })
-      : null
-
     const host = await db.getHostById(instance.host_id)
     const natPublicIp = host?.nat_public_ip || null
     let hostIpAddress = host?.ip_address || null
@@ -2559,7 +2420,6 @@ export default async function instanceRoutes(fastify: FastifyInstance) {
       incusId: string
       name: string
       status: string
-      failureReason?: string | null
       image: string
       imageName?: string | null
       cpu: number
@@ -2624,19 +2484,11 @@ export default async function instanceRoutes(fastify: FastifyInstance) {
           textColor: string
         } | null
       } | null
-      servicePanelExtensions?: Array<{
-        pluginId: string
-        serviceExtensionKey: string
-        name: string
-        productId: string | null
-        hook: 'servicePanel'
-      }>
     } = {
       id: instance.id,
       incusId: instance.incus_id,
       name: instance.name,
       status: instance.status,
-      failureReason: failureCase?.lastError?.trim() || null,
       image: instance.image,
       imageName: imageName || null,
       cpu: instance.cpu,
@@ -2695,15 +2547,6 @@ export default async function instanceRoutes(fastify: FastifyInstance) {
       suspend_reason: instance.suspend_reason,
       // 自动续费（仅付费实例有意义）
       autoRenew: (instance as any).auto_renew ?? false
-    }
-
-    if (instance.package_id) {
-      const servicePanelTargets = await listEnabledServiceExtensionTargets('servicePanel')
-      response.servicePanelExtensions = servicePanelTargets.filter(target =>
-        target.productId === null || target.productId === String(instance.package_id)
-      ).map(target => ({ ...target, hook: 'servicePanel' as const }))
-    } else {
-      response.servicePanelExtensions = []
     }
 
     // 用户托管节点：获取节点所有者详细信息
@@ -3254,18 +3097,6 @@ export default async function instanceRoutes(fastify: FastifyInstance) {
         suspendReason: reason || ''
       })
     }
-    emitServicePluginEvent({
-      event: 'service.suspended',
-      instanceId,
-      userId: instance.user_id,
-      hostId: instance.host_id,
-      instanceName: instance.name,
-      status: 'suspended',
-      incusId: instance.incus_id,
-      reason: reason || '',
-      source: 'instance.manual_suspend',
-      actor: { id: user.id, role: user.role, username: user.username }
-    })
 
     reply.code(200).send({
       message: 'Instance suspended successfully'
@@ -3324,18 +3155,6 @@ export default async function instanceRoutes(fastify: FastifyInstance) {
         hostName: host?.name || ''
       })
     }
-    emitServicePluginEvent({
-      event: 'service.unsuspended',
-      instanceId,
-      userId: instance.user_id,
-      hostId: instance.host_id,
-      instanceName: instance.name,
-      status: 'stopped',
-      incusId: instance.incus_id,
-      reason: null,
-      source: 'instance.manual_unsuspend',
-      actor: { id: user.id, role: user.role, username: user.username }
-    })
 
     reply.code(200).send({
       message: 'Instance unsuspended successfully'
@@ -4409,26 +4228,6 @@ export default async function instanceRoutes(fastify: FastifyInstance) {
             : '用户删除实例'
         }).catch(() => { })
       }
-      emitServicePluginEvent({
-        event: 'service.deleted',
-        instanceId,
-        userId: instance.user_id,
-        hostId: instance.host_id,
-        instanceName: instance.name,
-        status: 'deleted',
-        incusId: instance.incus_id,
-        reason: reason || null,
-        source: isPrivilegedDeleter && instance.user_id !== user.id
-          ? (isAdmin ? 'instance.admin_delete' : 'instance.host_owner_delete')
-          : 'instance.user_delete',
-        actor: { id: user.id, role: user.role, username: user.username },
-        metadata: {
-          cpu: instance.cpu,
-          memory: instance.memory,
-          disk: instance.disk,
-          releasedPorts: portMappingsCount
-        }
-      })
 
       await createLog(
         user.id,
@@ -6328,22 +6127,6 @@ export default async function instanceRoutes(fastify: FastifyInstance) {
       { instanceId: task.instanceId }
     )
 
-    const cancelledInstance = await db.getInstanceById(cancelledTask.instanceId).catch(() => null)
-    emitServiceTaskPluginEvent({
-      event: 'service.task.cancelled',
-      instanceId: cancelledTask.instanceId,
-      userId: cancelledTask.userId,
-      hostId: cancelledTask.hostId,
-      instanceName: cancelledInstance?.name || `instance-${cancelledTask.instanceId}`,
-      taskId: cancelledTask.id,
-      taskType: cancelledTask.taskType,
-      taskStatus: cancelledTask.status,
-      source: 'instances.route',
-      actor: { id: user.id, role: user.role },
-      dedupeKey: `service.task.cancelled:instances:${cancelledTask.id}`,
-      metadata: { failureType: 'user_cancelled' }
-    })
-
     return {
       message: 'Task cancelled',
       task: {
@@ -6779,8 +6562,7 @@ async function compensateFailedInstanceCreation(input: {
     resources,
     networkMode,
     portLimit,
-    instanceName,
-    errorMessage
+    instanceName: _instanceName
   } = input
   const updateResult = await prisma.instance.updateMany({
     where: {
@@ -6807,37 +6589,8 @@ async function compensateFailedInstanceCreation(input: {
       disk: resources.disk,
       portCount: rollbackPortCount
     })
-    emitServiceResourceRollbackPluginEvent({
-      event: 'service.resource.rollback.completed',
-      instanceId,
-      userId,
-      hostId: host.id,
-      instanceName,
-      source: 'instance.provisioning.failure',
-      reason: 'provisioning_failed',
-      cpu: resources.cpu,
-      memory: resources.memory,
-      disk: resources.disk,
-      portCount: rollbackPortCount,
-      dedupeKey: `service.resource.rollback.completed:provisioning:${instanceId}`
-    })
     console.log(`[Provisioning] 用户 ${userId} 资源已回滚 (CPU=${resources.cpu}, Mem=${resources.memory}MB, Disk=${resources.disk}MB)`)
   } catch (rollbackErr) {
-    emitServiceResourceRollbackPluginEvent({
-      event: 'service.resource.rollback.failed',
-      instanceId,
-      userId,
-      hostId: host.id,
-      instanceName,
-      source: 'instance.provisioning.failure',
-      reason: 'rollback_failed',
-      cpu: resources.cpu,
-      memory: resources.memory,
-      disk: resources.disk,
-      portCount: rollbackPortCount,
-      dedupeKey: `service.resource.rollback.failed:provisioning:${instanceId}`,
-      metadata: { failureType: 'resource_rollback_failed' }
-    })
     console.error(`[Provisioning] 资源回滚失败:`, rollbackErr)
   }
 
@@ -6849,9 +6602,6 @@ async function compensateFailedInstanceCreation(input: {
 
   try {
     const compensation = await db.compensateFailedInstancePurchase(instanceId, userId, host.id)
-    await markFlashSaleFailed(instanceId, errorMessage, compensation.refunded).catch((err) => {
-      console.error(`[Provisioning] 秒杀失败状态回写失败:`, err)
-    })
     if (compensation.refunded) {
       console.log(`[Provisioning] 实例 ${instanceId} 创建失败已自动退款 ¥${compensation.refundAmount.toFixed(2)}`)
     } else if (compensation.reason !== 'not_paid_purchase') {
@@ -6872,9 +6622,6 @@ async function compensateFailedInstanceCreation(input: {
   } catch (compensationErr) {
     const refundError = compensationErr instanceof Error ? compensationErr.message : String(compensationErr)
     console.error(`[Provisioning] 实例 ${instanceId} 创建失败后的账务补偿失败:`, compensationErr)
-    await markFlashSaleFailed(instanceId, errorMessage, false).catch((err) => {
-      console.error(`[Provisioning] 秒杀失败状态回写失败:`, err)
-    })
     return { claimed: true, refundStatus: 'failed', refundAmount: 0, refundError }
   }
 }
@@ -7048,10 +6795,6 @@ async function createInstanceAsync(
       return
     }
 
-    await markFlashSaleDelivered(instanceId).catch((err) => {
-      console.error(`[Provisioning] 秒杀交付状态回写失败:`, err)
-    })
-
     // 创建 IP 地址记录 (新双网卡架构: eth0=IPv4, eth1=IPv6)
     if (ipv4) {
       try {
@@ -7101,25 +6844,6 @@ async function createInstanceAsync(
         networkMode: config.networkMode,
         ipv4: ipv4 || undefined,
         ipv6: ipv6 || undefined
-      })
-      emitServicePluginEvent({
-        event: 'service.provisioned',
-        instanceId,
-        userId,
-        hostId: host.id,
-        instanceName: instance.name,
-        status: 'running',
-        incusId: config.name,
-        source: 'instance.provisioning',
-        metadata: {
-          image: config.image,
-          cpu: config.cpu,
-          memory: config.memory,
-          disk: config.disk,
-          networkMode: config.networkMode,
-          ipv4: ipv4 || null,
-          ipv6: ipv6 || null
-        }
       })
 
       // 发送实例创建成功邮件通知
@@ -7175,9 +6899,8 @@ async function createInstanceAsync(
     const errorMessage = error instanceof Error ? error.message : String(error)
     console.error(`[Provisioning] ✘ 实例 ${instanceId} 创建失败:`, errorMessage)
 
-    let compensationResult: Awaited<ReturnType<typeof compensateFailedInstanceCreation>>
     try {
-      compensationResult = await compensateFailedInstanceCreation({
+      await compensateFailedInstanceCreation({
         instanceId,
         host,
         userId,
@@ -7188,31 +6911,7 @@ async function createInstanceAsync(
         errorMessage
       })
     } catch (compensationError) {
-      const refundError = compensationError instanceof Error ? compensationError.message : String(compensationError)
       console.error(`[Provisioning] 实例 ${instanceId} 创建失败补偿流程异常:`, compensationError)
-      compensationResult = {
-        claimed: false,
-        refundStatus: 'failed',
-        refundAmount: 0,
-        refundError
-      }
-    }
-
-    try {
-      await recordInitialProvisioningFailureCase({
-        instanceId,
-        instanceName: config.name,
-        hostId: host.id,
-        userId,
-        errorMessage,
-        compensationClaimed: compensationResult.claimed,
-        refundStatus: compensationResult.refundStatus,
-        refundAmount: compensationResult.refundAmount,
-        refundReason: compensationResult.refundReason,
-        refundError: compensationResult.refundError
-      })
-    } catch (caseError) {
-      console.error(`[Provisioning] 实例 ${instanceId} 初始开通失败 case 创建失败:`, caseError)
     }
 
     try {

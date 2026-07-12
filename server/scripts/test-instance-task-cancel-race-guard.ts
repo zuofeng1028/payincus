@@ -104,7 +104,7 @@ const balanceDeduction = createTransaction.indexOf('const balanceUpdateResult = 
 
 assert.ok(
   idempotencyClaim >= 0 &&
-    createTransaction.includes('idempotencyKey: selectedPlan && !flashSaleCheckout ? normalPaidIdempotencyKey : null'),
+    createTransaction.includes('idempotencyKey: selectedPlan ? normalPaidIdempotencyKey : null'),
   'normal paid instance creation must claim its unique idempotency key by inserting the instance'
 )
 assert.ok(

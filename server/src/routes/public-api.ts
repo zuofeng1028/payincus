@@ -10,10 +10,6 @@ import { findUserById, getSystemConfigBoolean, performRenewal } from '../db/inde
 import { getAllAdminUserIds } from '../db/users.js'
 import { sendHostManagedInstanceNotification, sendNotification } from '../lib/notifier.js'
 import { sendRenewSuccessEmail } from '../lib/mailer.js'
-import { emitPluginEvent } from '../lib/plugin-event-emitter.js'
-import { executePluginAction } from '../lib/plugin-runtime.js'
-import type { PayIncusPluginManifest, PluginActionManifest, PluginNotificationTemplateManifest } from '../lib/plugin-manifest.js'
-import { emitServiceTaskPluginEvent, emitUserPluginEvent } from '../lib/plugin-business-events.js'
 import { cancelInstanceTask, createInstanceTask, getTaskQueuePosition, InstanceTaskConflictError } from '../db/instance-tasks.js'
 import { getExchangeOperationLock } from '../services/exchange-operation-lock.js'
 import {
@@ -48,13 +44,7 @@ const PUBLIC_API_RATE_LIMITS = {
   ticketReply: { max: 20, timeWindow: '1 minute' },
   ticketStatus: { max: 20, timeWindow: '1 minute' },
   notificationSend: { max: 20, timeWindow: '1 minute' },
-  pluginActionDispatch: { max: 30, timeWindow: '1 minute' }
 } as const
-const PUBLIC_PLUGIN_ACTION_DYNAMIC_RATE_LIMITS = {
-  normal: { max: 30, windowMs: 60_000 },
-  strict: { max: 10, windowMs: 60_000 }
-} as const
-const PUBLIC_PLUGIN_ACTION_RATE_LIMIT_GLOBAL_SCOPE = '*'
 const PUBLIC_TICKET_CATEGORIES = new Set(['general', 'billing', 'technical', 'abuse'])
 const PUBLIC_TICKET_PRIORITIES = new Set(['low', 'normal', 'high', 'urgent'])
 const PUBLIC_TICKET_STATUSES = new Set(['open', 'in_progress', 'resolved', 'closed'])
@@ -63,7 +53,6 @@ const PUBLIC_SERVICE_INCLUDES = new Set(['product', 'plan'])
 const PUBLIC_CREATED_AT_SORT_FIELDS = new Set(['createdAt'])
 const PUBLIC_SERVICE_SORT_FIELDS = new Set(['createdAt', 'displayOrder'])
 const PUBLIC_TICKET_SORT_FIELDS = new Set(['createdAt', 'updatedAt'])
-const PUBLIC_PLUGIN_SORT_FIELDS = new Set(['pluginId', 'createdAt'])
 const PUBLIC_ORDER_STATUSES = new Set(['pending', 'completed', 'failed', 'cancelled', 'refunded'])
 const PUBLIC_BILLING_RECORD_TYPES = new Set<BillingRecordType>(['newPurchase', 'renew', 'upgrade', 'downgrade', 'refund', 'transfer_fee'])
 const PUBLIC_BALANCE_ADJUSTMENT_STATUSES = new Set<BalanceAdjustmentRequestStatus>(['pending', 'approved', 'rejected'])
@@ -93,8 +82,6 @@ const PUBLIC_PROFILE_AVATAR_STYLE_SET = new Set<string>(PUBLIC_PROFILE_AVATAR_ST
 const PUBLIC_NOTIFICATION_TEMPLATE_IDS = ['flash_sale_reminder', 'service_action_update', 'billing_notice'] as const
 type PublicNotificationTemplateId = typeof PUBLIC_NOTIFICATION_TEMPLATE_IDS[number]
 const PUBLIC_NOTIFICATION_TEMPLATE_ID_SET = new Set<string>(PUBLIC_NOTIFICATION_TEMPLATE_IDS)
-const PUBLIC_PLUGIN_NOTIFICATION_TEMPLATE_PATTERN = /^plugin:([a-z][a-z0-9]*(?:\.[a-z][a-z0-9-]*){2,}):([a-z][a-z0-9_.:-]{0,79})$/
-const PUBLIC_NOTIFICATION_TEMPLATE_PLACEHOLDER_PATTERN = /\{\{\s*([A-Za-z][A-Za-z0-9_]{0,39})\s*\}\}/g
 
 interface PublicApiListQuery {
   page?: string
@@ -176,25 +163,6 @@ interface PublicApiNotificationListQuery extends PublicApiListQuery {
 
 interface PublicApiUpdateProfileBody {
   avatarStyle?: unknown
-}
-
-interface PublicApiPluginActionParams {
-  pluginId: string
-  action: string
-}
-
-interface PublicApiPluginParams {
-  pluginId: string
-}
-
-interface PublicApiPluginActionBody {
-  payload?: unknown
-  idempotencyKey?: unknown
-}
-
-interface PublicPluginActionRateLimitPolicyRow {
-  maxRequests: number
-  windowSeconds: number
 }
 
 interface PublicApiServiceActionBody {
@@ -519,15 +487,6 @@ function normalizePublicNotificationTemplate(value: unknown): PublicNotification
   const template = value.trim()
   return PUBLIC_NOTIFICATION_TEMPLATE_ID_SET.has(template) ? template as PublicNotificationTemplateId : null
 }
-
-function parsePublicPluginNotificationTemplateRef(value: unknown): { pluginId: string; templateId: string } | null {
-  if (value === undefined || value === null || value === '') return null
-  if (typeof value !== 'string') return null
-  const match = value.trim().match(PUBLIC_PLUGIN_NOTIFICATION_TEMPLATE_PATTERN)
-  if (!match) return null
-  return { pluginId: match[1], templateId: match[2] }
-}
-
 function normalizePublicNotificationVariables(value: unknown): Record<string, string> | null {
   if (value === undefined || value === null) return {}
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null
@@ -584,46 +543,15 @@ function renderPublicNotificationTemplate(
       return null
   }
 }
-
-function renderPublicPluginNotificationTemplate(
-  template: PluginNotificationTemplateManifest,
+async function resolvePublicNotificationTemplate(
+  value: unknown,
   variables: Record<string, string>
-): { title: string; message: string } | null {
-  for (const variable of template.variables || []) {
-    if (!variables[variable]) return null
-  }
-  const render = (source: string) => source.replace(PUBLIC_NOTIFICATION_TEMPLATE_PLACEHOLDER_PATTERN, (_match, key: string) => {
-    return variables[key] ?? ''
-  }).trim()
-  const title = render(template.title)
-  const message = render(template.message)
-  if (!title || title.length > MAX_PUBLIC_NOTIFICATION_TITLE_LENGTH || title.includes('{{')) return null
-  if (!message || message.length > MAX_PUBLIC_NOTIFICATION_MESSAGE_LENGTH || message.includes('{{')) return null
-  return { title, message }
-}
-
-async function resolvePublicNotificationTemplate(value: unknown, variables: Record<string, string>): Promise<{
-  templateId: string
-  rendered: { title: string; message: string }
-} | null> {
+): Promise<{ templateId: string; rendered: { title: string; message: string } } | null> {
   const platformTemplate = normalizePublicNotificationTemplate(value)
-  if (platformTemplate) {
-    const rendered = renderPublicNotificationTemplate(platformTemplate, variables)
-    return rendered ? { templateId: platformTemplate, rendered } : null
-  }
-  const pluginTemplateRef = parsePublicPluginNotificationTemplateRef(value)
-  if (!pluginTemplateRef) return null
-  const manifest = await loadEnabledPublicPluginManifest(pluginTemplateRef.pluginId)
-  if (!manifest || !(manifest.permissions || []).includes('notifications:send')) return null
-  const template = (manifest.capabilities?.notificationTemplates || []).find(item => item.id === pluginTemplateRef.templateId)
-  if (!template) return null
-  const rendered = renderPublicPluginNotificationTemplate(template, variables)
-  return rendered ? {
-    templateId: `plugin:${pluginTemplateRef.pluginId}:${pluginTemplateRef.templateId}`,
-    rendered
-  } : null
+  if (!platformTemplate) return null
+  const rendered = renderPublicNotificationTemplate(platformTemplate, variables)
+  return rendered ? { templateId: platformTemplate, rendered } : null
 }
-
 function parseOptionalBooleanString(value: unknown): boolean | undefined {
   if (value === 'true') return true
   if (value === 'false') return false
@@ -640,18 +568,6 @@ function normalizePublicBalanceLogType(value: unknown): BalanceLogType | undefin
   return typeof value === 'string' && PUBLIC_BALANCE_LOG_TYPES.has(value as BalanceLogType)
     ? value as BalanceLogType
     : undefined
-}
-
-function normalizePluginId(value: unknown): string | null {
-  if (typeof value !== 'string') return null
-  const trimmed = value.trim()
-  return /^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9-]*){2,}$/.test(trimmed) ? trimmed : null
-}
-
-function normalizePluginActionName(value: unknown): string | null {
-  if (typeof value !== 'string') return null
-  const trimmed = value.trim()
-  return /^[A-Za-z][A-Za-z0-9_.:-]{0,79}$/.test(trimmed) ? trimmed : null
 }
 
 function normalizePublicServiceOperation(value: unknown): PublicApiServiceOperation | null {
@@ -1013,148 +929,6 @@ async function loadPublicServiceOperationTask(userId: number, serviceId: number,
     }
   })
 }
-
-async function loadEnabledPublicPluginManifest(pluginId: string): Promise<PayIncusPluginManifest | null> {
-  const plugin = await prisma.plugin.findUnique({
-    where: { pluginId },
-    include: { versions: { orderBy: { installedAt: 'desc' }, take: 1 } }
-  })
-  if (!plugin || !plugin.enabled || plugin.status !== 'enabled') return null
-  return plugin.versions[0]?.manifest as unknown as PayIncusPluginManifest | null
-}
-
-function isPublicPluginAction(action: PluginActionManifest): boolean {
-  if (action.runtime !== 'webhook' || !action.url) return false
-  return !(action.scopes || []).some(scope => scope.startsWith('service-extension:') || scope.startsWith('gateway-extension:'))
-}
-
-function pluginManifestHasActionPermission(manifest: PayIncusPluginManifest, action: PluginActionManifest): boolean {
-  const permissions = new Set(manifest.permissions || [])
-  return permissions.has('plugin-action:run') && (action.scopes || []).every(scope => permissions.has(scope))
-}
-
-function serializePublicPluginAction(action: PluginActionManifest) {
-  return {
-    name: action.name,
-    method: action.method,
-    path: action.path,
-    runtime: action.runtime,
-    scopes: action.scopes || [],
-    idempotency: action.idempotency || 'none',
-    rateLimit: action.rateLimit || 'normal',
-    requestSchema: action.requestSchema || null,
-    responseSchema: action.responseSchema || null
-  }
-}
-
-async function resolvePublicPluginActionRateLimitPolicy(input: {
-  pluginId: string
-  actionName: string
-  rateLimit?: 'normal' | 'strict'
-}): Promise<{ rateLimit: 'normal' | 'strict'; max: number; windowMs: number }> {
-  const rateLimit = input.rateLimit === 'strict' ? 'strict' : 'normal'
-  const fallback = PUBLIC_PLUGIN_ACTION_DYNAMIC_RATE_LIMITS[rateLimit]
-  const rows = await prisma.$queryRaw<PublicPluginActionRateLimitPolicyRow[]>`
-    SELECT
-      "max_requests" AS "maxRequests",
-      "window_seconds" AS "windowSeconds"
-    FROM "public_plugin_action_rate_limit_policies"
-    WHERE "enabled" = true
-      AND "rate_limit" = ${rateLimit}
-      AND (
-        ("plugin_id" = ${input.pluginId} AND "action_name" = ${input.actionName})
-        OR ("plugin_id" = ${input.pluginId} AND "action_name" = ${PUBLIC_PLUGIN_ACTION_RATE_LIMIT_GLOBAL_SCOPE})
-        OR ("plugin_id" = ${PUBLIC_PLUGIN_ACTION_RATE_LIMIT_GLOBAL_SCOPE} AND "action_name" = ${PUBLIC_PLUGIN_ACTION_RATE_LIMIT_GLOBAL_SCOPE})
-      )
-    ORDER BY
-      CASE
-        WHEN "plugin_id" = ${input.pluginId} AND "action_name" = ${input.actionName} THEN 1
-        WHEN "plugin_id" = ${input.pluginId} AND "action_name" = ${PUBLIC_PLUGIN_ACTION_RATE_LIMIT_GLOBAL_SCOPE} THEN 2
-        ELSE 3
-      END ASC
-    LIMIT 1
-  `
-  const policy = rows[0]
-  if (!policy) return { rateLimit, ...fallback }
-
-  return {
-    rateLimit,
-    max: Math.max(1, Math.min(10_000, policy.maxRequests)),
-    windowMs: Math.max(10, Math.min(3600, policy.windowSeconds)) * 1000
-  }
-}
-
-async function checkPublicPluginActionDynamicRateLimit(input: {
-  tokenSource: string
-  tokenId: number
-  pluginId: string
-  actionName: string
-  rateLimit?: 'normal' | 'strict'
-}): Promise<{ allowed: true } | { allowed: false; retryAfterSeconds: number; limit: number }> {
-  const policy = await resolvePublicPluginActionRateLimitPolicy(input)
-  const now = new Date()
-  const resetAt = new Date(now.getTime() + policy.windowMs)
-  const rows = await prisma.$queryRaw<Array<{ requestCount: number; resetAt: Date }>>`
-    INSERT INTO "public_plugin_action_rate_limit_buckets" (
-      "token_source",
-      "token_id",
-      "plugin_id",
-      "action_name",
-      "policy",
-      "request_count",
-      "reset_at",
-      "created_at",
-      "updated_at"
-    )
-    VALUES (
-      ${input.tokenSource},
-      ${input.tokenId},
-      ${input.pluginId},
-      ${input.actionName},
-      ${policy.rateLimit},
-      1,
-      ${resetAt},
-      ${now},
-      ${now}
-    )
-    ON CONFLICT ("token_source", "token_id", "plugin_id", "action_name")
-    DO UPDATE SET
-      "policy" = ${policy.rateLimit},
-      "request_count" = CASE
-        WHEN "public_plugin_action_rate_limit_buckets"."reset_at" <= ${now} THEN 1
-        ELSE "public_plugin_action_rate_limit_buckets"."request_count" + 1
-      END,
-      "reset_at" = CASE
-        WHEN "public_plugin_action_rate_limit_buckets"."reset_at" <= ${now} THEN ${resetAt}
-        ELSE "public_plugin_action_rate_limit_buckets"."reset_at"
-      END,
-      "updated_at" = ${now}
-    RETURNING
-      "request_count" AS "requestCount",
-      "reset_at" AS "resetAt"
-  `
-  const bucket = rows[0]
-  if (!bucket) {
-    return { allowed: true }
-  }
-
-  if (bucket.requestCount > policy.max) {
-    return {
-      allowed: false,
-      retryAfterSeconds: Math.max(1, Math.ceil((bucket.resetAt.getTime() - now.getTime()) / 1000)),
-      limit: policy.max
-    }
-  }
-
-  return { allowed: true }
-}
-
-function getPublicPluginActions(manifest: PayIncusPluginManifest) {
-  return (manifest.capabilities?.actions || [])
-    .filter(action => isPublicPluginAction(action) && pluginManifestHasActionPermission(manifest, action))
-    .map(serializePublicPluginAction)
-}
-
 export default async function publicApiRoutes(fastify: FastifyInstance) {
   fastify.get('/openapi.json', async () => {
     return buildPublicApiOpenApiDocument()
@@ -1228,16 +1002,6 @@ export default async function publicApiRoutes(fastify: FastifyInstance) {
       LogResult.SUCCESS
     )
 
-    emitUserPluginEvent({
-      event: 'user.profile.updated',
-      userId: user.id,
-      username: user.username,
-      role: user.role,
-      status: user.status,
-      source: 'public_api.me.update',
-      actor: { id: apiToken.userId, role: apiToken.user.role, username: apiToken.user.username },
-      metadata: { fields: ['avatarStyle'] }
-    })
 
     return {
       data: {
@@ -1945,20 +1709,6 @@ export default async function publicApiRoutes(fastify: FastifyInstance) {
         taskType: action
       })
 
-      emitServiceTaskPluginEvent({
-        event: 'service.task.queued',
-        instanceId: service.id,
-        userId: apiToken.userId,
-        hostId: service.hostId,
-        instanceName: service.name,
-        taskId: task.id,
-        taskType: task.taskType,
-        taskStatus: task.status,
-        source: 'public_api.services.actions',
-        actor: { id: apiToken.userId, role: apiToken.user.role, username: apiToken.user.username },
-        dedupeKey: `service.task.queued:public-api:${task.id}`,
-        metadata: { action, tokenSource: apiToken.source }
-      })
 
       await createLog(
         apiToken.userId,
@@ -2159,20 +1909,6 @@ export default async function publicApiRoutes(fastify: FastifyInstance) {
       return reply.code(404).send({ error: 'Service task not found', code: 'SERVICE_TASK_NOT_FOUND' })
     }
 
-    emitServiceTaskPluginEvent({
-      event: 'service.task.cancelled',
-      instanceId: id,
-      userId: apiToken.userId,
-      hostId: publicTask.hostId,
-      instanceName: publicTask.instance.name,
-      taskId: publicTask.id,
-      taskType: publicTask.taskType,
-      taskStatus: publicTask.status,
-      source: 'public_api.services.tasks.cancel',
-      actor: { id: apiToken.userId, role: apiToken.user.role, username: apiToken.user.username },
-      dedupeKey: `service.task.cancelled:public-api:${publicTask.id}`,
-      metadata: { tokenSource: apiToken.source }
-    })
 
     await createLog(
       apiToken.userId,
@@ -2356,21 +2092,6 @@ export default async function publicApiRoutes(fastify: FastifyInstance) {
         console.error('[PublicAPI] Failed to send ticket creation notification:', error)
       }
 
-      emitPluginEvent('ticket.created', {
-        dedupeKey: `ticket.created:${result.ticketId}:${result.messageId}`,
-        ticketId: result.ticketId,
-        messageId: result.messageId,
-        userId: apiToken.userId,
-        username: apiToken.user.username,
-        subject,
-        category,
-        priority,
-        instanceId: instanceId ?? null,
-        hostId,
-        attachmentCount: uploadedAttachments.length,
-        source: 'public_api',
-        createdAt: new Date().toISOString()
-      }, { id: apiToken.userId, role: apiToken.user.role, username: apiToken.user.username }, { dedupeKey: `ticket.created:${result.ticketId}:${result.messageId}` })
 
       await createLog(apiToken.userId, LogModule.PLUGIN, 'public_api.ticket_create', `Public API ${apiToken.source} created ticket #${result.ticketId}`, LogResult.SUCCESS)
 
@@ -2502,17 +2223,6 @@ export default async function publicApiRoutes(fastify: FastifyInstance) {
       return reply.code(409).send({ error: 'Ticket status changed concurrently', code: 'TICKET_STATUS_CONFLICT' })
     }
 
-    emitPluginEvent('ticket.status.changed', {
-      dedupeKey: `ticket.status.changed:public-api:${ticket.id}:${nextStatus}:${now.getTime()}`,
-      ticketId: ticket.id,
-      userId: apiToken.userId,
-      username: apiToken.user.username,
-      subject: ticket.subject,
-      previousStatus: ticket.status,
-      status: nextStatus,
-      source: 'public_api',
-      changedAt: now.toISOString()
-    }, { id: apiToken.userId, role: apiToken.user.role, username: apiToken.user.username }, { dedupeKey: `ticket.status.changed:public-api:${ticket.id}:${nextStatus}:${now.getTime()}` })
 
     await createLog(apiToken.userId, LogModule.PLUGIN, 'public_api.ticket_status_update', `Public API ${apiToken.source} changed own ticket #${ticket.id} status to ${nextStatus}`, LogResult.SUCCESS)
 
@@ -2609,19 +2319,6 @@ export default async function publicApiRoutes(fastify: FastifyInstance) {
         console.error('[PublicAPI] Failed to send ticket reply notification:', error)
       }
 
-      emitPluginEvent('ticket.replied', {
-        dedupeKey: `ticket.replied:${ticket.id}:${message.id}`,
-        ticketId: ticket.id,
-        messageId: message.id,
-        userId: apiToken.userId,
-        username: apiToken.user.username,
-        subject: ticket.subject,
-        isFromOwner: false,
-        status: 'in_progress',
-        attachmentCount: uploadedAttachments.length,
-        source: 'public_api',
-        createdAt: message.createdAt
-      }, { id: apiToken.userId, role: apiToken.user.role, username: apiToken.user.username }, { dedupeKey: `ticket.replied:${ticket.id}:${message.id}` })
 
       await createLog(apiToken.userId, LogModule.PLUGIN, 'public_api.ticket_reply_create', `Public API ${apiToken.source} replied to own ticket #${ticket.id}`, LogResult.SUCCESS)
 
@@ -2723,7 +2420,7 @@ export default async function publicApiRoutes(fastify: FastifyInstance) {
     const template = request.body?.template ? await resolvePublicNotificationTemplate(request.body.template, variables) : null
     if (request.body?.template && !template) {
       return reply.code(400).send({
-        error: `template must be one of ${PUBLIC_NOTIFICATION_TEMPLATE_IDS.join(', ')} or plugin:<pluginId>:<templateId>, and all required variables must be provided`,
+        error: `template must be one of ${PUBLIC_NOTIFICATION_TEMPLATE_IDS.join(', ')}, and all required variables must be provided`,
         code: 'INVALID_NOTIFICATION_TEMPLATE'
       })
     }
@@ -2758,139 +2455,4 @@ export default async function publicApiRoutes(fastify: FastifyInstance) {
     })
   })
 
-  fastify.get<{ Querystring: PublicApiListQuery }>('/plugins', async (request, reply) => {
-    const apiToken = await authenticatePublicApiRequest(request, reply, 'plugins:action')
-    if (!apiToken) return
-    const pagination = parsePagination(request.query || {})
-    const sort = parsePublicApiSort(request.query?.sort, PUBLIC_PLUGIN_SORT_FIELDS, 'pluginId')
-    if (!sort) return reply.code(400).send({ error: 'Invalid sort', code: 'INVALID_PUBLIC_API_SORT' })
-    const plugins = await prisma.plugin.findMany({
-      where: { enabled: true, status: 'enabled' },
-      orderBy: buildPublicSortOrder(sort) as Prisma.PluginOrderByWithRelationInput[],
-      include: { versions: { orderBy: { installedAt: 'desc' }, take: 1 } }
-    })
-
-    const publicPlugins = plugins
-      .map(plugin => {
-        const manifest = plugin.versions[0]?.manifest as unknown as PayIncusPluginManifest | null
-        if (!manifest) return null
-        const actions = getPublicPluginActions(manifest)
-        if (actions.length === 0) return null
-        return {
-          pluginId: plugin.pluginId,
-          name: manifest.name,
-          version: manifest.version,
-          description: manifest.description || null,
-          author: manifest.author || null,
-          homepage: manifest.homepage || null,
-          actionCount: actions.length,
-          actions
-        }
-      })
-      .filter((plugin): plugin is NonNullable<typeof plugin> => plugin !== null)
-
-    await createLog(apiToken.userId, LogModule.PLUGIN, 'public_api.plugins_list', `Public API ${apiToken.source} listed enabled public plugin actions`, LogResult.SUCCESS)
-
-    return {
-      data: publicPlugins.slice(pagination.skip, pagination.skip + pagination.take),
-      meta: publicSortMeta({ page: pagination.page, pageSize: pagination.pageSize, total: publicPlugins.length, sort })
-    }
-  })
-
-  fastify.get<{ Params: PublicApiPluginParams }>('/plugins/:pluginId/actions', async (request, reply) => {
-    const apiToken = await authenticatePublicApiRequest(request, reply, 'plugins:action')
-    if (!apiToken) return
-    const pluginId = normalizePluginId(request.params.pluginId)
-    if (!pluginId) {
-      return reply.code(400).send({ error: 'Invalid plugin id', code: 'INVALID_PLUGIN_ID' })
-    }
-
-    const manifest = await loadEnabledPublicPluginManifest(pluginId)
-    if (!manifest) {
-      return reply.code(404).send({ error: 'Plugin not found', code: 'PLUGIN_NOT_FOUND' })
-    }
-    const actions = getPublicPluginActions(manifest)
-
-    await createLog(apiToken.userId, LogModule.PLUGIN, 'public_api.plugin_actions_list', `Public API ${apiToken.source} listed public actions for ${pluginId}`, LogResult.SUCCESS)
-
-    return {
-      data: {
-        pluginId,
-        name: manifest.name,
-        version: manifest.version,
-        description: manifest.description || null,
-        actions
-      }
-    }
-  })
-
-  fastify.post<{ Params: PublicApiPluginActionParams; Body: PublicApiPluginActionBody }>('/plugins/:pluginId/actions/:action', {
-    config: { rateLimit: PUBLIC_API_RATE_LIMITS.pluginActionDispatch }
-  }, async (request, reply) => {
-    const apiToken = await authenticatePublicApiRequest(request, reply, 'plugins:action')
-    if (!apiToken) return
-    const pluginId = normalizePluginId(request.params.pluginId)
-    const actionName = normalizePluginActionName(request.params.action)
-    if (!pluginId || !actionName) {
-      return reply.code(400).send({ error: 'Invalid plugin action', code: 'INVALID_PLUGIN_ACTION' })
-    }
-
-    const manifest = await loadEnabledPublicPluginManifest(pluginId)
-    if (!manifest) {
-      return reply.code(404).send({ error: 'Plugin not found', code: 'PLUGIN_NOT_FOUND' })
-    }
-    const action = (manifest.capabilities?.actions || []).find(item => item.name === actionName)
-    if (!action || !isPublicPluginAction(action) || !pluginManifestHasActionPermission(manifest, action)) {
-      return reply.code(404).send({ error: 'Plugin action not found', code: 'PLUGIN_ACTION_NOT_FOUND' })
-    }
-    const actionRateLimit = await checkPublicPluginActionDynamicRateLimit({
-      tokenSource: apiToken.source,
-      tokenId: apiToken.id,
-      pluginId,
-      actionName,
-      rateLimit: action.rateLimit
-    })
-    if (!actionRateLimit.allowed) {
-      reply.header('Retry-After', String(actionRateLimit.retryAfterSeconds))
-      return reply.code(429).send({
-        error: 'Plugin action rate limit exceeded',
-        code: 'PUBLIC_PLUGIN_ACTION_RATE_LIMITED',
-        retryAfter: actionRateLimit.retryAfterSeconds,
-        limit: actionRateLimit.limit
-      })
-    }
-
-    try {
-      const body = request.body || {}
-      const result = await executePluginAction({
-        pluginId,
-        manifest,
-        actionName,
-        actor: {
-          id: apiToken.userId,
-          role: apiToken.user.role,
-          username: apiToken.user.username
-        },
-        payload: body.payload ?? body,
-        source: 'user',
-        idempotencyKey: typeof body.idempotencyKey === 'string' ? body.idempotencyKey : null
-      })
-      await createLog(apiToken.userId, LogModule.PLUGIN, 'public_api.plugin_action_dispatch', `Public API ${apiToken.source} dispatched plugin action ${pluginId}:${actionName}`, LogResult.SUCCESS)
-      return {
-        data: {
-          pluginId,
-          action: actionName,
-          runtime: result.runtime,
-          status: result.status,
-          statusCode: result.statusCode,
-          requestId: result.requestId,
-          result: result.result
-        }
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error)
-      await createLog(apiToken.userId, LogModule.PLUGIN, 'public_api.plugin_action_dispatch', `Public API ${apiToken.source} failed plugin action ${pluginId}:${actionName}: ${message}`, LogResult.FAILED)
-      return reply.code(400).send({ error: message, code: 'PUBLIC_PLUGIN_ACTION_FAILED' })
-    }
-  })
 }

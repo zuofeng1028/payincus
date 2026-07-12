@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import api from '@/api'
-import ThemeTemplateSlot from '@/components/theme/ThemeTemplateSlot.vue'
 import { useReveal } from '@/composables/useReveal'
 
 const revealRoot = ref<HTMLElement | null>(null)
@@ -184,8 +183,6 @@ onMounted(loadOrders)
         刷新
       </button>
     </header>
-
-    <ThemeTemplateSlot slot-name="user.orders.banner" container-class="overflow-hidden rounded-xl border border-themed bg-themed-surface" />
 
     <section data-reveal class="nimbus-lift rounded-xl border border-themed bg-themed-surface p-4 shadow-sm">
       <div class="grid gap-3 md:grid-cols-[180px_180px_auto]">

@@ -213,32 +213,6 @@ enum InstanceTaskStatus {
   FAILED
 }
 
-enum DeliveryAssuranceCaseStatus {
-  pending_manual
-  auto_retryable
-  in_progress
-  recovered
-  closed
-}
-
-enum DeliveryAssuranceIssueType {
-  task_failed
-  task_stale
-  host_offline
-  agent_offline
-  resource_pressure
-  plan_upgrade_sync_failed
-}
-
-enum DeliveryAssuranceActionType {
-  detected
-  retry
-  takeover
-  notify_user
-  mark_recovered
-  close
-}
-
 enum SlaAlertSeverity {
   info
   warning
@@ -290,58 +264,6 @@ enum SystemUpdateTaskStatus {
   success
   failed
   rolled_back
-}
-
-enum PluginStatus {
-  installed
-  enabled
-  disabled
-  failed
-}
-
-enum PluginInstallTaskStatus {
-  pending
-  running
-  success
-  failed
-}
-
-enum PluginInstallTaskAction {
-  upload_install
-  market_install
-  enable
-  disable
-  uninstall
-}
-
-enum PluginSourceType {
-  upload
-  market
-}
-
-enum PluginPurchaseStatus {
-  completed
-  refunded
-}
-
-enum PluginLicenseStatus {
-  active
-  revoked
-}
-
-enum PluginRefundStatus {
-  completed
-}
-
-enum PluginDeveloperEarningStatus {
-  pending
-  reversed
-}
-
-enum PluginDeveloperWithdrawalStatus {
-  pending
-  completed
-  rejected
 }
 
 // ==================== 恢复任务模型 ====================
@@ -401,50 +323,6 @@ model InstanceTask {
   @@index([instanceId])
   @@index([userId])
   @@map("instance_tasks")
-}
-
-model DeliveryAssuranceCase {
-  id                Int                          @id @default(autoincrement())
-  taskId            Int?                         @unique @map("task_id")
-  instanceId        Int                          @map("instance_id")
-  hostId            Int                          @map("host_id")
-  userId            Int                          @map("user_id")
-  status            DeliveryAssuranceCaseStatus @default(pending_manual)
-  issueType         DeliveryAssuranceIssueType   @map("issue_type")
-  severity          String                       @default("warning")
-  retryable         Boolean                      @default(false)
-  retryTaskId       Int?                         @map("retry_task_id")
-  title             String
-  lastError         String?                      @map("last_error")
-  detail            Json?
-  note              String?
-  handledByUserId   Int?                         @map("handled_by_user_id")
-  handledByUsername String?                      @map("handled_by_username")
-  handledAt         DateTime?                    @map("handled_at")
-  createdAt         DateTime                     @default(now()) @map("created_at")
-  updatedAt         DateTime                     @updatedAt @map("updated_at")
-
-  @@index([status, createdAt(sort: Desc)])
-  @@index([instanceId])
-  @@index([hostId])
-  @@index([userId])
-  @@index([retryTaskId])
-  @@map("delivery_assurance_cases")
-}
-
-model DeliveryAssuranceAction {
-  id            Int                         @id @default(autoincrement())
-  caseId        Int                         @map("case_id")
-  actionType    DeliveryAssuranceActionType @map("action_type")
-  actorUserId   Int?                        @map("actor_user_id")
-  actorUsername String?                     @map("actor_username")
-  note          String?
-  detail        Json?
-  createdAt     DateTime                    @default(now()) @map("created_at")
-
-  @@index([caseId, createdAt(sort: Desc)])
-  @@index([actionType, createdAt(sort: Desc)])
-  @@map("delivery_assurance_actions")
 }
 
 model SlaAlertRule {
@@ -589,7 +467,6 @@ enum PaymentProviderType {
   alipay_direct // 支付宝直连（预留）
   wechat_direct // 微信直连（预留）
   manual        // 人工充值
-  plugin_gateway // 插件支付网关
 }
 
 // 支付渠道状态
@@ -635,37 +512,6 @@ enum BillingRecordType {
   downgrade     // 降级
   refund        // 退款（仅管理员操作）
   transfer_fee  // 转移手续费
-}
-
-enum FlashSaleCampaignStatus {
-  draft
-  scheduled
-  active
-  paused
-  ended
-  cancelled
-}
-
-enum FlashSaleReservationStatus {
-  paid
-  delivering
-  delivered
-  failed
-  refunded
-  cancelled
-}
-
-enum FlashSaleAuditAction {
-  create
-  update
-  start
-  pause
-  resume
-  finish
-  cancel
-  stock_adjust
-  reservation_refund
-  reservation_release
 }
 
 enum OrderOperationStatus {
@@ -748,17 +594,12 @@ model User {
   usedInviteCodes      InviteCode[]          @relation("UsedInviteCodes")
   sshKeys              SshKey[]
   instances            Instance[]
-  resourceRiskStates   InstanceRiskState[] @relation("InstanceRiskStateUser")
-  resourceRiskEvents   InstanceRiskEvent[] @relation("InstanceRiskEventUser")
-  resourceRiskSamples  InstanceResourceSample[] @relation("InstanceResourceSampleUser")
-  orderRestrictions    UserOrderRestriction[] @relation("UserOrderRestrictionUser")
   notificationChannels NotificationChannel[]
   storageConfigs       StorageConfig[]
   oauthBindings        UserOAuthBinding[]
   telegramBinding      UserTelegramBinding?
   telegramBindTokens   TelegramBindToken[]
   publicApiTokens      PublicApiToken[]
-  publicPluginActionRateLimitPolicies PublicPluginActionRateLimitPolicy[] @relation("PublicPluginActionRateLimitPolicyUpdater")
   helpArticles         HelpArticle[]         @relation("CreatedArticles")
   logs                 Log[]
   transfersSent        InstanceTransfer[]    @relation("TransferFrom")
@@ -879,40 +720,11 @@ model User {
   instanceAuditScans InstanceAuditScan[] @relation("InstanceAuditScanUser")
   instanceAuditActions InstanceAuditAction[] @relation("InstanceAuditActionUser")
   systemUpdateTasks SystemUpdateTask[] @relation("SystemUpdateTaskStarter")
-  pluginsInstalled Plugin[] @relation("PluginInstaller")
-  pluginsEnabled Plugin[] @relation("PluginEnabler")
-  pluginInstallTasks PluginInstallTask[] @relation("PluginInstallTaskStarter")
-  pluginEventLogs PluginEventLog[] @relation("PluginEventLogUser")
-  pluginUserData PluginUserData[] @relation("PluginUserDataUser")
-  pluginStorageItemsCreated PluginStorageItem[] @relation("PluginStorageItemCreator")
-  pluginStorageItemsUpdated PluginStorageItem[] @relation("PluginStorageItemUpdater")
-  pluginStorageBackupRemoteArchives PluginStorageBackupRemoteArchive[] @relation("PluginStorageBackupRemoteArchiveUploader")
-  pluginMarketSubmissions PluginMarketSubmission[] @relation("PluginMarketSubmissionSubmitter")
-  pluginMarketReviews PluginMarketSubmission[] @relation("PluginMarketSubmissionReviewer")
-  pluginPurchases PluginPurchase[] @relation("PluginPurchaseBuyer")
-  pluginSales PluginPurchase[] @relation("PluginPurchaseDeveloper")
-  pluginLicenses PluginLicense[] @relation("PluginLicenseOwner")
-  pluginDeveloperEarnings PluginDeveloperEarning[] @relation("PluginDeveloperEarningOwner")
-  pluginDeveloperWithdrawals PluginDeveloperWithdrawal[] @relation("PluginDeveloperWithdrawalOwner")
-  pluginDeveloperWithdrawalsReviewed PluginDeveloperWithdrawal[] @relation("PluginDeveloperWithdrawalReviewer")
-  pluginEventAlertPreferences PluginEventAlertPreference[] @relation("PluginEventAlertPreferenceUser")
-  themeMarketSubmissions ThemeMarketSubmission[] @relation("ThemeMarketSubmissionSubmitter")
-  themeMarketReviews ThemeMarketSubmission[] @relation("ThemeMarketSubmissionReviewer")
-  themesInstalled ThemePackage[] @relation("ThemeInstaller")
-  themesEnabled ThemePackage[] @relation("ThemeEnabler")
   oauthAppsCreated OAuthClientApp[] @relation("OAuthClientAppCreator")
   oauthAuthorizationCodes OAuthAuthorizationCode[] @relation("OAuthAuthorizationCodeUser")
   oauthAccessTokens OAuthAccessToken[] @relation("OAuthAccessTokenUser")
   oauthRefreshTokens OAuthRefreshToken[] @relation("OAuthRefreshTokenUser")
   oauthGrants OAuthGrant[] @relation("OAuthGrantUser")
-  lifecycleTags UserLifecycleTag[]
-  lifecycleSegmentMembers UserLifecycleSegmentMember[]
-  lifecycleEvents UserLifecycleEvent[]
-  lifecycleActionsTargeted UserLifecycleAction[] @relation("UserLifecycleActionTarget")
-  lifecycleActionsCreated UserLifecycleAction[] @relation("UserLifecycleActionActor")
-  flashSaleCampaignsCreated FlashSaleCampaign[] @relation("FlashSaleCampaignCreator")
-  flashSaleReservations FlashSaleReservation[] @relation("FlashSaleReservationUser")
-  flashSaleAuditLogs FlashSaleAuditLog[] @relation("FlashSaleAuditActor")
 
   @@map("users")
 }
@@ -1118,9 +930,6 @@ model Host {
 
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   instances    Instance[]
-  resourceRiskStates  InstanceRiskState[]
-  resourceRiskEvents  InstanceRiskEvent[]
-  resourceRiskSamples InstanceResourceSample[]
   ipAddresses  IpAddress[]
   publicIpv4Pools PublicIpv4Pool[]
   publicIpv4Addresses PublicIpv4Address[]
@@ -1517,10 +1326,6 @@ model Instance {
   snapshotPolicy  SnapshotPolicy?
   trafficSnapshot TrafficSnapshot?
   dailyTraffic    DailyTraffic[]
-  resourceRiskState InstanceRiskState?
-  resourceRiskEvents InstanceRiskEvent[]
-  resourceRiskSamples InstanceResourceSample[]
-  orderRestrictions UserOrderRestriction[] @relation("UserOrderRestrictionSourceInstance")
   transfers       InstanceTransfer[]
   ipAddresses     IpAddress[]
   publicIpv4Address PublicIpv4Address?
@@ -1531,7 +1336,6 @@ model Instance {
   checkinRecords   CheckinRecord[]
   redeemCodeUsages RedeemCodeUsage[]
   billingRecords   InstanceBillingRecord[]  // 计费记录
-  flashSaleReservations FlashSaleReservation[]
   affBinding       AffBinding?              // AFF优惠码绑定
   resourcePoolLogs ResourcePoolLog[]        // 资源池应用记录
   destroyRecords   UserDestroyRecord[]      // 销毁记录
@@ -1859,48 +1663,6 @@ model PublicApiToken {
   @@map("public_api_tokens")
 }
 
-model PublicPluginActionRateLimitBucket {
-  id           Int      @id @default(autoincrement())
-  tokenSource  String   @map("token_source")
-  tokenId      Int      @map("token_id")
-  pluginId     String   @map("plugin_id")
-  actionName   String   @map("action_name")
-  policy       String   @default("normal")
-  requestCount Int      @default(0) @map("request_count")
-  resetAt      DateTime @map("reset_at")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-
-  plugin Plugin @relation(fields: [pluginId], references: [pluginId], onDelete: Cascade)
-
-  @@unique([tokenSource, tokenId, pluginId, actionName])
-  @@index([pluginId])
-  @@index([resetAt])
-  @@map("public_plugin_action_rate_limit_buckets")
-}
-
-model PublicPluginActionRateLimitPolicy {
-  id              Int      @id @default(autoincrement())
-  pluginId        String   @default("*") @map("plugin_id")
-  actionName      String   @default("*") @map("action_name")
-  rateLimit       String   @map("rate_limit")
-  maxRequests     Int      @map("max_requests")
-  windowSeconds   Int      @default(60) @map("window_seconds")
-  enabled         Boolean  @default(true)
-  updatedByUserId Int?     @map("updated_by_user_id")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
-
-  updatedBy User? @relation("PublicPluginActionRateLimitPolicyUpdater", fields: [updatedByUserId], references: [id], onDelete: SetNull)
-
-  @@unique([pluginId, actionName, rateLimit])
-  @@index([pluginId])
-  @@index([rateLimit])
-  @@index([enabled])
-  @@index([updatedByUserId])
-  @@map("public_plugin_action_rate_limit_policies")
-}
-
 model OAuthClientApp {
   id              Int      @id @default(autoincrement())
   name            String
@@ -2057,24 +1819,6 @@ model SystemConfig {
   @@map("system_configs")
 }
 
-model IntegrationHealthCheck {
-  id              Int      @id @default(autoincrement())
-  key             String
-  title           String
-  status          String
-  message         String   @db.Text
-  detail          String?  @db.Text
-  durationMs      Int      @map("duration_ms")
-  checkedAt       DateTime @map("checked_at")
-  checkedByUserId Int?     @map("checked_by_user_id")
-  createdAt       DateTime @default(now()) @map("created_at")
-
-  @@index([key, checkedAt])
-  @@index([status, checkedAt])
-  @@index([checkedAt])
-  @@map("integration_health_checks")
-}
-
 // ==================== 流量统计模型 ====================
 
 // 流量快照 (用于增量计算)
@@ -2106,145 +1850,6 @@ model DailyTraffic {
   @@unique([instanceId, date])
   @@index([instanceId, date])
   @@map("daily_traffic")
-}
-
-model ResourceRiskPolicy {
-  id                         Int      @id @default(autoincrement())
-  name                       String   @default("默认策略")
-  enabled                    Boolean  @default(true)
-  bandwidthWindowMinutes     Int      @default(60) @map("bandwidth_window_minutes")
-  bandwidthActiveMinutes     Int      @default(45) @map("bandwidth_active_minutes")
-  bandwidthThresholdMbps     Int      @default(100) @map("bandwidth_threshold_mbps")
-  cpuWindowMinutes           Int      @default(60) @map("cpu_window_minutes")
-  cpuActiveMinutes           Int      @default(45) @map("cpu_active_minutes")
-  cpuThresholdPercent        Int      @default(90) @map("cpu_threshold_percent")
-  ppsThreshold               Int      @default(20000) @map("pps_threshold")
-  packetSmallRatioThreshold  Int      @default(85) @map("packet_small_ratio_threshold")
-  qosTiers                   Json     @default("[{\"level\":1,\"bandwidthMbps\":50,\"score\":50},{\"level\":2,\"bandwidthMbps\":30,\"score\":65},{\"level\":3,\"bandwidthMbps\":10,\"score\":80}]") @map("qos_tiers")
-  scoreDecayPerHour          Int      @default(3) @map("score_decay_per_hour")
-  orderRestrictScore         Int      @default(70) @map("order_restrict_score")
-  autoSuspendScore           Int      @default(90) @map("auto_suspend_score")
-  autoSuspendEnabled         Boolean  @default(false) @map("auto_suspend_enabled")
-  accountOrderRestrictEnabled Boolean @default(true) @map("account_order_restrict_enabled")
-  createdAt                  DateTime @default(now()) @map("created_at")
-  updatedAt                  DateTime @updatedAt @map("updated_at")
-
-  @@index([enabled])
-  @@map("resource_risk_policies")
-}
-
-model InstanceRiskState {
-  id                    Int      @id @default(autoincrement())
-  instanceId            Int      @unique @map("instance_id")
-  userId                Int      @map("user_id")
-  hostId                Int      @map("host_id")
-  score                 Int      @default(0)
-  level                 String   @default("normal")
-  status                String   @default("normal")
-  qosLevel              Int      @default(0) @map("qos_level")
-  currentBandwidthLimit String?  @map("current_bandwidth_limit")
-  originalIngress       String?  @map("original_ingress")
-  originalEgress        String?  @map("original_egress")
-  cpuLimited            Boolean  @default(false) @map("cpu_limited")
-  lastEvaluatedAt       DateTime? @map("last_evaluated_at")
-  lastTriggeredAt       DateTime? @map("last_triggered_at")
-  lastRecoveredAt       DateTime? @map("last_recovered_at")
-  reason                String?
-  evidence              Json     @default("{}")
-  createdAt             DateTime @default(now()) @map("created_at")
-  updatedAt             DateTime @updatedAt @map("updated_at")
-
-  instance Instance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
-  user     User     @relation("InstanceRiskStateUser", fields: [userId], references: [id], onDelete: Cascade)
-  host     Host     @relation(fields: [hostId], references: [id], onDelete: Cascade)
-
-  @@index([userId, status])
-  @@index([hostId, status])
-  @@index([score])
-  @@index([level])
-  @@map("instance_risk_states")
-}
-
-model InstanceResourceSample {
-  id              Int      @id @default(autoincrement())
-  instanceId      Int      @map("instance_id")
-  userId          Int      @map("user_id")
-  hostId          Int      @map("host_id")
-  sampledAt       DateTime @default(now()) @map("sampled_at")
-  rxBytesDelta    BigInt   @default(0) @map("rx_bytes_delta")
-  txBytesDelta    BigInt   @default(0) @map("tx_bytes_delta")
-  totalBytesDelta BigInt   @default(0) @map("total_bytes_delta")
-  rxPacketsDelta  BigInt   @default(0) @map("rx_packets_delta")
-  txPacketsDelta  BigInt   @default(0) @map("tx_packets_delta")
-  totalPacketsDelta BigInt @default(0) @map("total_packets_delta")
-  rxMbps          Decimal  @default(0) @map("rx_mbps") @db.Decimal(12, 2)
-  txMbps          Decimal  @default(0) @map("tx_mbps") @db.Decimal(12, 2)
-  totalMbps       Decimal  @default(0) @map("total_mbps") @db.Decimal(12, 2)
-  pps             Decimal  @default(0) @db.Decimal(12, 2)
-  cpuPercent      Decimal? @map("cpu_percent") @db.Decimal(8, 2)
-  source          String   @default("traffic_scheduler")
-  createdAt       DateTime @default(now()) @map("created_at")
-
-  instance Instance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
-  user     User     @relation("InstanceResourceSampleUser", fields: [userId], references: [id], onDelete: Cascade)
-  host     Host     @relation(fields: [hostId], references: [id], onDelete: Cascade)
-
-  @@index([instanceId, sampledAt(sort: Desc)])
-  @@index([userId, sampledAt(sort: Desc)])
-  @@index([hostId, sampledAt(sort: Desc)])
-  @@map("instance_resource_samples")
-}
-
-model InstanceRiskEvent {
-  id             Int      @id @default(autoincrement())
-  instanceId     Int      @map("instance_id")
-  userId         Int      @map("user_id")
-  hostId         Int      @map("host_id")
-  type           String
-  severity       String
-  scoreDelta     Int      @default(0) @map("score_delta")
-  scoreAfter     Int      @default(0) @map("score_after")
-  actionTaken    String?  @map("action_taken")
-  message        String
-  evidence       Json     @default("{}")
-  ticketId       Int?     @map("ticket_id")
-  createdAt      DateTime @default(now()) @map("created_at")
-
-  instance Instance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
-  user     User     @relation("InstanceRiskEventUser", fields: [userId], references: [id], onDelete: Cascade)
-  host     Host     @relation(fields: [hostId], references: [id], onDelete: Cascade)
-
-  @@index([instanceId, createdAt(sort: Desc)])
-  @@index([userId, createdAt(sort: Desc)])
-  @@index([severity, createdAt(sort: Desc)])
-  @@map("instance_risk_events")
-}
-
-model UserOrderRestriction {
-  id                 Int      @id @default(autoincrement())
-  userId             Int      @map("user_id")
-  status             String   @default("active")
-  reason             String
-  sourceInstanceId   Int?     @map("source_instance_id")
-  sourceRiskEventId  Int?     @map("source_risk_event_id")
-  ticketId           Int?     @map("ticket_id")
-  restrictedCreate   Boolean  @default(true) @map("restricted_create")
-  restrictedPurchase Boolean  @default(true) @map("restricted_purchase")
-  restrictedRenew    Boolean  @default(false) @map("restricted_renew")
-  reviewRequired     Boolean  @default(true) @map("review_required")
-  releasedByUserId   Int?     @map("released_by_user_id")
-  releasedAt         DateTime? @map("released_at")
-  releaseReason      String?  @map("release_reason")
-  createdAt          DateTime @default(now()) @map("created_at")
-  updatedAt          DateTime @updatedAt @map("updated_at")
-
-  user           User      @relation("UserOrderRestrictionUser", fields: [userId], references: [id], onDelete: Cascade)
-  sourceInstance Instance? @relation("UserOrderRestrictionSourceInstance", fields: [sourceInstanceId], references: [id], onDelete: SetNull)
-
-  @@index([userId, status])
-  @@index([sourceInstanceId])
-  @@index([sourceRiskEventId])
-  @@map("user_order_restrictions")
 }
 
 // ==================== 交易所模型 ====================
@@ -2509,42 +2114,9 @@ model StorageConfig {
 
   user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   uploadTasks BackupUploadTask[]
-  pluginStorageBackupRemoteArchives PluginStorageBackupRemoteArchive[]
 
   @@index([userId])
   @@map("storage_configs")
-}
-
-model PluginStorageBackupRemoteArchive {
-  id               Int         @id @default(autoincrement())
-  pluginId         String      @map("plugin_id")
-  backupId         String      @map("backup_id")
-  storageConfigId  Int         @map("storage_config_id")
-  uploadedByUserId Int         @map("uploaded_by_user_id")
-  remoteFileName   String      @map("remote_file_name")
-  remotePath       String?     @map("remote_path")
-  storageName      String      @map("storage_name")
-  storageType      StorageType @map("storage_type")
-  contentSha256    String      @map("content_sha256")
-  fileSize         BigInt      @map("file_size")
-  status           String      @default("available")
-  lastRestoredAt   DateTime?   @map("last_restored_at")
-  createdAt        DateTime    @default(now()) @map("created_at")
-  updatedAt        DateTime    @updatedAt @map("updated_at")
-
-  plugin Plugin @relation(fields: [pluginId], references: [pluginId], onDelete: Cascade)
-  storageConfig StorageConfig @relation(fields: [storageConfigId], references: [id], onDelete: Restrict)
-  uploadedBy User @relation("PluginStorageBackupRemoteArchiveUploader", fields: [uploadedByUserId], references: [id], onDelete: Restrict)
-
-  @@unique([pluginId, backupId, storageConfigId, remoteFileName])
-  @@index([pluginId])
-  @@index([backupId])
-  @@index([storageConfigId])
-  @@index([uploadedByUserId])
-  @@index([contentSha256])
-  @@index([status])
-  @@index([createdAt])
-  @@map("plugin_storage_backup_remote_archives")
 }
 
 // ==================== 备份上传任务模型 ====================
@@ -2621,542 +2193,6 @@ model SystemUpdateTask {
   @@index([startedByUserId])
   @@index([createdAt])
   @@map("system_update_tasks")
-}
-
-model Plugin {
-  id                Int          @id @default(autoincrement())
-  pluginId          String       @unique @map("plugin_id")
-  name              String
-  status            PluginStatus @default(installed)
-  enabled           Boolean      @default(false)
-  currentVersion    String?      @map("current_version")
-  sourceType        PluginSourceType @default(upload) @map("source_type")
-  sourceRepo        String?      @map("source_repo")
-  installedByUserId Int          @map("installed_by_user_id")
-  enabledByUserId   Int?         @map("enabled_by_user_id")
-  enabledAt         DateTime?    @map("enabled_at")
-  createdAt         DateTime     @default(now()) @map("created_at")
-  updatedAt         DateTime     @updatedAt @map("updated_at")
-
-  installedBy User @relation("PluginInstaller", fields: [installedByUserId], references: [id], onDelete: Restrict)
-  enabledBy User? @relation("PluginEnabler", fields: [enabledByUserId], references: [id], onDelete: SetNull)
-  versions PluginVersion[]
-  configs PluginConfig[]
-  tasks PluginInstallTask[]
-  eventLogs PluginEventLog[]
-  userData PluginUserData[]
-  tableRows PluginTableRow[]
-  tableMigrations PluginTableMigration[]
-  publicActionRateLimitBuckets PublicPluginActionRateLimitBucket[]
-  eventDedupeLocks PluginEventDedupeLock[]
-  storageBackupRemoteArchives PluginStorageBackupRemoteArchive[]
-  capabilityReviews PluginCapabilityReview[]
-
-  @@index([status])
-  @@index([enabled])
-  @@index([sourceType])
-  @@index([installedByUserId])
-  @@map("plugins")
-}
-
-model PluginCapabilityReview {
-  id               Int      @id @default(autoincrement())
-  pluginId         String   @map("plugin_id")
-  manifestVersion  String   @map("manifest_version")
-  capabilityKey    String   @map("capability_key")
-  capabilityType   String   @map("capability_type")
-  title            String
-  description      String?  @db.Text
-  riskLevel        String   @default("medium") @map("risk_level")
-  status           String   @default("pending")
-  scopes           Json     @default("[]")
-  hooks            Json     @default("[]")
-  reviewNotes      String?  @map("review_notes") @db.Text
-  reviewedByUserId Int?     @map("reviewed_by_user_id")
-  reviewedAt       DateTime? @map("reviewed_at")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
-
-  plugin Plugin @relation(fields: [pluginId], references: [pluginId], onDelete: Cascade)
-
-  @@unique([pluginId, manifestVersion, capabilityKey])
-  @@index([pluginId, status])
-  @@index([status, riskLevel])
-  @@index([capabilityType])
-  @@map("plugin_capability_reviews")
-}
-
-model PluginVersion {
-  id            Int      @id @default(autoincrement())
-  pluginId      String   @map("plugin_id")
-  version       String
-  manifest      Json
-  packageSha256 String   @map("package_sha256")
-  installPath   String   @map("install_path")
-  installedAt   DateTime @default(now()) @map("installed_at")
-
-  plugin Plugin @relation(fields: [pluginId], references: [pluginId], onDelete: Cascade)
-
-  @@unique([pluginId, version])
-  @@index([pluginId])
-  @@map("plugin_versions")
-}
-
-model PluginInstallTask {
-  id              Int                     @id @default(autoincrement())
-  pluginId        String?                 @map("plugin_id")
-  action          PluginInstallTaskAction
-  status          PluginInstallTaskStatus @default(pending)
-  sourceType      PluginSourceType        @default(upload) @map("source_type")
-  sourceUrl       String?                 @map("source_url")
-  logPath         String?                 @map("log_path")
-  errorMessage    String?                 @map("error_message")
-  startedByUserId Int                     @map("started_by_user_id")
-  startedAt       DateTime?               @map("started_at")
-  finishedAt      DateTime?               @map("finished_at")
-  createdAt       DateTime                @default(now()) @map("created_at")
-  updatedAt       DateTime                @updatedAt @map("updated_at")
-
-  plugin Plugin? @relation(fields: [pluginId], references: [pluginId], onDelete: SetNull)
-  startedBy User @relation("PluginInstallTaskStarter", fields: [startedByUserId], references: [id], onDelete: Restrict)
-
-  @@index([pluginId])
-  @@index([status])
-  @@index([action])
-  @@index([startedByUserId])
-  @@index([createdAt])
-  @@map("plugin_install_tasks")
-}
-
-model PluginConfig {
-  id             Int      @id @default(autoincrement())
-  pluginId       String   @map("plugin_id")
-  key            String
-  valueEncrypted String?  @map("value_encrypted")
-  valueJson      Json?    @map("value_json")
-  isSecret       Boolean  @default(false) @map("is_secret")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
-
-  plugin Plugin @relation(fields: [pluginId], references: [pluginId], onDelete: Cascade)
-
-  @@unique([pluginId, key])
-  @@index([pluginId])
-  @@map("plugin_configs")
-}
-
-model PluginMarketSource {
-  id        Int      @id @default(autoincrement())
-  name      String
-  url       String   @unique
-  enabled   Boolean  @default(true)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@index([enabled])
-  @@map("plugin_market_sources")
-}
-
-model PluginMarketSubmission {
-  id                Int       @id @default(autoincrement())
-  pluginId          String    @map("plugin_id")
-  version           String
-  name              String
-  repoUrl           String    @map("repo_url")
-  releaseUrl        String    @map("release_url")
-  manifestUrl       String    @map("manifest_url")
-  packageUrl        String    @map("package_url")
-  sha256            String
-  developerName     String    @map("developer_name")
-  developerHomepage String?   @map("developer_homepage")
-  developerGithub   String?   @map("developer_github")
-  contactEmail      String    @map("contact_email")
-  permissions       Json      @default("{}")
-  compatibility     Json      @default("{}")
-  pricing           Json      @default("{}")
-  notes             String?
-  reviewStatus      String    @default("pending") @map("review_status")
-  riskLevel         String    @default("medium") @map("risk_level")
-  reviewNotes       String?   @map("review_notes")
-  scanStatus        String    @default("pending") @map("scan_status")
-  scanResult        Json      @default("{}") @map("scan_result")
-  scannedAt         DateTime? @map("scanned_at")
-  submittedByUserId Int       @map("submitted_by_user_id")
-  reviewedByUserId  Int?      @map("reviewed_by_user_id")
-  reviewedAt        DateTime? @map("reviewed_at")
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @updatedAt @map("updated_at")
-
-  submittedBy User  @relation("PluginMarketSubmissionSubmitter", fields: [submittedByUserId], references: [id], onDelete: Cascade)
-  reviewedBy  User? @relation("PluginMarketSubmissionReviewer", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
-  purchases PluginPurchase[]
-
-  @@unique([pluginId, version])
-  @@index([reviewStatus])
-  @@index([riskLevel])
-  @@index([scanStatus])
-  @@index([submittedByUserId])
-  @@index([reviewedByUserId])
-  @@index([createdAt])
-  @@map("plugin_market_submissions")
-}
-
-model PluginPurchase {
-  id               Int                  @id @default(autoincrement())
-  tradeNo          String               @unique @map("trade_no")
-  idempotencyKey   String               @map("idempotency_key")
-  userId           Int                  @map("user_id")
-  developerId      Int                  @map("developer_id")
-  submissionId     Int                  @map("submission_id")
-  pluginId         String               @map("plugin_id")
-  version          String
-  grossCents       Int                  @map("gross_cents")
-  platformFeeCents Int                  @map("platform_fee_cents")
-  netCents         Int                  @map("net_cents")
-  currency         String               @db.VarChar(3)
-  status           PluginPurchaseStatus @default(completed)
-  refundableUntil  DateTime             @map("refundable_until")
-  refundedAt       DateTime?            @map("refunded_at")
-  createdAt        DateTime             @default(now()) @map("created_at")
-  updatedAt        DateTime             @updatedAt @map("updated_at")
-
-  user       User                    @relation("PluginPurchaseBuyer", fields: [userId], references: [id], onDelete: Restrict)
-  developer  User                    @relation("PluginPurchaseDeveloper", fields: [developerId], references: [id], onDelete: Restrict)
-  submission PluginMarketSubmission  @relation(fields: [submissionId], references: [id], onDelete: Restrict)
-  license    PluginLicense?
-  refund     PluginRefund?
-  earning    PluginDeveloperEarning?
-
-  @@unique([userId, idempotencyKey])
-  @@unique([userId, pluginId, version])
-  @@index([developerId, currency, createdAt])
-  @@index([submissionId])
-  @@index([status, refundableUntil])
-  @@map("plugin_purchases")
-}
-
-model PluginLicense {
-  id         Int                 @id @default(autoincrement())
-  purchaseId Int                 @unique @map("purchase_id")
-  userId     Int                 @map("user_id")
-  pluginId   String              @map("plugin_id")
-  version    String
-  status     PluginLicenseStatus @default(active)
-  grantedAt  DateTime            @default(now()) @map("granted_at")
-  revokedAt  DateTime?           @map("revoked_at")
-
-  purchase PluginPurchase @relation(fields: [purchaseId], references: [id], onDelete: Restrict)
-  user     User           @relation("PluginLicenseOwner", fields: [userId], references: [id], onDelete: Restrict)
-
-  @@unique([userId, pluginId, version])
-  @@index([userId, pluginId, status])
-  @@map("plugin_licenses")
-}
-
-model PluginRefund {
-  id          Int                @id @default(autoincrement())
-  purchaseId  Int                @unique @map("purchase_id")
-  amountCents Int                @map("amount_cents")
-  currency    String             @db.VarChar(3)
-  reason      String?
-  status      PluginRefundStatus @default(completed)
-  createdAt   DateTime           @default(now()) @map("created_at")
-
-  purchase PluginPurchase @relation(fields: [purchaseId], references: [id], onDelete: Restrict)
-
-  @@index([createdAt])
-  @@map("plugin_refunds")
-}
-
-model PluginDeveloperEarning {
-  id               Int                          @id @default(autoincrement())
-  purchaseId       Int                          @unique @map("purchase_id")
-  developerId      Int                          @map("developer_id")
-  pluginId         String                       @map("plugin_id")
-  grossCents       Int                          @map("gross_cents")
-  platformFeeCents Int                          @map("platform_fee_cents")
-  netCents         Int                          @map("net_cents")
-  currency         String                       @db.VarChar(3)
-  status           PluginDeveloperEarningStatus @default(pending)
-  availableAt      DateTime                     @map("available_at")
-  reversedAt       DateTime?                    @map("reversed_at")
-  createdAt        DateTime                     @default(now()) @map("created_at")
-  updatedAt        DateTime                     @updatedAt @map("updated_at")
-
-  purchase  PluginPurchase @relation(fields: [purchaseId], references: [id], onDelete: Restrict)
-  developer User           @relation("PluginDeveloperEarningOwner", fields: [developerId], references: [id], onDelete: Restrict)
-
-  @@index([developerId, currency, status, availableAt])
-  @@index([pluginId, createdAt])
-  @@map("plugin_developer_earnings")
-}
-
-model PluginDeveloperWithdrawal {
-  id               Int                             @id @default(autoincrement())
-  developerId      Int                             @map("developer_id")
-  idempotencyKey   String                          @map("idempotency_key")
-  amountCents      Int                             @map("amount_cents")
-  currency         String                          @db.VarChar(3)
-  payoutMethod     String                          @map("payout_method") @db.VarChar(32)
-  payoutTarget     String                          @map("payout_target") @db.VarChar(256)
-  status           PluginDeveloperWithdrawalStatus @default(pending)
-  rejectReason     String?                         @map("reject_reason")
-  reviewedByUserId Int?                            @map("reviewed_by_user_id")
-  reviewedAt       DateTime?                       @map("reviewed_at")
-  createdAt        DateTime                        @default(now()) @map("created_at")
-  updatedAt        DateTime                        @updatedAt @map("updated_at")
-
-  developer  User  @relation("PluginDeveloperWithdrawalOwner", fields: [developerId], references: [id], onDelete: Restrict)
-  reviewedBy User? @relation("PluginDeveloperWithdrawalReviewer", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
-
-  @@unique([developerId, idempotencyKey])
-  @@index([developerId, currency, status, createdAt])
-  @@index([status, createdAt])
-  @@map("plugin_developer_withdrawals")
-}
-
-model ThemeMarketSubmission {
-  id                Int       @id @default(autoincrement())
-  themeId           String    @map("theme_id")
-  version           String
-  name              String
-  repoUrl           String    @map("repo_url")
-  releaseUrl        String    @map("release_url")
-  manifestUrl       String    @map("manifest_url")
-  packageUrl        String    @map("package_url")
-  sha256            String
-  developerName     String    @map("developer_name")
-  developerHomepage String?   @map("developer_homepage")
-  developerGithub   String?   @map("developer_github")
-  contactEmail      String    @map("contact_email")
-  compatibility     Json      @default("{}")
-  tokens            Json      @default("[]")
-  layoutSlots       Json      @default("[]") @map("layout_slots")
-  notes             String?
-  reviewStatus      String    @default("pending") @map("review_status")
-  riskLevel         String    @default("medium") @map("risk_level")
-  reviewNotes       String?   @map("review_notes")
-  scanStatus        String    @default("pending") @map("scan_status")
-  scanResult        Json      @default("{}") @map("scan_result")
-  scannedAt         DateTime? @map("scanned_at")
-  submittedByUserId Int       @map("submitted_by_user_id")
-  reviewedByUserId  Int?      @map("reviewed_by_user_id")
-  reviewedAt        DateTime? @map("reviewed_at")
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @updatedAt @map("updated_at")
-
-  submittedBy User  @relation("ThemeMarketSubmissionSubmitter", fields: [submittedByUserId], references: [id], onDelete: Cascade)
-  reviewedBy  User? @relation("ThemeMarketSubmissionReviewer", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
-
-  @@unique([themeId, version])
-  @@index([reviewStatus])
-  @@index([riskLevel])
-  @@index([scanStatus])
-  @@index([submittedByUserId])
-  @@index([reviewedByUserId])
-  @@index([createdAt])
-  @@map("theme_market_submissions")
-}
-
-model ThemePackage {
-  id                Int       @id @default(autoincrement())
-  themeId           String    @unique @map("theme_id")
-  name              String
-  version           String
-  description       String?
-  author            String?
-  status            String    @default("installed")
-  enabled           Boolean   @default(false)
-  manifest          Json
-  tokens            Json      @default("{}")
-  configValues      Json      @default("{}") @map("config_values")
-  cssPath           String    @map("css_path")
-  installPath       String    @map("install_path")
-  packageSha256     String    @map("package_sha256")
-  installedByUserId Int       @map("installed_by_user_id")
-  enabledByUserId   Int?      @map("enabled_by_user_id")
-  enabledAt         DateTime? @map("enabled_at")
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @updatedAt @map("updated_at")
-
-  installedBy User  @relation("ThemeInstaller", fields: [installedByUserId], references: [id], onDelete: Restrict)
-  enabledBy   User? @relation("ThemeEnabler", fields: [enabledByUserId], references: [id], onDelete: SetNull)
-
-  @@index([enabled])
-  @@index([status])
-  @@index([installedByUserId])
-  @@index([enabledByUserId])
-  @@map("theme_packages")
-}
-
-model PluginEventLog {
-  id        Int      @id @default(autoincrement())
-  pluginId  String   @map("plugin_id")
-  userId    Int?     @map("user_id")
-  action    String
-  result    String
-  message   String?
-  eventName String?  @map("event_name")
-  handler   String?
-  payload   Json?    @default("{}")
-  actor     Json?    @default("{}")
-  retryCount Int     @default(0) @map("retry_count")
-  maxRetries Int     @default(3) @map("max_retries")
-  nextRetryAt DateTime? @map("next_retry_at")
-  deadLetterAt DateTime? @map("dead_letter_at")
-  dedupeKey String? @map("dedupe_key")
-  lastAttemptAt DateTime? @map("last_attempt_at")
-  lastError String?  @map("last_error")
-  createdAt DateTime @default(now()) @map("created_at")
-
-  plugin Plugin @relation(fields: [pluginId], references: [pluginId], onDelete: Cascade)
-  user User? @relation("PluginEventLogUser", fields: [userId], references: [id], onDelete: SetNull)
-
-  @@index([pluginId])
-  @@index([userId])
-  @@index([action])
-  @@index([result])
-  @@index([eventName])
-  @@index([handler])
-  @@index([dedupeKey])
-  @@index([pluginId, eventName, handler, dedupeKey])
-  @@index([nextRetryAt])
-  @@index([deadLetterAt])
-  @@index([lastAttemptAt])
-  @@index([createdAt])
-  @@map("plugin_event_logs")
-}
-
-model PluginEventDedupeLock {
-  id        Int      @id @default(autoincrement())
-  pluginId  String   @map("plugin_id")
-  eventName String   @map("event_name")
-  handler   String
-  dedupeKey String   @map("dedupe_key")
-  status    String   @default("in_flight")
-  eventLogId Int?    @map("event_log_id")
-  expiresAt DateTime? @map("expires_at")
-  firstSeenAt DateTime @default(now()) @map("first_seen_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  plugin Plugin @relation(fields: [pluginId], references: [pluginId], onDelete: Cascade)
-
-  @@unique([pluginId, eventName, handler, dedupeKey])
-  @@index([pluginId])
-  @@index([eventName])
-  @@index([handler])
-  @@index([dedupeKey])
-  @@index([status])
-  @@index([expiresAt])
-  @@index([eventLogId])
-  @@map("plugin_event_dedupe_locks")
-}
-
-model PluginEventAlertPreference {
-  id                       Int      @id @default(autoincrement())
-  userId                   Int      @map("user_id")
-  pluginId                 String   @map("plugin_id")
-  enabled                  Boolean  @default(true)
-  minimumLevel             String   @default("warning") @map("minimum_level")
-  cooldownMinutes          Int      @default(360) @map("cooldown_minutes")
-  notifyOnDeadLetter       Boolean  @default(true) @map("notify_on_dead_letter")
-  notifyOnDueRetry         Boolean  @default(true) @map("notify_on_due_retry")
-  notifyOnSuccessRateBelow Boolean  @default(true) @map("notify_on_success_rate_below")
-  successRateThreshold     Int      @default(95) @map("success_rate_threshold")
-  recentWindowHours        Int      @default(24) @map("recent_window_hours")
-  createdAt                DateTime @default(now()) @map("created_at")
-  updatedAt                DateTime @updatedAt @map("updated_at")
-
-  user User @relation("PluginEventAlertPreferenceUser", fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, pluginId])
-  @@index([pluginId])
-  @@index([userId])
-  @@map("plugin_event_alert_preferences")
-}
-
-model PluginUserData {
-  id        Int      @id @default(autoincrement())
-  pluginId  String   @map("plugin_id")
-  userId    Int      @map("user_id")
-  key       String
-  valueJson Json     @default("{}") @map("value_json")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  plugin Plugin @relation(fields: [pluginId], references: [pluginId], onDelete: Cascade)
-  user User @relation("PluginUserDataUser", fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([pluginId, userId, key])
-  @@index([pluginId])
-  @@index([userId])
-  @@map("plugin_user_data")
-}
-
-model PluginStorageItem {
-  id              Int      @id @default(autoincrement())
-  pluginId        String   @map("plugin_id")
-  scopeType       String   @map("scope_type")
-  scopeId         String   @default("_") @map("scope_id")
-  key             String
-  valueJson       Json     @default("{}") @map("value_json")
-  createdByUserId Int?     @map("created_by_user_id")
-  updatedByUserId Int?     @map("updated_by_user_id")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
-
-  createdBy User? @relation("PluginStorageItemCreator", fields: [createdByUserId], references: [id], onDelete: SetNull)
-  updatedBy User? @relation("PluginStorageItemUpdater", fields: [updatedByUserId], references: [id], onDelete: SetNull)
-
-  @@unique([pluginId, scopeType, scopeId, key])
-  @@index([pluginId])
-  @@index([scopeType, scopeId])
-  @@index([createdByUserId])
-  @@index([updatedByUserId])
-  @@map("plugin_storage_items")
-}
-
-model PluginTableRow {
-  id              Int      @id @default(autoincrement())
-  pluginId        String   @map("plugin_id")
-  tableName       String   @map("table_name")
-  scopeType       String   @map("scope_type")
-  scopeId         String   @default("_") @map("scope_id")
-  rowKey          String   @map("row_key")
-  valueJson       Json     @default("{}") @map("value_json")
-  createdByUserId Int?     @map("created_by_user_id")
-  updatedByUserId Int?     @map("updated_by_user_id")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
-
-  plugin Plugin @relation(fields: [pluginId], references: [pluginId], onDelete: Cascade)
-
-  @@unique([pluginId, tableName, scopeType, scopeId, rowKey])
-  @@index([pluginId])
-  @@index([pluginId, tableName])
-  @@index([scopeType, scopeId])
-  @@index([createdByUserId])
-  @@index([updatedByUserId])
-  @@map("plugin_table_rows")
-}
-
-model PluginTableMigration {
-  id              Int      @id @default(autoincrement())
-  pluginId        String   @map("plugin_id")
-  tableName       String   @map("table_name")
-  version         String
-  name            String
-  appliedByUserId Int      @map("applied_by_user_id")
-  appliedAt       DateTime @default(now()) @map("applied_at")
-
-  plugin Plugin @relation(fields: [pluginId], references: [pluginId], onDelete: Cascade)
-
-  @@unique([pluginId, tableName, version])
-  @@index([pluginId])
-  @@index([pluginId, tableName])
-  @@index([appliedByUserId])
-  @@index([appliedAt])
-  @@map("plugin_table_migrations")
 }
 
 model InstanceAuditRule {
@@ -3425,133 +2461,6 @@ model DistributedLock {
   @@map("distributed_locks")
 }
 
-// ==================== 用户生命周期运营模型 ====================
-
-enum UserLifecycleTagKey {
-  new_user
-  paid_user
-  high_value
-  expiring_soon
-  churn_risk
-  risk_flag
-}
-
-enum UserLifecycleEventType {
-  registered
-  first_login
-  first_recharge
-  first_purchase
-  renewed
-  expiring
-  churn_risk
-  winback
-}
-
-enum UserLifecycleActionType {
-  add_tag
-  remove_tag
-  assign_segment
-  remove_segment
-  issue_redeem_code
-  send_reminder
-}
-
-enum UserLifecycleActionStatus {
-  success
-  failed
-}
-
-model UserLifecycleTag {
-  id                 Int                 @id @default(autoincrement())
-  userId             Int                 @map("user_id")
-  tagKey             UserLifecycleTagKey @map("tag_key")
-  active             Boolean             @default(true)
-  note               String?
-  assignedByUserId   Int?                @map("assigned_by_user_id")
-  assignedByUsername String?             @map("assigned_by_username")
-  assignedAt         DateTime            @default(now()) @map("assigned_at")
-  removedAt          DateTime?           @map("removed_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, tagKey])
-  @@index([tagKey, active])
-  @@index([assignedByUserId])
-  @@map("user_lifecycle_tags")
-}
-
-model UserLifecycleSegmentRule {
-  id          Int      @id @default(autoincrement())
-  key         String   @unique
-  name        String
-  description String?
-  rule        Json
-  enabled     Boolean  @default(true)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  members UserLifecycleSegmentMember[]
-
-  @@index([enabled])
-  @@map("user_lifecycle_segment_rules")
-}
-
-model UserLifecycleSegmentMember {
-  id            Int      @id @default(autoincrement())
-  segmentRuleId Int      @map("segment_rule_id")
-  userId        Int      @map("user_id")
-  snapshot      Json
-  matchedAt     DateTime @default(now()) @map("matched_at")
-
-  segmentRule UserLifecycleSegmentRule @relation(fields: [segmentRuleId], references: [id], onDelete: Cascade)
-  user        User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([segmentRuleId, userId])
-  @@index([userId])
-  @@index([matchedAt])
-  @@map("user_lifecycle_segment_members")
-}
-
-model UserLifecycleEvent {
-  id          Int                    @id @default(autoincrement())
-  userId      Int                    @map("user_id")
-  eventType   UserLifecycleEventType @map("event_type")
-  eventKey    String                 @unique @map("event_key")
-  sourceType  String?                @map("source_type")
-  sourceId    Int?                   @map("source_id")
-  metadata    Json?
-  occurredAt  DateTime               @default(now()) @map("occurred_at")
-  createdAt   DateTime               @default(now()) @map("created_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, eventType])
-  @@index([eventType, occurredAt])
-  @@index([sourceType, sourceId])
-  @@map("user_lifecycle_events")
-}
-
-model UserLifecycleAction {
-  id              Int                       @id @default(autoincrement())
-  actionType      UserLifecycleActionType   @map("action_type")
-  status          UserLifecycleActionStatus @default(success)
-  targetUserId    Int?                      @map("target_user_id")
-  actorUserId     Int                       @map("actor_user_id")
-  actorUsername   String                    @map("actor_username")
-  payload         Json?
-  result          Json?
-  message         String?
-  createdAt       DateTime                  @default(now()) @map("created_at")
-
-  targetUser User? @relation("UserLifecycleActionTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
-  actor      User  @relation("UserLifecycleActionActor", fields: [actorUserId], references: [id], onDelete: Restrict)
-
-  @@index([actionType, createdAt])
-  @@index([targetUserId, createdAt])
-  @@index([actorUserId])
-  @@map("user_lifecycle_actions")
-}
-
 // ==================== 系统镜像模型 ====================
 
 model SystemImage {
@@ -3771,9 +2680,7 @@ enum TicketObjectLinkType {
   order_operation_case
   instance
   host
-  delivery_case
   sla_alert
-  plugin_task
 }
 
 model TicketInternalNote {
@@ -4388,7 +3295,6 @@ model PackagePlan {
   package   Package    @relation(fields: [packageId], references: [id], onDelete: Cascade)
   instances Instance[]
   affCodes  AffCode[]  // AFF优惠码
-  flashSaleItems FlashSaleItem[]
 
   @@unique([packageId, name]) // 同一套餐下方案名称唯一
   @@index([packageId, isActive])
@@ -4420,112 +3326,6 @@ model InstanceBillingRecord {
   @@index([instanceId, createdAt(sort: Desc)])
   @@index([userId, createdAt(sort: Desc)])
   @@map("instance_billing_records")
-}
-
-model FlashSaleCampaign {
-  id                  Int                     @id @default(autoincrement())
-  name                String
-  description         String?
-  status              FlashSaleCampaignStatus @default(draft)
-  startAt             DateTime                @map("start_at")
-  endAt               DateTime                @map("end_at")
-  requireTurnstile    Boolean                 @default(true) @map("require_turnstile")
-  minAccountAgeHours  Int                     @default(0) @map("min_account_age_hours")
-  requireEmail        Boolean                 @default(false) @map("require_email")
-  blockRiskRestricted Boolean                 @default(true) @map("block_risk_restricted")
-  maxPerUser          Int                     @default(1) @map("max_per_user")
-  notes               String?
-  createdByUserId     Int                     @map("created_by_user_id")
-  createdAt           DateTime                @default(now()) @map("created_at")
-  updatedAt           DateTime                @updatedAt @map("updated_at")
-
-  createdBy    User                   @relation("FlashSaleCampaignCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
-  items        FlashSaleItem[]
-  reservations FlashSaleReservation[]
-  auditLogs    FlashSaleAuditLog[]
-
-  @@index([status, startAt, endAt])
-  @@index([createdByUserId, createdAt(sort: Desc)])
-  @@map("flash_sale_campaigns")
-}
-
-model FlashSaleItem {
-  id                    Int      @id @default(autoincrement())
-  campaignId            Int      @map("campaign_id")
-  packagePlanId         Int      @map("package_plan_id")
-  flashPrice            Decimal  @map("flash_price") @db.Decimal(10, 2)
-  originalPriceSnapshot Decimal  @map("original_price_snapshot") @db.Decimal(10, 2)
-  totalStock            Int      @map("total_stock")
-  soldCount             Int      @default(0) @map("sold_count")
-  reservedCount         Int      @default(0) @map("reserved_count")
-  deliveredCount        Int      @default(0) @map("delivered_count")
-  failedCount           Int      @default(0) @map("failed_count")
-  perUserLimit          Int      @default(1) @map("per_user_limit")
-  allowCoupon           Boolean  @default(false) @map("allow_coupon")
-  allowAff              Boolean  @default(false) @map("allow_aff")
-  sortOrder             Int      @default(0) @map("sort_order")
-  createdAt             DateTime @default(now()) @map("created_at")
-  updatedAt             DateTime @updatedAt @map("updated_at")
-
-  campaign     FlashSaleCampaign      @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  packagePlan  PackagePlan            @relation(fields: [packagePlanId], references: [id], onDelete: Restrict)
-  reservations FlashSaleReservation[]
-
-  @@unique([campaignId, packagePlanId])
-  @@index([packagePlanId])
-  @@index([campaignId, sortOrder])
-  @@map("flash_sale_items")
-}
-
-model FlashSaleReservation {
-  id              Int                        @id @default(autoincrement())
-  campaignId      Int                        @map("campaign_id")
-  itemId          Int                        @map("item_id")
-  userId          Int                        @map("user_id")
-  instanceId      Int?                       @map("instance_id")
-  status          FlashSaleReservationStatus @default(paid)
-  amount          Decimal                    @db.Decimal(10, 2)
-  balanceLogId    Int?                       @map("balance_log_id")
-  billingRecordId Int?                       @map("billing_record_id")
-  idempotencyKey  String                     @map("idempotency_key")
-  failureReason   String?                    @map("failure_reason")
-  metadata        Json?                      @default("{}")
-  paidAt          DateTime?                  @map("paid_at")
-  deliveredAt     DateTime?                  @map("delivered_at")
-  refundedAt      DateTime?                  @map("refunded_at")
-  createdAt       DateTime                   @default(now()) @map("created_at")
-  updatedAt       DateTime                   @updatedAt @map("updated_at")
-
-  campaign FlashSaleCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  item     FlashSaleItem     @relation(fields: [itemId], references: [id], onDelete: Cascade)
-  user     User              @relation("FlashSaleReservationUser", fields: [userId], references: [id], onDelete: Cascade)
-  instance Instance?         @relation(fields: [instanceId], references: [id], onDelete: SetNull)
-
-  @@unique([idempotencyKey])
-  @@index([userId, createdAt(sort: Desc)])
-  @@index([campaignId, status])
-  @@index([itemId, status])
-  @@index([instanceId])
-  @@map("flash_sale_reservations")
-}
-
-model FlashSaleAuditLog {
-  id          Int                  @id @default(autoincrement())
-  campaignId  Int                  @map("campaign_id")
-  itemId      Int?                 @map("item_id")
-  actorUserId Int                  @map("actor_user_id")
-  action      FlashSaleAuditAction
-  beforeData  Json?                @map("before_data")
-  afterData   Json?                @map("after_data")
-  reason      String?
-  createdAt   DateTime             @default(now()) @map("created_at")
-
-  campaign FlashSaleCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  actor    User              @relation("FlashSaleAuditActor", fields: [actorUserId], references: [id], onDelete: Restrict)
-
-  @@index([campaignId, createdAt(sort: Desc)])
-  @@index([actorUserId, createdAt(sort: Desc)])
-  @@map("flash_sale_audit_logs")
 }
 
 // ==================== AFF推荐计划模型 ====================

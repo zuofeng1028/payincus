@@ -24,8 +24,7 @@ export const PUBLIC_API_SCOPES = [
   'tickets:read',
   'tickets:write',
   'notifications:read',
-  'notifications:send',
-  'plugins:action'
+  'notifications:send'
 ] as const
 
 export type PublicApiScope = (typeof PUBLIC_API_SCOPES)[number]
@@ -182,16 +181,6 @@ export const PUBLIC_API_SCOPE_METADATA: Record<PublicApiScope, PublicApiScopeMet
     implemented: true,
     notes: ['仅允许自有通知、平台模板和已启用扩展声明的模板；不允许广播、HTML、任意渠道或覆盖内部事件类型。']
   },
-  'plugins:action': {
-    scope: 'plugins:action',
-    title: '扩展动作调用',
-    description: '发现并调用已启用扩展声明的公开 webhook action。',
-    risk: 'high',
-    access: 'operate',
-    resources: ['/api/v1/plugins', '/api/v1/plugins/:pluginId/actions', '/api/v1/plugins/:pluginId/actions/:action'],
-    implemented: true,
-    notes: ['不暴露 webhook URL、密钥、配置值、服务扩展 hook 或网关扩展 hook。']
-  }
 }
 
 export function listPublicApiScopeMetadata(scopes: readonly PublicApiScope[] = PUBLIC_API_SCOPES): PublicApiScopeMetadata[] {

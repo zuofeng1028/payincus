@@ -1,123 +1,7 @@
 import axios, { type AxiosInstance } from 'axios'
 import { useAuthStore } from '@/stores/auth'
 import { buildApiUrl } from '@/utils/api-url'
-import type {
-  LoginRequest,
-  LoginResponse,
-  RegisterRequest,
-  RegisterResponse,
-  UpdateUserResponse,
-  GenerateInviteRequest,
-  InviteListResponse,
-  User,
-  BadgeOverview,
-  BadgeMultiDrawResponse,
-  BadgeOwnership,
-  BadgeCatalogItem,
-  BadgeSeriesItem,
-  UpdateUserRequest,
-  Instance,
-  InstanceWithDetails,
-  InstanceStats,
-  CreateInstanceRequest,
-  CreateInstanceResponse,
-  FlashSaleCampaign,
-  FlashSaleReservation,
-  UpdateInstanceRequest,
-  ChangeHostOptionsResponse,
-  PortMapping,
-  CreatePortMappingRequest,
-  IpAddress,
-  Ipv6Subnet,
-  HostAgentStatusResponse,
-  HostAgentInstallCommandResponse,
-  HostAgentUpgradeRequestResponse,
-  Snapshot,
-  Backup,
-  CreateSnapshotRequest,
-  CreateBackupRequest,
-  SnapshotPolicy,
-  BackupPolicy,
-  UpdateSnapshotPolicyRequest,
-  UpdateBackupPolicyRequest,
-  Host,
-  HostWithDetails,
-  AvailableHost,
-  CreateHostRequest,
-  UpdateHostRequest,
-  Package,
-  CreatePackageRequest,
-  UpdatePackageRequest,
-  SshKey,
-  CreateSshKeyRequest,
-  NotificationChannel,
-  CreateNotificationChannelRequest,
-  UpdateNotificationChannelRequest,
-  UserOAuthBinding,
-  HelpArticle,
-  HostImagePolicy,
-  SystemImage,
-  Log,
-  PaginatedResponse,
-  Ticket,
-  TicketMessage,
-  TicketStatus,
-  TicketObjectLink,
-  TicketObjectLinkType,
-  TicketSupportContext,
-  TicketAiDraftResponse,
-  TicketAiReplyResponse,
-  TicketInternalNote,
-  CreateTicketRequest,
-  PaginatedTickets,
-  PaginatedTicketMessages,
-  TerminalSavedCommand,
-  CreateTerminalSavedCommandRequest,
-  UpdateTerminalSavedCommandRequest,
-  TelegramBindingStatus,
-  TelegramBindTokenResponse,
-  UserInvite,
-  UserInviteSummary,
-  UserLifecycleOffer,
-  PluginClientExtension,
-  PluginUserData,
-  PluginStorageItem,
-  PluginStorageScope,
-  PluginStorageBackup,
-  PluginStorageRestoreResult,
-  PluginStorageRestoreDryRunResult,
-  PluginTableMigration,
-  PluginTableRow,
-  PublicApiScope,
-  PublicApiScopeMetadata,
-  PublicApiToken,
-  CreatePublicApiTokenRequest,
-  CreatePublicApiTokenResponse,
-  OAuthProviderConsentResponse,
-  OAuthProviderAuthorizeRequest,
-  OAuthProviderAuthorizeResponse,
-  OAuthProviderAuthorization,
-  GiftCardListResponse,
-  GiftCardRecord,
-  PluginMarketSubmission,
-  DeveloperPluginEventHealth,
-  PluginEventAlertPreference,
-  PluginMarketSubmissionUploadResult,
-  CreatePluginMarketSubmissionRequest,
-  UpdatePluginEventAlertPreferenceRequest,
-  ThemePackageRecord,
-  ThemeMarketSubmission,
-  CreateThemeMarketSubmissionRequest,
-  ExchangeDispute,
-  ExchangeEligibilityResult,
-  ExchangeListing,
-  ExchangeMarketPackageCategory,
-  ExchangeOrder,
-  ExchangePublicConfig,
-  ExchangeWallet,
-  ExchangeWalletLog,
-  ExchangeWithdrawal
-} from '@/types/api.js'
+import type { LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, UpdateUserResponse, GenerateInviteRequest, InviteListResponse, User, BadgeOverview, BadgeMultiDrawResponse, BadgeOwnership, BadgeCatalogItem, BadgeSeriesItem, UpdateUserRequest, Instance, InstanceWithDetails, InstanceStats, CreateInstanceRequest, CreateInstanceResponse, UpdateInstanceRequest, ChangeHostOptionsResponse, PortMapping, CreatePortMappingRequest, IpAddress, Ipv6Subnet, HostAgentStatusResponse, HostAgentInstallCommandResponse, HostAgentUpgradeRequestResponse, Snapshot, Backup, CreateSnapshotRequest, CreateBackupRequest, SnapshotPolicy, BackupPolicy, UpdateSnapshotPolicyRequest, UpdateBackupPolicyRequest, Host, HostWithDetails, AvailableHost, CreateHostRequest, UpdateHostRequest, Package, CreatePackageRequest, UpdatePackageRequest, SshKey, CreateSshKeyRequest, NotificationChannel, CreateNotificationChannelRequest, UpdateNotificationChannelRequest, UserOAuthBinding, HelpArticle, HostImagePolicy, SystemImage, Log, PaginatedResponse, Ticket, TicketMessage, TicketStatus, TicketObjectLink, TicketObjectLinkType, TicketSupportContext, TicketInternalNote, CreateTicketRequest, PaginatedTickets, PaginatedTicketMessages, TerminalSavedCommand, CreateTerminalSavedCommandRequest, UpdateTerminalSavedCommandRequest, TelegramBindingStatus, TelegramBindTokenResponse, UserInvite, UserInviteSummary, PublicApiScope, PublicApiScopeMetadata, PublicApiToken, CreatePublicApiTokenRequest, CreatePublicApiTokenResponse, OAuthProviderConsentResponse, OAuthProviderAuthorizeRequest, OAuthProviderAuthorizeResponse, OAuthProviderAuthorization, GiftCardListResponse, GiftCardRecord, ExchangeDispute, ExchangeEligibilityResult, ExchangeListing, ExchangeMarketPackageCategory, ExchangeOrder, ExchangePublicConfig, ExchangeWallet, ExchangeWalletLog, ExchangeWithdrawal } from '@/types/api.js'
 
 export type VipRuleType = 'user' | 'hosting'
 export type VipConditionMode = 'any' | 'all'
@@ -2608,14 +2492,6 @@ const api = {
       http.get(`/tickets/${id}/support-context`),
 
     // 生成 AI 回复草稿（仅管理员，插件启用后可用，不会自动发送）
-    generateAiDraft: (id: number): Promise<TicketAiDraftResponse> =>
-      http.post(`/tickets/${id}/ai/draft`, {}, { timeout: TIMEOUT.MEDIUM }),
-
-    // 由 AI 工单插件生成并发送回复（仅管理员，要求插件 reply 权限和非草稿模式）
-    sendAiReply: (id: number): Promise<TicketAiReplyResponse> =>
-      http.post(`/tickets/${id}/ai/reply`, {}, { timeout: TIMEOUT.MEDIUM }),
-
-    // 创建内部备注（仅管理员）
     createInternalNote: (id: number, content: string): Promise<{ note: TicketInternalNote }> =>
       http.post(`/tickets/${id}/internal-notes`, { content }),
 
@@ -2660,13 +2536,6 @@ const api = {
     // 获取待处理工单数量
     getPendingCount: (): Promise<{ userTickets: number; hostTickets: number; total: number; isHostOwner: boolean }> =>
       http.get('/tickets/pending-count')
-  },
-
-  resourceRisk: {
-    createReviewTicket: (content?: string): Promise<{ message: string; ticket: { id: number; messageId: number } }> =>
-      http.post('/resource-risk/review-ticket', { content }),
-    getMyStatus: (): Promise<{ restricted: boolean; restriction: unknown; riskStates: unknown[] }> =>
-      http.get('/resource-risk/my-status')
   },
 
   // 签到系统
@@ -3362,17 +3231,6 @@ const api = {
       http.get('/gift-cards/user/mine', { params })
   },
 
-  flashSales: {
-    list: (): Promise<{ campaigns: FlashSaleCampaign[] }> =>
-      http.get('/flash-sales'),
-    myReservations: (params: { page?: number; pageSize?: number } = {}): Promise<{
-      reservations: FlashSaleReservation[]
-      total: number
-      page: number
-      pageSize: number
-    }> => http.get('/flash-sales/my-reservations', { params })
-  },
-
   exchange: {
     getConfig: (): Promise<ExchangePublicConfig> =>
       http.get('/exchange/config'),
@@ -3973,63 +3831,7 @@ const api = {
     }> => http.post('/vip-benefits/claim-all')
   },
 
-  userLifecycle: {
-    myOffers: (): Promise<{ offers: UserLifecycleOffer[] }> =>
-      http.get('/user-lifecycle/my-offers')
-  },
-
   // 域名邮箱
-  plugins: {
-    getEnabledClientExtensions: (): Promise<{ extensions: PluginClientExtension[] }> =>
-      http.get('/plugins/enabled-client-extensions'),
-    getEnabledAdminClientExtensions: (): Promise<{ extensions: PluginClientExtension[] }> =>
-      http.get('/plugins/enabled-admin-client-extensions'),
-    getPublicConfig: (pluginId: string): Promise<{ config: Record<string, unknown> }> =>
-      http.get(`/plugins/${pluginId}/config/public`),
-    getStorage: (pluginId: string, key: string): Promise<{ data: PluginUserData | null }> =>
-      http.get(`/plugins/${pluginId}/storage/${encodeURIComponent(key)}`),
-    setStorage: (pluginId: string, key: string, value: unknown): Promise<{ data: PluginUserData }> =>
-      http.put(`/plugins/${pluginId}/storage/${encodeURIComponent(key)}`, { value }),
-    deleteStorage: (pluginId: string, key: string): Promise<{ message: string }> =>
-      http.delete(`/plugins/${pluginId}/storage/${encodeURIComponent(key)}`),
-    getScopedStorage: (pluginId: string, scope: PluginStorageScope, key: string, scopeId?: string | number): Promise<{ data: PluginStorageItem | null }> =>
-      http.get(`/plugins/${pluginId}/scoped-storage/${scope}/${encodeURIComponent(key)}`, { params: scopeId ? { scopeId } : undefined }),
-    setScopedStorage: (pluginId: string, scope: PluginStorageScope, key: string, value: unknown, scopeId?: string | number): Promise<{ data: PluginStorageItem }> =>
-      http.put(`/plugins/${pluginId}/scoped-storage/${scope}/${encodeURIComponent(key)}`, { value }, { params: scopeId ? { scopeId } : undefined }),
-    deleteScopedStorage: (pluginId: string, scope: PluginStorageScope, key: string, scopeId?: string | number): Promise<{ message: string }> =>
-      http.delete(`/plugins/${pluginId}/scoped-storage/${scope}/${encodeURIComponent(key)}`, { params: scopeId ? { scopeId } : undefined }),
-    getTableRow: (pluginId: string, scope: PluginStorageScope, table: string, rowKey: string, scopeId?: string | number): Promise<{ data: PluginTableRow | null }> =>
-      http.get(`/plugins/${pluginId}/table-storage/${scope}/${encodeURIComponent(table)}/${encodeURIComponent(rowKey)}`, { params: scopeId ? { scopeId } : undefined }),
-    setTableRow: (pluginId: string, scope: PluginStorageScope, table: string, rowKey: string, value: unknown, scopeId?: string | number): Promise<{ data: PluginTableRow }> =>
-      http.put(`/plugins/${pluginId}/table-storage/${scope}/${encodeURIComponent(table)}/${encodeURIComponent(rowKey)}`, { value }, { params: scopeId ? { scopeId } : undefined }),
-    deleteTableRow: (pluginId: string, scope: PluginStorageScope, table: string, rowKey: string, scopeId?: string | number): Promise<{ message: string }> =>
-      http.delete(`/plugins/${pluginId}/table-storage/${scope}/${encodeURIComponent(table)}/${encodeURIComponent(rowKey)}`, { params: scopeId ? { scopeId } : undefined }),
-    listTableMigrations: (pluginId: string, table: string): Promise<{ data: PluginTableMigration[] }> =>
-      http.get(`/plugins/${pluginId}/table-storage/${encodeURIComponent(table)}/migrations`),
-    applyTableMigration: (pluginId: string, table: string, version: string): Promise<{ data: PluginTableMigration }> =>
-      http.post(`/plugins/${pluginId}/table-storage/${encodeURIComponent(table)}/migrations`, { version }),
-    exportStorageBackup: (pluginId: string): Promise<{ backup: PluginStorageBackup }> =>
-      http.get(`/plugins/${pluginId}/storage-backup`),
-    restoreStorageBackup: (pluginId: string, backup: PluginStorageBackup): Promise<{ restored: PluginStorageRestoreResult }> =>
-      http.post(`/plugins/${pluginId}/storage-backup/restore`, { backup }),
-    validateStorageBackupRestore: (pluginId: string, backup: PluginStorageBackup): Promise<{ dryRun: PluginStorageRestoreDryRunResult }> =>
-      http.post(`/plugins/${pluginId}/storage-backup/restore`, { backup }, { params: { dryRun: 'true' } }),
-    runAction: (pluginId: string, action: string, payload?: Record<string, unknown>): Promise<unknown> =>
-      http.post(`/plugins/${pluginId}/actions/${action}`, payload || {})
-  },
-
-  themes: {
-    getActive: (): Promise<{ theme: ThemePackageRecord | null }> =>
-      http.get('/themes/active')
-  },
-
-  themeMarketSubmissions: {
-    create: (data: CreateThemeMarketSubmissionRequest): Promise<{ submission: ThemeMarketSubmission }> =>
-      http.post('/theme-market-submissions', data),
-    mine: (): Promise<{ submissions: ThemeMarketSubmission[] }> =>
-      http.get('/theme-market-submissions/mine')
-  },
-
   apiTokens: {
     list: (): Promise<{ scopes: readonly PublicApiScope[]; tokens: PublicApiToken[] }> =>
       http.get('/api-tokens'),
@@ -4056,27 +3858,6 @@ const api = {
       http.get('/oauth-provider/authorizations'),
     revokeAuthorization: (id: number): Promise<{ authorization: OAuthProviderAuthorization }> =>
       http.delete(`/oauth-provider/authorizations/${id}`)
-  },
-
-  pluginMarketSubmissions: {
-    uploadPackage: (file: File): Promise<{ upload: PluginMarketSubmissionUploadResult }> => {
-      const form = new FormData()
-      form.append('package', file)
-      return http.post('/plugin-market-submissions/upload-package', form, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        timeout: TIMEOUT.LONG
-      })
-    },
-    create: (data: CreatePluginMarketSubmissionRequest): Promise<{ submission: PluginMarketSubmission }> =>
-      http.post('/plugin-market-submissions', data),
-    mine: (): Promise<{ submissions: PluginMarketSubmission[] }> =>
-      http.get('/plugin-market-submissions/mine'),
-    eventHealth: (): Promise<{ plugins: DeveloperPluginEventHealth[]; updatedAt: string }> =>
-      http.get('/plugin-market-submissions/mine/event-health'),
-    eventAlertPreferences: (): Promise<{ preferences: PluginEventAlertPreference[]; updatedAt: string }> =>
-      http.get('/plugin-market-submissions/mine/event-alert-preferences'),
-    updateEventAlertPreference: (pluginId: string, data: UpdatePluginEventAlertPreferenceRequest): Promise<{ preference: PluginEventAlertPreference }> =>
-      http.patch(`/plugin-market-submissions/mine/event-alert-preferences/${encodeURIComponent(pluginId)}`, data)
   },
 
   orders: {

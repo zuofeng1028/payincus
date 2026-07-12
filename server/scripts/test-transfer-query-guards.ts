@@ -117,17 +117,6 @@ for (const [name, route] of [
 }
 
 assert.ok(
-  routeSource.includes('assertUserCanPurchaseOrReceiveInstance,') &&
-    routeSource.includes('OrderRestrictedError,') &&
-    routeSource.includes('orderRestrictionApiError') &&
-    acceptRoute.includes('await assertUserCanPurchaseOrReceiveInstance(user.id)') &&
-    acceptRoute.includes('await rollbackToPending()') &&
-    acceptRoute.includes('error instanceof OrderRestrictedError') &&
-    acceptRoute.includes('return reply.code(403).send(orderRestrictionApiError(error))'),
-  'accept transfer route must reject purchase-restricted recipients and restore the pending transfer state'
-)
-
-assert.ok(
   executeTransferHelper.includes('userId: toUserId,') &&
     executeTransferHelper.includes('autoRenew: false,'),
   'completed transfers must disable auto-renew when ownership changes'

@@ -324,15 +324,6 @@ function isAllowedPublicOrTokenRoute(route: RouteInfo): boolean {
   if (file === 'recharge.ts') return path.startsWith('/api/recharge/callback/')
   if (file === 'backups.ts') return path === '/:instanceId/backups/export/:taskId/download'
   if (file === 'terminal.ts') return path === '/:id/terminal'
-  if (file === 'plugin-market-submissions.ts') return path === '/uploads/plugins/:filename'
-  if (file === 'themes.ts') {
-    return [
-      '/active',
-      '/:themeId/config-files/:key/:filename',
-      '/preview/:themeId'
-    ].includes(path)
-  }
-
   return false
 }
 

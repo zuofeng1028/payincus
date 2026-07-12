@@ -9,7 +9,6 @@ import { createInboxMessage } from '../db/inbox.js'
 import { prisma } from '../db/prisma.js'
 import { assertSafeWebhookUrl, safeFetch } from './outbound-security.js'
 import { sanitizeTokensInString } from './log-sanitizer.js'
-import { emitNotificationSentPluginEvent } from './plugin-business-events.js'
 
 // 重试配置
 const MAX_RETRIES = 3
@@ -37,7 +36,6 @@ type EventType =
   | 'instance_cloned'
   | 'instance_host_changed'
   | 'instance_task_failed'
-  | 'delivery_assurance_update'
   | 'exchange_delivery_completed'
   | 'exchange_delivery_failed'
   | 'exchange_sale_confirming'
@@ -81,7 +79,6 @@ type EventType =
   | '2fa_disabled'
   // 配额与资源类
   | 'quota_warning'
-  | 'resource_risk_qos_limited'
   // 工单类
   | 'ticket_created'
   | 'ticket_replied'
@@ -97,7 +94,6 @@ type EventType =
   // 公共 API 受控通知
   | 'public_api_notification'
   // 扩展开发者告警
-  | 'plugin_event_delivery_alert'
 
 interface EventData {
   instanceName?: string
@@ -138,13 +134,6 @@ interface EventData {
   publicApiMessage?: string
   publicApiSource?: string
   // 扩展事件投递告警
-  pluginEventPluginId?: string
-  pluginEventDeadLetterCount?: number
-  pluginEventDueRetryCount?: number
-  pluginEventRecentFailedCount?: number
-  pluginEventLatestEventName?: string
-  pluginEventLatestHandler?: string
-  // 社交互动相关
   fromUsername?: string       // 来源用户名
   toUsername?: string         // 目标用户名
   // 套餐共享相关
@@ -425,21 +414,6 @@ const EVENT_TEMPLATES: Record<EventType, EventTemplate> = {
       return msg
     }
   },
-  delivery_assurance_update: {
-    title: '🛠️ 交付保障通知',
-    message: (data) => {
-      const statusLabel = data.status === 'delayed'
-        ? '交付处理中'
-        : data.status === 'recovered'
-          ? '交付已恢复'
-          : '需要人工处理'
-      let msg = `实例「${data.instanceName}」${statusLabel}`
-      if (data.hostName) msg += `\n节点: ${data.hostName}`
-      if (data.deliveryMessage) msg += `\n说明: ${data.deliveryMessage}`
-      if (data.status === 'contact_support') msg += `\n请通过工单或客服继续跟进。`
-      return msg
-    }
-  },
   exchange_delivery_completed: {
     title: '✅ 交易所交割完成',
     message: (data) => {
@@ -661,19 +635,6 @@ const EVENT_TEMPLATES: Record<EventType, EventTemplate> = {
       return msg
     }
   },
-  resource_risk_qos_limited: {
-    title: '⚠️ 实例已触发资源风控',
-    message: (data) => {
-      let msg = `实例「${data.instanceName}」已触发资源风控限速`
-      if (data.hostName) msg += `\n节点: ${data.hostName}`
-      if (data.bandwidthLimit) msg += `\n当前限速: ${data.bandwidthLimit}`
-      if (typeof data.score === 'number') msg += `\n当前评分: ${data.score}`
-      if (data.reason) msg += `\n原因: ${data.reason}`
-      msg += `\n持续异常可能限制下单或暂停实例，如有疑问请发送工单`
-      return msg
-    }
-  },
-
   // ==================== 工单类 ====================
   ticket_created: {
     title: '📩 收到新工单',
@@ -879,24 +840,7 @@ const EVENT_TEMPLATES: Record<EventType, EventTemplate> = {
       const source = data.publicApiSource ? `\n来源: ${data.publicApiSource}` : ''
       return `${data.publicApiTitle || '来自扩展的通知'}\n\n${data.publicApiMessage || ''}${source}`
     }
-  },
-  plugin_event_delivery_alert: {
-    title: '⚠️ 扩展事件投递告警',
-    message: (data) => {
-      const lines = [
-        `扩展「${data.pluginEventPluginId || '-'}」存在事件投递异常。`,
-        `死信事件: ${data.pluginEventDeadLetterCount || 0}`,
-        `到期重试: ${data.pluginEventDueRetryCount || 0}`,
-        `近期待处理失败: ${data.pluginEventRecentFailedCount || 0}`
-      ]
-      if (data.pluginEventLatestEventName || data.pluginEventLatestHandler) {
-        lines.push(`最近事件: ${data.pluginEventLatestEventName || '-'} -> ${data.pluginEventLatestHandler || '-'}`)
-      }
-      lines.push('请在扩展中心查看事件健康、修复 webhook 后手动重放或等待自动重试。')
-      return lines.join('\n')
-    }
-  }
-}
+  }}
 
 /**
  * 延迟函数
@@ -1018,7 +962,6 @@ export async function sendNotification(
     const channels = await db.getEnabledChannelsByUserId(userId)
 
     if (channels.length === 0) {
-      emitNotificationSentPluginEvent({ userId, eventType, sent: 0, failed: 0, channelCount: 0 })
       return { sent: 0, failed: 0 }
     }
 
@@ -1083,7 +1026,6 @@ export async function sendNotification(
       }
     }
 
-    emitNotificationSentPluginEvent({ userId, eventType, sent, failed, channelCount: channels.length })
     return { sent, failed }
   } catch (err) {
     console.error('[Notifier] sendNotification error:', err)

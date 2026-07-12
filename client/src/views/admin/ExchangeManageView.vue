@@ -5,7 +5,7 @@ import { useToast } from '@/stores/toast'
 
 defineOptions({ name: 'ExchangeManageView' })
 
-type TabKey = 'listings' | 'orders' | 'delivery' | 'wallets' | 'withdrawals' | 'disputes' | 'risk' | 'config' | 'audit'
+type TabKey = 'listings' | 'orders' | 'delivery' | 'wallets' | 'withdrawals' | 'disputes' | 'config' | 'audit'
 type ListTabKey = Exclude<TabKey, 'config'>
 
 interface ListState {
@@ -63,7 +63,6 @@ const tabs: Array<{ key: TabKey; label: string }> = [
   { key: 'wallets', label: '交易所余额' },
   { key: 'withdrawals', label: '提现审核' },
   { key: 'disputes', label: '争议管理' },
-  { key: 'risk', label: '风控记录' },
   { key: 'config', label: '配置中心' },
   { key: 'audit', label: '审计日志' }
 ]
@@ -86,7 +85,6 @@ const deliveryTasks = ref<any[]>([])
 const wallets = ref<any[]>([])
 const withdrawals = ref<any[]>([])
 const disputes = ref<any[]>([])
-const riskRecords = ref<any[]>([])
 const auditLogs = ref<any[]>([])
 const policy = ref<Record<string, any>>({})
 const adminActionDialog = ref<AdminActionDialog | null>(null)
@@ -100,7 +98,6 @@ const listState = ref<Record<ListTabKey, ListState>>({
   wallets: { page: 1, total: 0, status: '' },
   withdrawals: { page: 1, total: 0, status: '' },
   disputes: { page: 1, total: 0, status: '' },
-  risk: { page: 1, total: 0, status: '' },
   audit: { page: 1, total: 0, status: '' }
 })
 const statusOptions: Record<ListTabKey, Array<{ value: string; label: string }>> = {
@@ -148,13 +145,6 @@ const statusOptions: Record<ListTabKey, Array<{ value: string; label: string }>>
     { value: 'refunded', label: '已退款' },
     { value: 'released', label: '已放款' },
     { value: 'closed', label: '已关闭' }
-  ],
-  risk: [
-    { value: '', label: '全部风控' },
-    { value: 'normal', label: '正常' },
-    { value: 'qos_limited', label: 'QoS 限速' },
-    { value: 'suspended', label: '已暂停' },
-    { value: 'manual_review', label: '人工审核' }
   ],
   audit: []
 }
@@ -378,12 +368,6 @@ async function loadDisputes(): Promise<void> {
   setListResult('disputes', res)
 }
 
-async function loadRiskRecords(): Promise<void> {
-  const res = await api.exchange.listRiskRecords(queryFor('risk'))
-  riskRecords.value = res.items
-  setListResult('risk', res)
-}
-
 async function loadAuditLogs(): Promise<void> {
   const res = await api.exchange.listAuditLogs({ page: listState.value.audit.page, pageSize })
   auditLogs.value = res.items
@@ -409,7 +393,6 @@ async function loadActive(): Promise<void> {
     if (activeTab.value === 'wallets') await loadWallets()
     if (activeTab.value === 'withdrawals') await loadWithdrawals()
     if (activeTab.value === 'disputes') await loadDisputes()
-    if (activeTab.value === 'risk') await loadRiskRecords()
     if (activeTab.value === 'config') await loadConfig()
     if (activeTab.value === 'audit') await loadAuditLogs()
   } catch (error: any) {
@@ -1160,37 +1143,6 @@ onMounted(loadActive)
             </td>
           </tr>
           <tr v-if="disputes.length === 0"><td class="px-4 py-8 text-center text-themed-muted" colspan="7">暂无争议。</td></tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section v-else-if="activeTab === 'risk'" class="card overflow-hidden">
-      <table class="w-full table-fixed text-sm">
-        <thead>
-          <tr class="border-b border-themed">
-            <th class="nimbus-th w-[16%]">实例</th>
-            <th class="nimbus-th w-[14%]">用户</th>
-            <th class="nimbus-th w-[12%]">节点</th>
-            <th class="nimbus-th w-[10%]">评分</th>
-            <th class="nimbus-th w-[14%]">状态</th>
-            <th class="nimbus-th w-[20%]">原因</th>
-            <th class="nimbus-th w-[14%]">更新时间</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in riskRecords" :key="item.id" class="nimbus-row border-b border-themed align-top">
-            <td class="px-4 py-3 break-words text-themed">{{ item.instance?.name || item.instanceId }} <span class="text-themed-muted">({{ item.instance?.status || '-' }})</span></td>
-            <td class="px-4 py-3 break-words text-themed">{{ item.user?.username || '-' }} / #{{ item.userId }}</td>
-            <td class="px-4 py-3 break-words text-themed">{{ item.host?.name || item.hostId }}</td>
-            <td class="px-4 py-3 tabular-nums text-themed">{{ item.score }} / {{ item.level }}</td>
-            <td class="px-4 py-3">
-              <span class="nimbus-pill" :class="item.status === 'normal' ? 'text-green-600 dark:text-green-400' : item.status === 'suspended' ? 'text-rose-600 dark:text-rose-400' : 'text-amber-600 dark:text-amber-400'"><span class="dot"></span>{{ item.status }}</span>
-              <span v-if="item.currentBandwidthLimit" class="mt-1 block text-xs text-themed-muted">· {{ item.currentBandwidthLimit }}</span>
-            </td>
-            <td class="px-4 py-3 text-themed-muted"><span class="block break-words">{{ item.reason || '-' }}</span></td>
-            <td class="px-4 py-3 text-themed-muted">{{ formatDate(item.updatedAt) }}</td>
-          </tr>
-          <tr v-if="riskRecords.length === 0"><td class="px-4 py-8 text-center text-themed-muted" colspan="7">暂无风控记录。</td></tr>
         </tbody>
       </table>
     </section>

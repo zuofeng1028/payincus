@@ -8,7 +8,6 @@ import { useToast } from '@/stores/toast'
 import { useThemeStore } from '@/stores/theme'
 import { dashboardPath } from '@/utils/app-paths'
 import UserAvatar from '@/components/UserAvatar.vue'
-import ThemeTemplateSlot from '@/components/theme/ThemeTemplateSlot.vue'
 
 defineOptions({ name: 'InvitesView' })
 
@@ -167,8 +166,6 @@ function nextPage(): void {
         {{ t('invites.backToOverview') }}
       </RouterLink>
     </div>
-
-    <ThemeTemplateSlot slot-name="user.invites.banner" container-class="overflow-hidden rounded-lg border border-themed bg-themed-surface" />
 
     <div v-if="loading" class="card p-6 animate-pulse">
       <div class="h-6 w-1/4 rounded bg-themed-secondary mb-5"></div>

@@ -119,7 +119,6 @@ export * from './balance.js'
 
 // 导出计费记录相关操作
 export * from './billing-records.js'
-export * from './plugins.js'
 
 // 导出徽章相关操作
 export * from './badges.js'

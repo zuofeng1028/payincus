@@ -38,7 +38,6 @@ assertStartGuard('server/src/services/hosting-scheduler.ts', 'startHostingSchedu
 assertStartGuard('server/src/services/status-scheduler.ts', 'startStatusScheduler', 'let schedulerStarted = false')
 assertStartGuard('server/src/services/system-monitor.ts', 'startSystemMonitor', 'let schedulerStarted = false')
 assertStartGuard('server/src/services/traffic-scheduler.ts', 'startTrafficScheduler', 'let schedulerStarted = false')
-assertStartGuard('server/src/services/ai-ticket-auto-reply-scheduler.ts', 'startAiTicketAutoReplyScheduler', 'let schedulerStarted = false')
 assertStartGuard('server/src/services/mail-usage-scheduler.ts', 'startMailUsageScheduler', 'let schedulerStarted = false')
 assertStartGuard('server/src/services/mail-autorenew-scheduler.ts', 'startMailAutoRenewScheduler', 'let schedulerStarted = false')
 

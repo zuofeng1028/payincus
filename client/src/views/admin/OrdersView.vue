@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import api from '@/api/admin'
 
 type OrderSourceType = 'recharge' | 'instance_billing'
 type OrderOperationStatus = 'pending_review' | 'confirmed' | 'compensated' | 'closed'
+
+const route = useRoute()
 
 interface OrderOperationCase {
   id: number
@@ -566,6 +569,7 @@ function goRequestPage(nextPage: number) {
 }
 
 onMounted(() => {
+  if (typeof route.query.keyword === 'string') keyword.value = route.query.keyword
   void loadOrders()
   void loadAdjustmentRequests()
 })

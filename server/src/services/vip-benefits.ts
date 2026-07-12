@@ -110,24 +110,14 @@ export async function getUserContinuousVipBenefit(
   }
 }
 
-export type VipPriceSource = 'base' | 'aff' | 'vip' | 'flash_sale'
+export type VipPriceSource = 'base' | 'aff' | 'vip'
 
 export function arbitrateVipPrice(input: {
   basePrice: number
   affDiscountRate?: number
   vipDiscountPercent?: number
-  flashSalePrice?: number | null
 }): { finalPrice: number; discountAmount: number; source: VipPriceSource } {
   const basePrice = Number(input.basePrice.toFixed(2))
-  if (input.flashSalePrice !== null && input.flashSalePrice !== undefined) {
-    const finalPrice = Number(input.flashSalePrice.toFixed(2))
-    return {
-      finalPrice,
-      discountAmount: Number(Math.max(0, basePrice - finalPrice).toFixed(2)),
-      source: 'flash_sale'
-    }
-  }
-
   const affRate = Math.max(0, Math.min(1, input.affDiscountRate ?? 0))
   const vipRate = Math.max(0, Math.min(1, (input.vipDiscountPercent ?? 0) / 100))
   const candidates: Array<{ price: number; source: VipPriceSource }> = [

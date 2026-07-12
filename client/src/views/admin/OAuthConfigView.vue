@@ -4,7 +4,6 @@ import { useI18n } from 'vue-i18n'
 import api from '@/api/admin'
 import { useToast } from '@/stores/toast'
 import { useThemeStore } from '@/stores/theme'
-import ThemeTemplateSlot from '@/components/theme/ThemeTemplateSlot.vue'
 import type { AdminOAuthAuthorization, OAuthClientApp, OAuthConfig, PublicApiScope, PublicApiScopeMetadata, UpdateOAuthConfigRequest } from '@/types/api'
 import { buildPublicApiUrl } from '@/utils/api-url'
 
@@ -385,7 +384,6 @@ function formatScopeAccess(access: PublicApiScopeMetadata['access']): string {
         </div>
       </div>
     </header>
-    <ThemeTemplateSlot slot-name="admin.oauth.banner" container-class="overflow-hidden rounded-xl border border-themed bg-themed-surface" />
 
     <!-- Loading -->
     <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 gap-6">
