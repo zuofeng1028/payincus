@@ -89,7 +89,7 @@
 
   /* ============ 按钮 - Vercel 风格 ============ */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
   }
 
   /* 主按钮 */
@@ -157,11 +157,11 @@
   }
 
   .dark .input {
-    @apply border border-gray-800 text-gray-100 placeholder-gray-600 focus:outline-none focus:border-gray-600 focus:ring-1 focus:ring-gray-600;
+    @apply border border-gray-800 text-gray-100 placeholder-gray-600 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500;
   }
 
   .light .input {
-    @apply bg-white border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400;
+    @apply bg-white border border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500;
   }
 
   /* 下拉选择框 */
@@ -804,11 +804,11 @@
 
 /* ============ 输入框聚焦效果 ============ */
 .dark .input:focus {
-  box-shadow: 0 0 0 1px rgba(82, 82, 91, 0.3);
+  box-shadow: 0 0 0 3px rgba(139, 135, 255, 0.22);
 }
 
 .light .input:focus {
-  box-shadow: 0 0 0 1px rgba(156, 163, 175, 0.3);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.14);
 }
 
 /* ============ 按钮点击效果 ============ */
@@ -890,11 +890,15 @@
 }
 
 .card-interactive:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 .light .card-interactive:hover {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 24px -6px rgba(16, 24, 40, 0.12), 0 4px 8px -4px rgba(16, 24, 40, 0.06);
+}
+
+.dark .card-interactive:hover {
+  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.55);
 }
 
 /* ============ 数字徽章动画 ============ */
@@ -1247,15 +1251,15 @@
 .kawaii-instance-card,
 .card,
 .kawaii-brand-mark {
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.05) !important;
+  box-shadow: 0 1px 2px rgb(16 24 40 / 0.05), 0 6px 16px rgb(16 24 40 / 0.05) !important;
 }
 
-/* 6) 渐变 CTA / 主按钮 / 选中态 → 纯黑白墨色（浅色黑底白字 / 深色白底黑字） */
+/* 6) 渐变 CTA / 主按钮 / 选中态 → Nimbus 靛蓝（明暗各一，靛蓝微光） */
 .kawaii-header-cta,
 .kawaii-primary-button,
 .btn-primary {
   background-image: none !important;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.05) !important;
+  box-shadow: 0 1px 2px rgb(79 70 229 / 0.28), 0 6px 18px rgb(79 70 229 / 0.26) !important;
 }
 .dark .kawaii-header-cta,
 .dark .kawaii-primary-button,
