@@ -308,13 +308,17 @@ jobs:
           cp "incudal-${VERSION}-ota-manifest.json" ota-manifest.json
           ls -lh incudal-*.tar.gz incudal-*.sha256 *ota-manifest.json
 
-      - name: 生成官方插件市场资产
+      - name: 生成官方插件市场资产（插件平台已下线，缺失即跳过）
         run: |
           set -euo pipefail
+          PLUGIN_SOURCE_DIR="plugin-templates/ai-ticket-agent-plugin"
+          if [[ ! -f "${PLUGIN_SOURCE_DIR}/payincus.plugin.json" ]]; then
+            echo "插件平台已移除，跳过插件市场资产生成"
+            exit 0
+          fi
           VERSION="${{ steps.version.outputs.version }}"
           REPO="${{ github.repository }}"
           PLUGIN_ID="com.payincus.ai-ticket-agent"
-          PLUGIN_SOURCE_DIR="plugin-templates/ai-ticket-agent-plugin"
           PLUGIN_VERSION="$(node -e "console.log(require('./${PLUGIN_SOURCE_DIR}/payincus.plugin.json').version)")"
           PLUGIN_PACKAGE="payincus-plugin-ai-ticket-agent-${PLUGIN_VERSION}.tar.gz"
           PLUGIN_MANIFEST="payincus-plugin-ai-ticket-agent-${PLUGIN_VERSION}.manifest.json"
@@ -394,10 +398,6 @@ jobs:
             incudal-*.tar.gz.sha256
             incudal-*-ota-manifest.json
             ota-manifest.json
-            payincus-plugin-*.tar.gz
-            payincus-plugin-*.tar.gz.sha256
-            payincus-plugin-*.manifest.json
-            plugin-market-index.json
           generate_release_notes: true
           draft: false
           prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
