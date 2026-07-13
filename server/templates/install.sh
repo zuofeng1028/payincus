@@ -37,6 +37,8 @@ readonly BRIDGE_NAME="incusbr0"
 # 本脚本写入 /etc/wireguard/wg0.conf 时打的标记：用于区分「我们生成的 WARP 配置」
 # 和「客户自己的 WireGuard 配置」，避免覆盖/卸载时误删客户的东西。
 readonly WG_MANAGED_MARKER="# Managed by PayIncus (incudal) WARP - do not edit, will be overwritten"
+# /etc/ndppd.conf 是全局配置，客户可能已有自己的 NDP 代理规则；同样用标记区分。
+readonly NDPPD_MANAGED_MARKER="# Managed by PayIncus (incudal) - do not edit, will be overwritten"
 readonly PRESEED_FILE="/tmp/.incus-preseed-$$.yaml"
 readonly AGENT_ID="${INJECT_AGENT_ID:-}"
 readonly AGENT_SECRET="${INJECT_AGENT_SECRET:-}"
@@ -80,6 +82,18 @@ info()  { echo -e "${BLUE}[i]${NC} $1"; }
 warn()  { echo -e "${YELLOW}[!]${NC} $1"; }
 error() { echo -e "${RED}[✗]${NC} $1"; }
 step()  { echo -e "\n${CYAN}[▶]${NC} ${BOLD}$1${NC}"; }
+
+# 校验下载到的文件确实是一个 ELF 可执行文件（魔数 7f 45 4c 46）。
+# 下载端点被 CDN/WAF 拦截、Release 资产缺失或链接失效时，拿到的往往是一段 HTML
+# 错误页；若不校验就 chmod +x 并执行/安装，行为不可预测（用户侧表现为诡异报错）。
+# 校验不过一律视为下载失败，绝不安装。
+is_elf_binary() {
+    local f="$1"
+    [[ -s "$f" ]] || return 1
+    local magic
+    magic=$(head -c 4 "$f" 2>/dev/null | od -An -tx1 2>/dev/null | tr -d ' \n')
+    [[ "$magic" == "7f454c46" ]]
+}
 
 # 分隔线
 divider() {
@@ -863,12 +877,15 @@ setup_warp_v4() {
     local max_retry=3
     while [[ $retry -lt $max_retry ]]; do
         if curl -fsSL --connect-timeout 30 --max-time 120 "$wgcf_url" -o /usr/local/bin/wgcf 2>/dev/null; then
-            # 验证下载是否成功（文件大于 1MB）
+            # 验证下载结果：既要够大（>1MB），也必须确实是 ELF 可执行文件。
+            # 只看大小挡不住"体积够大的 HTML/错误页"，加 ELF 魔数校验才算真的拿到二进制。
             local fsize
             fsize=$(stat -c%s /usr/local/bin/wgcf 2>/dev/null || echo "0")
-            if [[ "$fsize" -gt 1048576 ]]; then
+            if [[ "$fsize" -gt 1048576 ]] && is_elf_binary /usr/local/bin/wgcf; then
                 break
             fi
+            warn "wgcf 下载内容校验未通过（非 ELF 可执行文件或体积异常）"
+            rm -f /usr/local/bin/wgcf 2>/dev/null || true
         fi
         retry=$((retry + 1))
         if [[ $retry -lt $max_retry ]]; then
@@ -1083,17 +1100,25 @@ net.ipv4.udp_wmem_min = 8192
 # ======== IPv6 转发（所有模式默认启用） ========
 net.ipv6.conf.all.forwarding = 1
 net.ipv6.conf.default.forwarding = 1
+
+# ======== 开启 forwarding 后必须显式接受 RA（所有模式，缺一不可） ========
+# Linux 内核在 forwarding=1 时会默认停止接受 Router Advertisement（因为"路由器"
+# 不该被别人通告路由）。而绝大多数 VPS 的 IPv6 默认路由正是靠 RA/SLAAC 下发的。
+# 如果只开 forwarding 却不设 accept_ra=2，宿主机现有的 IPv6 默认路由会在 RA 租期
+# 到期后（通常 30 分钟~2 小时）消失且不再刷新 —— 宿主机丢失 IPv6 连通性；若客户
+# 是通过 IPv6 SSH 登录的，会被直接锁在服务器外面，而且是安装数小时后才发作。
+# accept_ra=2 = "即使 forwarding 开启也继续接受 RA"，这是唯一正确的取值。
+net.ipv6.conf.all.accept_ra = 2
+net.ipv6.conf.default.accept_ra = 2
+net.ipv6.conf.${DEFAULT_IFACE}.accept_ra = 2
 EOF
 
-    # 独立 IPv6 routed 模式追加代理与路由通告参数
+    # 独立 IPv6 routed 模式追加 NDP 代理参数（accept_ra 已在上面对所有模式设置）
     if [[ "$MODE" == "nat_ipv6" ]]; then
         cat >> /etc/sysctl.d/99-incus.conf <<EOF
 
 # 独立 IPv6 routed 模式专用参数
 net.ipv6.conf.all.proxy_ndp = 1
-net.ipv6.conf.all.accept_ra = 2
-net.ipv6.conf.default.accept_ra = 2
-net.ipv6.conf.${DEFAULT_IFACE}.accept_ra = 2
 net.ipv6.conf.${DEFAULT_IFACE}.proxy_ndp = 1
 EOF
     fi
@@ -1303,8 +1328,16 @@ install_zfs_prebuilt() {
     }
 
     # 锁定内核版本
+    # 必须锁定「当前正在运行」的内核 —— ZFS 模块正是为它编译/安装的。
+    # 原实现取 dpkg 列表里的第一个 linux-image，机器上有多个内核时会锁错版本：
+    # 重启后进入另一个没有 ZFS 模块的内核，存储池直接不可用。
     local kernel_pkg
-    kernel_pkg=$(dpkg -l | awk '/^ii.*linux-image-[0-9]/ {print $2}' | head -n1 || true)
+    kernel_pkg=""
+    if dpkg -s "linux-image-$(uname -r)" >/dev/null 2>&1; then
+        kernel_pkg="linux-image-$(uname -r)"
+    else
+        kernel_pkg=$(dpkg -l | awk '/^ii.*linux-image-[0-9]/ {print $2}' | head -n1 || true)
+    fi
     if [[ -n "$kernel_pkg" ]]; then
         apt-mark hold "$kernel_pkg" >/dev/null 2>&1 || true
         info "已锁定内核版本: ${kernel_pkg}"
@@ -1428,7 +1461,20 @@ init_incus() {
         if [[ -n "${IPV6_SUBNET:-}" && -n "${IPV6_IFACE:-}" ]]; then
             export DEBIAN_FRONTEND=noninteractive
             apt-get install -y -qq ndppd >/dev/null 2>&1 || true
+
+            # /etc/ndppd.conf 是全局配置，客户可能已经有自己的 NDP 代理规则。
+            # 直接覆盖会把他原有规则整份抹掉，因此：本脚本写入的配置打标记；
+            # 若发现已存在且不是我们写的，先备份再覆盖，并明确告警。
+            if [[ -f /etc/ndppd.conf ]] && ! grep -q "$NDPPD_MANAGED_MARKER" /etc/ndppd.conf 2>/dev/null; then
+                local ndppd_backup
+                ndppd_backup="/etc/ndppd.conf.before-incudal.$(date +%Y%m%d%H%M%S)"
+                cp -a /etc/ndppd.conf "$ndppd_backup" 2>/dev/null || true
+                warn "检测到已存在的 /etc/ndppd.conf（疑似您自己的 NDP 代理配置）"
+                warn "已备份到: ${ndppd_backup}，随后将被覆盖"
+            fi
+
             cat > /etc/ndppd.conf <<EOF
+${NDPPD_MANAGED_MARKER}
 proxy ${IPV6_IFACE} {
     rule ${IPV6_SUBNET} {
         auto
@@ -2082,8 +2128,16 @@ install_rfw() {
         info "下载 RFW (第 ${attempt} 次)..."
         if curl -sSfL --connect-timeout 15 --max-time 120 \
             "$rfw_url" -o "${RFW_INSTALL_DIR}/rfw" 2>/dev/null; then
-            download_ok=true
-            break
+            # 必须确认拿到的确实是 ELF 可执行文件。Release 资产缺失或被 CDN/WAF
+            # 拦截时，HTTP 可能仍返回 200 + 一段 HTML；不校验就 chmod +x 去跑，
+            # 行为不可预测。校验不过一律按下载失败处理并重试。
+            if is_elf_binary "${RFW_INSTALL_DIR}/rfw"; then
+                download_ok=true
+                break
+            fi
+            warn "第 ${attempt} 次下载内容校验未通过（不是 ELF 可执行文件）"
+            rm -f "${RFW_INSTALL_DIR}/rfw" 2>/dev/null || true
+            [[ "$attempt" -lt 3 ]] && sleep 3
         else
             warn "第 ${attempt} 次下载失败"
             [[ "$attempt" -lt 3 ]] && sleep 3
