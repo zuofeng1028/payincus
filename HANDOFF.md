@@ -1,6 +1,6 @@
 # PayIncus Handoff
 
-Last updated: 2026-07-13 11:10 CST
+Last updated: 2026-07-13 11:45 CST
 
 This file is a handoff note for a new Codex conversation. Do not include server passwords or other secrets in this file.
 
@@ -12,13 +12,31 @@ Give the next Codex session this file first. The active working directory is:
 C:\Users\Administrator\Desktop\payinces
 ```
 
-Production is currently on `v1.5.2` — a systematic remediation of the three scripts that run as ROOT on customer hosts (host install / agent install / caddy), fixing defects that could lock an admin out of their own server (IPv6 accept_ra), orphan a host from the panel (cert rotation), destroy customer tooling/configs (blanket purge, rm -rf /etc/wireguard), or leak credentials (token script at 0755, caddy password in argv). See the v1.5.2 section below. Prior release v1.5.1: This patch fixes a full-page white-screen on the System/Telegram settings page (an unescaped literal `@` in the Telegram username-hint i18n string was parsed by vue-i18n as linked-message syntax `@:key` and threw compile error code 10 INVALID_LINKED_FORMAT, crashing the whole page render; literal `@` is now escaped as `{'@'}` in all three locales, and the same bug in the Heleket payment placeholder `@TRON`/`@BSC` was fixed too). It also unifies refunds to balance-only by full-stack removing the plugin-gateway-dependent "original-route recharge refund" workbench (refunds are handled by order-refund approval + manual balance adjustment), adds a new i18n message-compile guard (`test:i18n-message-compile-guards`, compiles all ~21.7k messages with the real vue-i18n compiler so unescaped `@`/braces fail CI), and drops the `recharge_refund_requests` table + `RechargeRefundStatus` enum plus 6 orphan `Exchange*` enum types left by v1.5.0.
+Production is currently on `v1.5.3` — fixes the admin 节点详情 blank-page (shared view hardcoding the user-side route name + KeepAlive + a v-if/v-else-if with no v-else) and pins wgcf/RFW to fixed versions with committed SHA-256. Prior release v1.5.2 — a systematic remediation of the three scripts that run as ROOT on customer hosts (host install / agent install / caddy), fixing defects that could lock an admin out of their own server (IPv6 accept_ra), orphan a host from the panel (cert rotation), destroy customer tooling/configs (blanket purge, rm -rf /etc/wireguard), or leak credentials (token script at 0755, caddy password in argv). See the v1.5.2 section below. Prior release v1.5.1: This patch fixes a full-page white-screen on the System/Telegram settings page (an unescaped literal `@` in the Telegram username-hint i18n string was parsed by vue-i18n as linked-message syntax `@:key` and threw compile error code 10 INVALID_LINKED_FORMAT, crashing the whole page render; literal `@` is now escaped as `{'@'}` in all three locales, and the same bug in the Heleket payment placeholder `@TRON`/`@BSC` was fixed too). It also unifies refunds to balance-only by full-stack removing the plugin-gateway-dependent "original-route recharge refund" workbench (refunds are handled by order-refund approval + manual balance adjustment), adds a new i18n message-compile guard (`test:i18n-message-compile-guards`, compiles all ~21.7k messages with the real vue-i18n compiler so unescaped `@`/braces fail CI), and drops the `recharge_refund_requests` table + `RechargeRefundStatus` enum plus 6 orphan `Exchange*` enum types left by v1.5.0.
 
 v1.5.0 (the prior release) removed 12 non-core modules and the entire plugin/theme platform full-stack, completed the Linear-style monochrome UI rebuild, and fixed the long-standing sidebar white-screen (`index.html` served with `Cache-Control: no-cache`).
 
 The Service Worker derives its cache name from the registered client version (`/sw.js?v=1.5.1` -> `incudal-cache-v1.5.1`). Removed features' backend routes return HTTP 404; retained routes (billing records, orders, telegram binding) return HTTP 401. All removal migrations are idempotent and lossless (`DROP ... IF EXISTS ... CASCADE`, safe enum narrowing), so open-source self-hosted users can OTA from any prior version without unintended data loss.
 
 The release commit/tag and OTA evidence below are production proof for `v1.5.1`.
+
+### Current v1.5.3 Production / OTA Status
+
+- `v1.5.3` release commit/tag: `2422606` / annotated tag `v1.5.3`.
+- GitHub Actions: Build & Release `29246829367` -> success; CI `29246827343` -> success; Docs Pages `29246827394` -> success.
+- OTA manifest proof: version `v1.5.3`, buildTime `2026-07-13T11:39:36.661Z`, amd64 sha256 `592e6103ca7490cef666c68680639c7377fb9b0b89c169afbae6b5edc1fcee8e`, arm64 sha256 `51a1b879d3f61062492386e57b687b5406e549091f76e56df1cb44c6384a2ffe`.
+- Final OTA task `#154`: `v1.5.2 -> v1.5.3`, status `success`, log `/opt/incudal/update-logs/system-update-154.log`, `RUN_DB_CHECKS=0`. No schema change. `System update completed successfully` at `2026-07-13T11:42:31.234Z`.
+- Current production state: `/opt/incudal/current -> /opt/incudal/releases/v1.5.3-20260713114056`; `version.json` v1.5.3; backend active; local/pay/admin `/api/health` 200; admin index `Cache-Control: no-cache` with the new v1.5.3 bundle.
+- **Admin "节点 → 节点详情" full-page white screen (refresh fixed it, no JS error, no `hosts/:id` request in the network tab).** Root cause chain — worth internalising, because every symptom follows from it:
+  - `MyHostDetailView.vue` is **shared by the user and admin routers**. The user route is named `my-host-detail`; the admin route is `admin-my-host-detail`.
+  - Inside the component, the `watch` that reloads on `route.params.id` change guarded with `if (route.name !== 'my-host-detail') return` — so **on the admin side it always returned early and never loaded anything**.
+  - The component sits inside `<KeepAlive>` (in `AdminApp.vue`), so on a cached re-activation **`onMounted` does not run again** — and there was no `onActivated`.
+  - The template had `v-if="loading"` / `v-else-if="host"` and **no `v-else`**. With `loading=false` and `host=null`, *neither branch renders* → the page is literally empty. No crash, hence no console error; `loadHost()` was never called, hence no `hosts/:id` request; a full reload re-mounts and runs `onMounted`, hence "refresh fixes it".
+  - Fixed three ways: the route-name guard now accepts both names; `onActivated` reloads when the cached component is re-entered with an empty/stale host; the template has a `v-else` fallback (「加载失败」+ retry/back) so this class can never render as a blank page again.
+  - **Lesson:** a shared view that hardcodes one side's route name is a latent bug; and any `v-if/v-else-if` pair with no `v-else` is a white-screen waiting to happen.
+- **Supply-chain hardening for the host installer:** `wgcf` and `RFW` are installed and executed as root on customer hosts. `RFW` was fetched from the upstream `latest/download` — whatever upstream pushes lands on the customer's machine, unreproducible and unverifiable. Now both are pinned (wgcf `2.2.22`, RFW `v0.1.9`) with **expected SHA-256 committed in the script**; downloads are byte-compared and discarded on any mismatch (fail closed). Note: comparing against the upstream's own `checksums.txt` is *not* sufficient — an attacker who can swap the binary can swap that file too, so the hashes are pinned by us (and were verified by downloading and re-computing them independently).
+- Post-OTA verified on the live box: the served `install.sh` contains 2/2 pinned versions, 4/4 pinned hashes, 3 `verify_sha256` sites, 0 uses of `latest`; the live admin bundle contains `admin-my-host-detail` (the new guard).
+- Standing owner directive from 2026-07-10 remains active: all OTA runs use `RUN_DB_CHECKS=0`.
 
 ### Current v1.5.2 Production / OTA Status
 
