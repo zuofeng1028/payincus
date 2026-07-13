@@ -34,6 +34,9 @@ readonly PANEL_URL
 readonly SCRIPT_VERSION="2.0.0"
 readonly BRIDGE_SUBNET="10.10.0.1/22"
 readonly BRIDGE_NAME="incusbr0"
+# 本脚本写入 /etc/wireguard/wg0.conf 时打的标记：用于区分「我们生成的 WARP 配置」
+# 和「客户自己的 WireGuard 配置」，避免覆盖/卸载时误删客户的东西。
+readonly WG_MANAGED_MARKER="# Managed by PayIncus (incudal) WARP - do not edit, will be overwritten"
 readonly PRESEED_FILE="/tmp/.incus-preseed-$$.yaml"
 readonly AGENT_ID="${INJECT_AGENT_ID:-}"
 readonly AGENT_SECRET="${INJECT_AGENT_SECRET:-}"
@@ -859,7 +862,7 @@ setup_warp_v4() {
     local retry=0
     local max_retry=3
     while [[ $retry -lt $max_retry ]]; do
-        if curl -sL --connect-timeout 30 --max-time 120 "$wgcf_url" -o /usr/local/bin/wgcf 2>/dev/null; then
+        if curl -fsSL --connect-timeout 30 --max-time 120 "$wgcf_url" -o /usr/local/bin/wgcf 2>/dev/null; then
             # 验证下载是否成功（文件大于 1MB）
             local fsize
             fsize=$(stat -c%s /usr/local/bin/wgcf 2>/dev/null || echo "0")
@@ -909,9 +912,21 @@ setup_warp_v4() {
         # 导致宿主机和所有容器的 DNS 解析全部瘫痪
         sed -i '/^DNS/d' wgcf-profile.conf
         
+        # 客户可能已经在用 wg0 做自己的 VPN / 管理隧道，直接覆盖会打断它
+        # （若 wg0 正是他的 SSH 管理通道，甚至会把他锁在服务器外面）。
+        # 因此：本脚本生成的配置统一打标记；发现已存在且「不是我们写的」，先备份再覆盖并告警。
+        if [[ -f wg0.conf ]] && ! grep -q "$WG_MANAGED_MARKER" wg0.conf 2>/dev/null; then
+            local wg_backup
+            wg_backup="/etc/wireguard/wg0.conf.before-incudal.$(date +%Y%m%d%H%M%S)"
+            cp -a wg0.conf "$wg_backup" 2>/dev/null || true
+            warn "检测到已存在的 wg0.conf（疑似您自己的 WireGuard 配置）"
+            warn "已备份到: ${wg_backup}，随后将被 WARP 配置覆盖"
+        fi
+
         cp wgcf-profile.conf wg0.conf
+        sed -i "1i ${WG_MANAGED_MARKER}" wg0.conf
         chmod 600 wg0.conf
-        
+
         systemctl enable wg-quick@wg0 >/dev/null 2>&1 || true
         systemctl start wg-quick@wg0 >/dev/null 2>&1 || true
         
@@ -1185,12 +1200,18 @@ install_deps() {
             info "已锁定内核版本: ${kernel_pkg}（防止自动更新导致 ZFS 失效）"
         fi
 
-        # 卸载编译工具链（gcc、g++、make 等，约 200-500MB）
-        apt-get purge -y -qq build-essential cpp gcc g++ make dpkg-dev >/dev/null 2>&1 || true
-        # 卸载内核头文件（约 100-200MB）
-        apt-get purge -y -qq "linux-headers-$(uname -r)" linux-headers-* >/dev/null 2>&1 || true
-        # 自动清理不再需要的依赖
-        apt-get autoremove -y -qq >/dev/null 2>&1 || true
+        # 只卸载「本脚本为了编译 ZFS 而新装的」软件包。
+        # 绝不使用 linux-headers-* 这类通配符，也绝不动客户机器上原本就有的工具链——
+        # 否则会把客户自己的开发环境和其它内核的头文件一起删掉。
+        local zfs_added_pkgs="${ZFS_BUILD_PKGS_ADDED_BY_US:-}"
+        if [[ -n "${zfs_added_pkgs// /}" ]]; then
+            # shellcheck disable=SC2086
+            apt-get purge -y -qq $zfs_added_pkgs >/dev/null 2>&1 || true
+            apt-get autoremove -y -qq >/dev/null 2>&1 || true
+            info "已清理本次为编译 ZFS 新装的工具链:${zfs_added_pkgs}"
+        else
+            info "编译工具链为客户机器原有环境，全部保留不清理"
+        fi
         # 清理 APT 下载缓存
         apt-get clean 2>/dev/null || true
 
@@ -1299,7 +1320,17 @@ install_zfs_prebuilt() {
 # ---- Debian ZFS 策略 2: DKMS 即时编译（回退方案）----
 install_zfs_dkms() {
     info "安装 DKMS 编译依赖（linux-headers、build-essential）..."
-    
+
+    # 记录哪些编译相关软件包是「本脚本新装的」。编译完成后的清理只能删这些；
+    # 客户机器上原本就存在的工具链（他自己的开发环境）必须原样保留。
+    ZFS_BUILD_PKGS_ADDED_BY_US=""
+    local _zfs_pkg
+    for _zfs_pkg in build-essential dkms cpp gcc g++ make dpkg-dev "linux-headers-$(uname -r)"; do
+        if ! dpkg -s "$_zfs_pkg" >/dev/null 2>&1; then
+            ZFS_BUILD_PKGS_ADDED_BY_US="${ZFS_BUILD_PKGS_ADDED_BY_US} ${_zfs_pkg}"
+        fi
+    done
+
     # 优先安装通用编译核心工具，防止一处失败导致全部跳过
     apt-get install -y -qq build-essential dkms >/dev/null 2>&1 || true
 
@@ -1460,7 +1491,23 @@ import_cert() {
         exit 1
     fi
 
-    # 证书可能因面板重装、迁移或灾备恢复而轮换；先成功下载新证书，再替换旧信任项。
+    # 在动信任库之前，先确认下载到的确实是一份合法的 X.509 证书。
+    # 否则一旦拿到的是 CDN/WAF 的错误页或损坏内容，旧 trust 已被删除、新证书又导入失败，
+    # 面板将永久无法连接这台宿主机（且脚本会直接 exit，客户无从恢复）。
+    local cert_valid=false
+    if command -v openssl >/dev/null 2>&1; then
+        openssl x509 -noout -in "$cert_file" >/dev/null 2>&1 && cert_valid=true
+    elif grep -q "BEGIN CERTIFICATE" "$cert_file" 2>/dev/null; then
+        cert_valid=true
+    fi
+    if [[ "$cert_valid" != "true" ]]; then
+        rm -f "$cert_file"
+        error "下载到的面板证书内容无效（可能被 CDN/WAF 拦截，或 token 已失效）"
+        error "已中止，未改动这台宿主机上任何现有的 Incus 信任配置"
+        exit 1
+    fi
+
+    # 证书可能因面板重装、迁移或灾备恢复而轮换；证书已校验通过，此处再替换旧信任项。
     if incus config trust list --format csv 2>/dev/null | grep -q "panel"; then
         info "面板证书已存在，更新为当前证书"
         incus config trust remove panel >/dev/null 2>&1 || true
@@ -2379,7 +2426,16 @@ do_uninstall() {
     if ip link show wg0 >/dev/null 2>&1 || [[ -f /usr/local/bin/wgcf ]] || [[ -d /etc/wireguard ]]; then
         systemctl stop wg-quick@wg0 2>/dev/null || true
         systemctl disable wg-quick@wg0 2>/dev/null || true
-        rm -rf /etc/wireguard/ 2>/dev/null || true
+        # 只删除「本脚本生成的」wg0 配置（带 WG_MANAGED_MARKER 标记）。
+        # 客户可能在同一目录下有自己的 WireGuard 配置（wg0/wg1/密钥等），
+        # 整目录 rm -rf 会把它们一并抹掉，绝不允许。
+        if [[ -f /etc/wireguard/wg0.conf ]] && grep -q "$WG_MANAGED_MARKER" /etc/wireguard/wg0.conf 2>/dev/null; then
+            rm -f /etc/wireguard/wg0.conf 2>/dev/null || true
+        elif [[ -f /etc/wireguard/wg0.conf ]]; then
+            warn "/etc/wireguard/wg0.conf 不是本脚本生成的，已保留（未删除）"
+        fi
+        rm -f /etc/wireguard/wgcf-account.toml /etc/wireguard/wgcf-profile.conf 2>/dev/null || true
+        rmdir /etc/wireguard 2>/dev/null || true   # 仅当目录已空时才移除
         rm -f /usr/local/bin/wgcf 2>/dev/null || true
         rm -f /usr/local/bin/incus-warp 2>/dev/null || true
         
