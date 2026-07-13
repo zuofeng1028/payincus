@@ -1633,7 +1633,7 @@ do_uninstall() {
     echo -e "  ${RED}  1. 停止并删除 PayIncus systemd 服务${NC}"
     echo -e "  ${RED}  2. 删除安装目录 ${INSTALL_DIR}${NC}"
     echo -e "  ${RED}  3. 删除系统用户 ${RUN_USER}${NC}"
-    echo -e "  ${RED}  安装目录中的插件、主题、运行资产、OTA release 和更新日志也会被删除${NC}"
+    echo -e "  ${RED}  安装目录中的运行资产、OTA release 和更新日志也会被删除${NC}"
     echo -e "  ${YELLOW}  注意：PostgreSQL/Redis 和数据库数据不会被删除${NC}"
     echo ""
     echo -ne "  ${BOLD}确认卸载？${NC}[y/N]: "
