@@ -1727,6 +1727,12 @@ do_install() {
     install_postgresql
     install_redis
 
+    # 创建用户（必须早于 install_release）：install_release 会创建 server/certs 并立即
+    # 调用 incudal-online-task harden，而 harden 会把 .env / server/certs 等 chown 到
+    # root:${RUN_USER} 组。若此时系统用户/组尚未创建，chown 会以
+    # "invalid group: 'root:incudal'" 失败，导致全新安装中断。
+    create_user
+
     # 仅在全新安装时获取和解压产物包（已安装则跳过）
     if ! check_existing; then
         # 获取产物包（自动下载或手动放置）
@@ -1741,9 +1747,6 @@ do_install() {
     else
         log "产物包已就绪，跳过下载和解压"
     fi
-
-    # 创建用户
-    create_user
 
     # 配置 Git 元数据
     configure_git_metadata
